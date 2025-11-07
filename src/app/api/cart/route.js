@@ -1,0 +1,142 @@
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { CartViewModel } from "@/viewmodels/CartViewModel";
+
+/**
+ * GET /api/cart
+ * Get user's cart items
+ */
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      console.log("❌ GET cart: Unauthorized");
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    console.log("📦 Fetching cart for user:", session.user.id);
+
+    // Get user discount for B2B users
+    const userDiscount =
+      session.user.role === "B2B" && session.user.discount
+        ? session.user.discount
+        : 0;
+
+    const result = await CartViewModel.getUserCart(
+      session.user.id,
+      userDiscount
+    );
+
+    console.log("📦 Cart result:", result);
+
+    // getUserCart returns { success, data: { items, subtotal, ... } }
+    if (result.success) {
+      return NextResponse.json({
+        success: true,
+        data: result.data,
+      });
+    } else {
+      return NextResponse.json({
+        success: false,
+        message: result.message || "Gagal mengambil keranjang",
+      });
+    }
+  } catch (error) {
+    console.error("❌ Error fetching cart:", error);
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * POST /api/cart
+ * Add item to cart
+ */
+export async function POST(request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { variantId, quantity } = body;
+
+    if (!variantId || !quantity) {
+      return NextResponse.json(
+        { success: false, message: "variantId dan quantity harus diisi" },
+        { status: 400 }
+      );
+    }
+
+    const validation = await CartViewModel.validateCartItem(
+      variantId,
+      quantity
+    );
+    if (!validation.valid) {
+      return NextResponse.json(
+        { success: false, message: validation.message },
+        { status: 400 }
+      );
+    }
+
+    const cartItem = await CartViewModel.addToCart(
+      session.user.id,
+      variantId,
+      quantity
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: "Produk berhasil ditambahkan ke keranjang",
+      data: cartItem,
+    });
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE /api/cart
+ * Clear cart
+ */
+export async function DELETE() {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    await CartViewModel.clearCart(session.user.id);
+
+    return NextResponse.json({
+      success: true,
+      message: "Keranjang berhasil dikosongkan",
+    });
+  } catch (error) {
+    console.error("Error clearing cart:", error);
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
+  }
+}
