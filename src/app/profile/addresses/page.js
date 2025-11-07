@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Navbar from "@/components/layout/Navbar";
@@ -13,7 +13,7 @@ import Loading from "@/components/ui/Loading";
  * Allows users to view, create, edit, and delete shipping addresses
  */
 
-export default function AddressesPage() {
+function AddressesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
@@ -212,5 +212,13 @@ export default function AddressesPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function AddressesPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <AddressesContent />
+    </Suspense>
   );
 }
