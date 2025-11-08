@@ -5,6 +5,9 @@ const nextConfig = {
   
   // Ensure Prisma binaries are included in Vercel deployment
   serverExternalPackages: ['@prisma/client', 'prisma'],
+  
+  // Output standalone for better Prisma compatibility
+  output: 'standalone',
 };
 
 export default nextConfig;
