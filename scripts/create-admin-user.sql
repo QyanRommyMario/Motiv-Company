@@ -1,15 +1,17 @@
 -- ========================================
 -- INSERT/UPDATE ADMIN USER
 -- ========================================
--- Email: admin@motiv.com
+-- Email: admin@motiv.com (FIXED - was admin@motivv.com)
 -- Password: Motiv@Admin123
 -- Role: ADMIN
 -- ========================================
 
--- Delete existing admin if any (optional)
+-- Delete existing admin if any (clean up old data)
+DELETE FROM "User" WHERE email = 'admin@motivv.com';
 DELETE FROM "User" WHERE email = 'admin@motiv.com';
+DELETE FROM "User" WHERE id = 'admin-001';
 
--- Insert new admin user
+-- Insert new admin user with CORRECT email
 INSERT INTO "User" (id, name, email, password, role, status, "createdAt", "updatedAt")
 VALUES (
     'admin-001',
