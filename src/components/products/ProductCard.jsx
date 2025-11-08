@@ -26,9 +26,9 @@ export default function ProductCard({ product }) {
 
   return (
     <Link href={`/products/${product.id}`}>
-      <div className="group bg-white border border-[#E5E7EB] hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer h-full">
+      <div className="group bg-white border border-[#E5E7EB] hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer h-full flex flex-col">
         {/* Image */}
-        <div className="relative h-80 bg-[#F5F4F0] overflow-hidden">
+        <div className="relative h-48 sm:h-64 md:h-72 lg:h-80 bg-[#F5F4F0] overflow-hidden flex-shrink-0">
           {product.images && product.images[0] ? (
             <img
               src={product.images[0]}
@@ -55,51 +55,51 @@ export default function ProductCard({ product }) {
 
           {/* B2B Badge */}
           {hasDiscount && (
-            <div className="absolute top-4 right-4 bg-[#1A1A1A] text-white px-3 py-1.5 text-xs uppercase tracking-wider">
+            <div className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-[#1A1A1A] text-white px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs uppercase tracking-wider">
               -{session.user.discount}% B2B
             </div>
           )}
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-5 md:p-6 flex-grow flex flex-col">
           {/* Category */}
-          <p className="text-xs text-[#9CA3AF] uppercase tracking-widest mb-2 letter-spacing-widest">
+          <p className="text-[10px] sm:text-xs text-[#9CA3AF] uppercase tracking-widest mb-1 sm:mb-2">
             {product.category}
           </p>
 
           {/* Name */}
-          <h3 className="text-lg font-medium text-[#1A1A1A] mb-3 line-clamp-2 tracking-tight">
+          <h3 className="text-sm sm:text-base md:text-lg font-medium text-[#1A1A1A] mb-2 sm:mb-3 line-clamp-2 tracking-tight">
             {product.name}
           </h3>
 
           {/* Description */}
-          <p className="text-sm text-[#6B7280] mb-4 line-clamp-2 leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#6B7280] mb-3 sm:mb-4 line-clamp-2 leading-relaxed flex-grow">
             {product.description}
           </p>
 
           {/* Price */}
-          <div className="flex items-center justify-between pt-4 border-t border-[#E5E7EB]">
+          <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-[#E5E7EB] mt-auto">
             <div>
               {hasDiscount ? (
                 // B2B Price
-                <div className="space-y-1">
+                <div className="space-y-0.5 sm:space-y-1">
                   {minB2BPrice === maxB2BPrice ? (
                     <>
-                      <p className="text-lg font-semibold text-[#1A1A1A]">
+                      <p className="text-sm sm:text-base md:text-lg font-semibold text-[#1A1A1A]">
                         Rp {minB2BPrice.toLocaleString("id-ID")}
                       </p>
-                      <p className="text-sm text-[#9CA3AF] line-through">
+                      <p className="text-xs sm:text-sm text-[#9CA3AF] line-through">
                         Rp {minPrice.toLocaleString("id-ID")}
                       </p>
                     </>
                   ) : (
                     <>
-                      <p className="text-lg font-semibold text-[#1A1A1A]">
+                      <p className="text-sm sm:text-base md:text-lg font-semibold text-[#1A1A1A]">
                         Rp {minB2BPrice.toLocaleString("id-ID")} -{" "}
                         {maxB2BPrice.toLocaleString("id-ID")}
                       </p>
-                      <p className="text-sm text-[#9CA3AF] line-through">
+                      <p className="text-xs sm:text-sm text-[#9CA3AF] line-through">
                         Rp {minPrice.toLocaleString("id-ID")} -{" "}
                         {maxPrice.toLocaleString("id-ID")}
                       </p>
@@ -110,11 +110,11 @@ export default function ProductCard({ product }) {
                 // Regular Price
                 <>
                   {minPrice === maxPrice ? (
-                    <p className="text-lg font-semibold text-[#1A1A1A]">
+                    <p className="text-sm sm:text-base md:text-lg font-semibold text-[#1A1A1A]">
                       Rp {minPrice.toLocaleString("id-ID")}
                     </p>
                   ) : (
-                    <p className="text-lg font-semibold text-[#1A1A1A]">
+                    <p className="text-sm sm:text-base md:text-lg font-semibold text-[#1A1A1A]">
                       Rp {minPrice.toLocaleString("id-ID")} -{" "}
                       {maxPrice.toLocaleString("id-ID")}
                     </p>
@@ -124,7 +124,7 @@ export default function ProductCard({ product }) {
             </div>
 
             {/* Stock indicator */}
-            <div className="text-xs uppercase tracking-wider">
+            <div className="text-[10px] sm:text-xs uppercase tracking-wider flex-shrink-0">
               {product.variants.some((v) => v.stock > 0) ? (
                 <span className="text-[#10B981]">Available</span>
               ) : (
