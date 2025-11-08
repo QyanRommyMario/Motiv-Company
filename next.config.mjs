@@ -4,19 +4,7 @@ const nextConfig = {
   reactCompiler: true,
   
   // Ensure Prisma binaries are included in Vercel deployment
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client', 'prisma']
-  },
-  
-  // Configure webpack to handle Prisma properly
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals.push({
-        '@prisma/client': '@prisma/client'
-      });
-    }
-    return config;
-  },
+  serverExternalPackages: ['@prisma/client', 'prisma'],
 };
 
 export default nextConfig;
