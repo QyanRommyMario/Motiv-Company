@@ -13,8 +13,6 @@ const nextConfig = {
     }
     return config;
   },
-  // Output standalone for better Vercel performance
-  output: 'standalone',
 };
 
 export default nextConfig;
