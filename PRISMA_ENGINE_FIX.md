@@ -22,6 +22,7 @@ The following locations have been searched:
 ### 1. **Next.js Standalone Output** ✅
 
 Updated `next.config.mjs`:
+
 ```javascript
 output: 'standalone',  // Enable standalone build for Vercel
 ```
@@ -33,12 +34,14 @@ output: 'standalone',  // Enable standalone build for Vercel
 ### 2. **Prisma Engine Copy Script** ✅
 
 Created `scripts/copy-prisma-engines.js`:
+
 - Runs AFTER `next build`
 - Copies `.prisma/client` → `.next/standalone/node_modules/.prisma/client`
 - Copies `@prisma/client` → `.next/standalone/node_modules/@prisma/client`
 - Verifies `libquery_engine-rhel-openssl-3.0.x.so.node` exists
 
 **Triggered by**:
+
 ```json
 "build": "prisma generate && next build && node scripts/copy-prisma-engines.js"
 ```
@@ -48,6 +51,7 @@ Created `scripts/copy-prisma-engines.js`:
 ### 3. **Dynamic Engine Path Detection** ✅
 
 Updated `src/lib/prisma.js`:
+
 ```javascript
 // Detect Vercel environment
 const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV;
@@ -59,10 +63,13 @@ if (isVercel) {
     "/var/task/.next/standalone/node_modules/.prisma/client",
     path.join(process.cwd(), "node_modules/.prisma/client"),
   ];
-  
+
   // Set PRISMA_QUERY_ENGINE_LIBRARY env var
   for (const basePath of possiblePaths) {
-    const enginePath = path.join(basePath, "libquery_engine-rhel-openssl-3.0.x.so.node");
+    const enginePath = path.join(
+      basePath,
+      "libquery_engine-rhel-openssl-3.0.x.so.node"
+    );
     if (fs.existsSync(enginePath)) {
       process.env.PRISMA_QUERY_ENGINE_LIBRARY = enginePath;
       break;
@@ -130,14 +137,14 @@ webpack: (config, { isServer }) => {
 
 ## ✅ What Changed
 
-| File | Change | Purpose |
-|------|--------|---------|
-| `next.config.mjs` | Added `output: 'standalone'` | Enable self-contained build |
-| `next.config.mjs` | Added Turbopack alias | Force Prisma client resolution |
-| `next.config.mjs` | Added webpack externals | Prevent Prisma bundling |
-| `package.json` | Updated build script | Run engine copy after build |
-| `scripts/copy-prisma-engines.js` | **NEW** | Copy engine binaries to standalone |
-| `src/lib/prisma.js` | Added engine path detection | Help Prisma find engine at runtime |
+| File                             | Change                       | Purpose                            |
+| -------------------------------- | ---------------------------- | ---------------------------------- |
+| `next.config.mjs`                | Added `output: 'standalone'` | Enable self-contained build        |
+| `next.config.mjs`                | Added Turbopack alias        | Force Prisma client resolution     |
+| `next.config.mjs`                | Added webpack externals      | Prevent Prisma bundling            |
+| `package.json`                   | Updated build script         | Run engine copy after build        |
+| `scripts/copy-prisma-engines.js` | **NEW**                      | Copy engine binaries to standalone |
+| `src/lib/prisma.js`              | Added engine path detection  | Help Prisma find engine at runtime |
 
 ---
 
@@ -146,6 +153,7 @@ webpack: (config, { isServer }) => {
 After deployment, check Vercel build logs:
 
 ### ✅ Expected Output:
+
 ```
 > prisma generate && next build && node scripts/copy-prisma-engines.js
 
@@ -180,15 +188,19 @@ Creating an optimized production build ...
 ### Test API Endpoints:
 
 1. **Stories API**: https://motivcompany.vercel.app/api/stories
+
    ```bash
    curl https://motivcompany.vercel.app/api/stories
    ```
+
    **Expected**: JSON array of stories (NOT "Internal server error")
 
 2. **Products API**: https://motivcompany.vercel.app/api/products
+
    ```bash
    curl https://motivcompany.vercel.app/api/products
    ```
+
    **Expected**: JSON array of products
 
 3. **Health Check**: https://motivcompany.vercel.app/api/health
@@ -202,7 +214,9 @@ Creating an optimized production build ...
 ## ⚠️ Important Notes
 
 ### Environment Variables Required:
+
 Make sure these are set in Vercel:
+
 - ✅ `DATABASE_URL` - Connection pooling URL
 - ✅ `DIRECT_URL` - Direct connection for migrations
 - ✅ `NEXTAUTH_SECRET`
@@ -217,6 +231,7 @@ Make sure these are set in Vercel:
 ## 📝 Why This Happens
 
 **Next.js 16 + Turbopack + Vercel Serverless**:
+
 - Turbopack (new bundler) handles dependencies differently than webpack
 - `output: 'standalone'` creates minimal output, excluding some binaries by default
 - Prisma needs native binary (`.so.node` file), can't be bundled
@@ -230,12 +245,14 @@ Make sure these are set in Vercel:
 ## 🔄 Rollback Plan
 
 If this causes issues, revert with:
+
 ```bash
 git revert bb3be79
 git push
 ```
 
 Then use alternative approach:
+
 1. Disable `output: 'standalone'`
 2. Use Prisma's official Vercel integration
 3. Or switch to Prisma Data Proxy

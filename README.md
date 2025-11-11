@@ -52,6 +52,7 @@ Full-stack e-commerce platform untuk penjualan kopi premium dengan fitur B2C (Bu
 ## 🚀 Features
 
 ### Customer (B2C)
+
 - Authentication & session management
 - Product catalog with categories & search
 - Shopping cart with real-time pricing
@@ -61,12 +62,14 @@ Full-stack e-commerce platform untuk penjualan kopi premium dengan fitur B2C (Bu
 - Voucher system
 
 ### Business (B2B)
+
 - B2B account registration & approval
 - Custom discount pricing (0-100%)
 - Combined discounts (B2B + voucher)
 - Business dashboard
 
 ### Admin
+
 - Dashboard with sales analytics
 - Product management (CRUD)
 - Order management & tracking
@@ -109,12 +112,14 @@ prisma/
 ## 🚦 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - PostgreSQL database (atau Supabase account)
 
 ### Installation
 
 1. **Clone & Install**
+
 ```bash
 git clone <repository-url>
 cd motiv
@@ -122,11 +127,13 @@ npm install
 ```
 
 2. **Environment Setup**
+
 ```bash
 cp .env.example .env
 ```
 
 Edit `.env`:
+
 ```env
 DATABASE_URL="postgresql://..."
 DIRECT_URL="postgresql://..."
@@ -137,6 +144,7 @@ NEXTAUTH_URL="http://localhost:3000"
 **Lihat**: `INSTALLATION.md` untuk setup lengkap
 
 3. **Database Setup**
+
 ```bash
 npx prisma generate
 npx prisma db push
@@ -144,6 +152,7 @@ npx prisma db seed  # Optional: seed data
 ```
 
 4. **Run Development**
+
 ```bash
 npm run dev
 ```
@@ -169,14 +178,15 @@ Open http://localhost:3000
 
 ---
 
-
 ## � Default Accounts
 
 ### Admin
+
 - Email: `admin@motiv.com`
 - Password: `admin123`
 
 ### Test Customer
+
 - Email: `customer@test.com`
 - Password: `customer123`
 
