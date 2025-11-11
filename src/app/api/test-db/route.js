@@ -135,9 +135,13 @@ export async function GET() {
         hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
         hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
         hasDatabaseUrl: !!process.env.DATABASE_URL,
+        hasDirectUrl: !!process.env.DIRECT_URL,
         nextAuthUrl: process.env.NEXTAUTH_URL,
         databaseUrlPreview: process.env.DATABASE_URL 
           ? process.env.DATABASE_URL.substring(0, 40) + "..." 
+          : "Not Set",
+        directUrlPreview: process.env.DIRECT_URL
+          ? process.env.DIRECT_URL.substring(0, 40) + "..."
           : "Not Set"
       }
     });
