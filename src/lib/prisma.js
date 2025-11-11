@@ -18,6 +18,17 @@ const prismaClientOptions = {
       url: process.env.DATABASE_URL,
     },
   },
+  // Connection pooling for better performance
+  // Supabase pooler recommended settings
+  __internal: {
+    engine: {
+      // Use pgBouncer connection pooling
+      pgBouncer: true,
+      // Connection pool size
+      poolTimeout: 10, // 10 seconds timeout
+      connectionLimit: 10, // Max 10 connections per serverless instance
+    },
+  },
 };
 
 // In Vercel, help Prisma find the query engine

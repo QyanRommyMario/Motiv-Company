@@ -117,32 +117,36 @@ export async function GET(request) {
       }),
     ]);
 
-    // Get product details for top products
+    // Get product details for top products in a single query
     const topProductIds = topProducts.map((p) => p.variantId);
-    const topProductDetails = await prisma.productVariant.findMany({
-      where: {
-        id: { in: topProductIds },
-      },
-      include: {
-        product: {
-          select: {
-            name: true,
-            images: true,
-          },
-        },
-      },
-    });
+    const topProductDetails =
+      topProductIds.length > 0
+        ? await prisma.productVariant.findMany({
+            where: {
+              id: { in: topProductIds },
+            },
+            include: {
+              product: {
+                select: {
+                  name: true,
+                  images: true,
+                },
+              },
+            },
+          })
+        : [];
 
     // Merge top products with details
     const topProductsWithDetails = topProducts.map((tp) => {
       const detail = topProductDetails.find((d) => d.id === tp.variantId);
       return {
-        ...tp,
+        totalQuantity: tp._sum.quantity,
+        orderCount: tp._count.id,
         variant: detail,
       };
     });
 
-    // Calculate growth (compared to last month - simplified)
+    // Calculate growth (compared to last month)
     const lastMonth = new Date();
     lastMonth.setMonth(lastMonth.getMonth() - 1);
 
