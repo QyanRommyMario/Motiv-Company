@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://aaltkprawfanoajoevcp.supabase.co";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(request) {
   try {
@@ -11,7 +15,7 @@ export async function POST(request) {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        { success: false, message: "Unauthorized - Admin only" },
         { status: 401 }
       );
     }
@@ -56,56 +60,51 @@ export async function POST(request) {
       );
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
     // Create unique filename
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(7);
     const extension = file.name.split(".").pop();
     const filename = `${timestamp}-${randomString}.${extension}`;
 
-    // VERCEL COMPATIBILITY: Use /tmp for serverless or public/uploads for local
-    const isVercel = process.env.VERCEL === "1";
-    const uploadsDir = isVercel
-      ? join("/tmp", "uploads")
-      : join(process.cwd(), "public", "uploads");
+    // Convert file to buffer
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
 
-    // Create uploads directory if it doesn't exist
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
-    }
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from("motiv-uploads") // Bucket name - create this in Supabase dashboard
+      .upload(`images/${filename}`, buffer, {
+        contentType: file.type,
+        cacheControl: "3600",
+        upsert: false,
+      });
 
-    // Save file
-    const filepath = join(uploadsDir, filename);
-    await writeFile(filepath, buffer);
-
-    // IMPORTANT: For Vercel, files in /tmp are temporary
-    // Consider using cloud storage (Cloudinary, AWS S3, etc.) for production
-    // For now, we'll warn the user
-    if (isVercel) {
-      console.warn(
-        "⚠️  File uploaded to /tmp on Vercel - this is temporary! Consider using Cloudinary or S3."
+    if (error) {
+      console.error("Supabase upload error:", error);
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: "Upload failed", 
+          error: error.message 
+        },
+        { status: 500 }
       );
     }
 
-    // Return public URL
-    // NOTE: On Vercel, /tmp files are not publicly accessible
-    // This is a limitation - you need cloud storage for production
-    const publicUrl = isVercel
-      ? `/api/uploads/${filename}` // We'll need to create API endpoint to serve from /tmp
-      : `/uploads/${filename}`;
+    // Get public URL
+    const { data: publicUrlData } = supabase.storage
+      .from("motiv-uploads")
+      .getPublicUrl(`images/${filename}`);
 
     return NextResponse.json({
       success: true,
-      message: "File uploaded successfully",
-      url: publicUrl,
-      warning: isVercel
-        ? "File is temporary on Vercel. Please configure cloud storage for production."
-        : null,
+      message: "File uploaded successfully to Supabase Storage",
+      url: publicUrlData.publicUrl,
+      path: data.path,
     });
+
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error("Upload error:", error);
     return NextResponse.json(
       {
         success: false,
