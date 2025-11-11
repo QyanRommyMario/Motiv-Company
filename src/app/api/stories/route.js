@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getPrismaClient, handleApiError, requireAuth, validateRequest } from "@/lib/apiErrorHandler";
+import {
+  getPrismaClient,
+  handleApiError,
+  requireAuth,
+  validateRequest,
+} from "@/lib/apiErrorHandler";
 
 // GET - Fetch all published stories (for public) or all stories (for admin)
 export async function GET(request) {
@@ -33,7 +38,7 @@ export async function POST(request) {
     const data = await request.json();
 
     // Validate required fields
-    validateRequest(data, ['title', 'content']);
+    validateRequest(data, ["title", "content"]);
 
     const { title, content, imageUrl, isPublished, order } = data;
 
