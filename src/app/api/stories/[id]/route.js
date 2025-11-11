@@ -49,7 +49,7 @@ export async function PUT(request, { params }) {
     }
 
     const { id } = await params;
-    const { title, content, imageUrl, isPublished, order } =
+    const { title, content, imageUrl, featuredImage, isPublished, order } =
       await request.json();
 
     const story = await prisma.story.update({
@@ -57,7 +57,7 @@ export async function PUT(request, { params }) {
       data: {
         title,
         content,
-        imageUrl,
+        featuredImage: featuredImage || imageUrl, // Support both field names
         isPublished,
         order,
       },

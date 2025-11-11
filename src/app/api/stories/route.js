@@ -40,13 +40,13 @@ export async function POST(request) {
     // Validate required fields
     validateRequest(data, ["title", "content"]);
 
-    const { title, content, imageUrl, isPublished, order } = data;
+    const { title, content, imageUrl, featuredImage, isPublished, order } = data;
 
     const story = await prisma.story.create({
       data: {
         title,
         content,
-        imageUrl: imageUrl || null,
+        featuredImage: featuredImage || imageUrl || null, // Support both field names
         isPublished: isPublished || false,
         order: order || 0,
       },
