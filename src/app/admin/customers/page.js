@@ -338,7 +338,7 @@ export default function AdminCustomersPage() {
 
                 {/* B2B Info if applicable */}
                 {selectedCustomer.role === "B2B" &&
-                  selectedCustomer.b2bInfo && (
+                  selectedCustomer.b2bRequest && (
                     <div className="border-2 border-[#E5E7EB] p-6">
                       <h4 className="font-bold text-[#1A1A1A] mb-4 uppercase tracking-wider text-sm">
                         Informasi Business
@@ -346,30 +346,36 @@ export default function AdminCustomersPage() {
                       <div className="space-y-3">
                         <div>
                           <p className="text-xs text-[#6B7280] uppercase tracking-wider mb-1">
-                            Nama Perusahaan
+                            Nama Bisnis
                           </p>
                           <p className="font-semibold text-[#1A1A1A]">
-                            {selectedCustomer.b2bInfo.companyName}
+                            {selectedCustomer.b2bRequest.businessName}
                           </p>
                         </div>
                         <div>
                           <p className="text-xs text-[#6B7280] uppercase tracking-wider mb-1">
-                            Tipe Bisnis
+                            No. Telepon
                           </p>
                           <p className="font-semibold text-[#1A1A1A]">
-                            {selectedCustomer.b2bInfo.businessType}
+                            {selectedCustomer.b2bRequest.phone}
                           </p>
                         </div>
-                        {selectedCustomer.b2bInfo.taxId && (
-                          <div>
-                            <p className="text-xs text-[#6B7280] uppercase tracking-wider mb-1">
-                              NPWP
-                            </p>
-                            <p className="font-semibold text-[#1A1A1A]">
-                              {selectedCustomer.b2bInfo.taxId}
-                            </p>
-                          </div>
-                        )}
+                        <div>
+                          <p className="text-xs text-[#6B7280] uppercase tracking-wider mb-1">
+                            Alamat
+                          </p>
+                          <p className="font-semibold text-[#1A1A1A]">
+                            {selectedCustomer.b2bRequest.address}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-[#6B7280] uppercase tracking-wider mb-1">
+                            Status Permintaan
+                          </p>
+                          <p className="font-semibold text-[#1A1A1A]">
+                            {selectedCustomer.b2bRequest.status}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}

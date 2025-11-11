@@ -4,8 +4,12 @@ import { authOptions } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
 
 // Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://aaltkprawfanoajoevcp.supabase.co";
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  "https://aaltkprawfanoajoevcp.supabase.co";
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -82,10 +86,10 @@ export async function POST(request) {
     if (error) {
       console.error("Supabase upload error:", error);
       return NextResponse.json(
-        { 
-          success: false, 
-          message: "Upload failed", 
-          error: error.message 
+        {
+          success: false,
+          message: "Upload failed",
+          error: error.message,
         },
         { status: 500 }
       );
@@ -102,7 +106,6 @@ export async function POST(request) {
       url: publicUrlData.publicUrl,
       path: data.path,
     });
-
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(

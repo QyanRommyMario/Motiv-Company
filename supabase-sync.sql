@@ -1,9 +1,15 @@
 -- ============================================
 -- SUPABASE PRODUCTION DATABASE - SYNC (SAFE)
--- ✅ Only ADD missing columns, NO DATA LOSS
+-- ✅ Only ADD/RENAME missing columns, NO DATA LOSS
 -- Complete schema alignment with development
 -- Generated: 2025-11-11
 -- ============================================
+
+-- ============================================
+-- ProductVariant Table - Rename 'size' to 'name'
+-- ============================================
+ALTER TABLE "ProductVariant" 
+RENAME COLUMN "size" TO "name";
 
 -- ============================================
 -- Order Table - Add missing shipping columns
@@ -43,6 +49,11 @@ ADD COLUMN IF NOT EXISTS "country" TEXT DEFAULT 'Indonesia';
 -- VERIFICATION - Check if all columns exist
 -- ============================================
 
+-- Check ProductVariant table (should have 'name' column)
+-- SELECT column_name, data_type 
+-- FROM information_schema.columns 
+-- WHERE table_name = 'ProductVariant';
+
 -- Check Order table columns
 -- SELECT column_name, data_type, is_nullable, column_default 
 -- FROM information_schema.columns 
@@ -63,15 +74,15 @@ ADD COLUMN IF NOT EXISTS "country" TEXT DEFAULT 'Indonesia';
 -- NOTES:
 -- ============================================
 -- ✅ No data deleted - all existing data preserved
+-- ✅ ProductVariant.size renamed to name (to match Prisma)
 -- ✅ Only missing columns added
 -- ✅ Story table already correct (featuredImage exists)
 -- ✅ User table already correct (no changes needed)
--- ✅ Safe to run multiple times (IF NOT EXISTS)
 -- ============================================
 
 -- After running this SQL:
 -- 1. All tables will match development schema
 -- 2. Existing data remains intact
--- 3. New Order records can use shipping fields
+-- 3. ProductVariant will use 'name' column
 -- 4. Ready to redeploy Vercel
 -- ============================================

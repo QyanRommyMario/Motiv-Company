@@ -33,11 +33,12 @@ export async function GET(request) {
             status: true,
           },
         },
-        b2bInfo: {
+        b2bRequest: {
           select: {
-            companyName: true,
-            businessType: true,
-            taxId: true,
+            businessName: true,
+            phone: true,
+            address: true,
+            status: true,
           },
         },
       },
@@ -60,7 +61,7 @@ export async function GET(request) {
         createdAt: customer.createdAt,
         _count: customer._count,
         totalSpent,
-        b2bInfo: customer.b2bInfo,
+        b2bRequest: customer.b2bRequest,
       };
     });
 
