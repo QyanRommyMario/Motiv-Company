@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { getPrismaClient, handleApiError, requireAuth, validateRequest } from "@/lib/apiErrorHandler";
 
 // GET - Fetch all published stories (for public) or all stories (for admin)
 export async function GET(request) {
   try {
+    const prisma = await getPrismaClient();
     const session = await getServerSession(authOptions);
     const isAdmin = session?.user?.role === "ADMIN";
 
@@ -15,34 +16,26 @@ export async function GET(request) {
       orderBy: { order: "asc" },
     });
 
-    return NextResponse.json({ stories });
+    return NextResponse.json({ success: true, stories });
   } catch (error) {
-    console.error("Error fetching stories:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch stories" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
 // POST - Create new story (Admin only)
 export async function POST(request) {
   try {
-    const session = await getServerSession(authOptions);
+    // Check authentication
+    const { session, error } = await requireAuth(request, "ADMIN");
+    if (error) return error;
 
-    if (!session || session.user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const prisma = await getPrismaClient();
+    const data = await request.json();
 
-    const { title, content, imageUrl, isPublished, order } =
-      await request.json();
+    // Validate required fields
+    validateRequest(data, ['title', 'content']);
 
-    if (!title || !content) {
-      return NextResponse.json(
-        { error: "Title and content are required" },
-        { status: 400 }
-      );
-    }
+    const { title, content, imageUrl, isPublished, order } = data;
 
     const story = await prisma.story.create({
       data: {
@@ -54,12 +47,8 @@ export async function POST(request) {
       },
     });
 
-    return NextResponse.json({ story }, { status: 201 });
+    return NextResponse.json({ success: true, story }, { status: 201 });
   } catch (error) {
-    console.error("Error creating story:", error);
-    return NextResponse.json(
-      { error: "Failed to create story" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

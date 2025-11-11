@@ -73,12 +73,12 @@ export default function GuestLanding() {
         </div>
       </nav>
 
-      {/* Hero Section - FULL BLACK with Background Image */}
+      {/* Hero Section - FULL BLACK with Background */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden bg-[#0A0A0A]">
-        {/* Background Image/Pattern - Subtle texture */}
+        {/* Background Gradient - Subtle texture */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[url('/coffee-texture.jpg')] bg-cover bg-center opacity-30"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80"></div>
+          <div className="absolute inset-0 bg-linear-to-br from-zinc-900 via-black to-zinc-900 opacity-50"></div>
+          <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/40 to-black/80"></div>
         </div>
 
         {/* Subtle lighting effects */}

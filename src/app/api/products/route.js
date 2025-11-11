@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import { ProductViewModel } from "@/viewmodels/ProductViewModel";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { handleApiError } from "@/lib/apiErrorHandler";
 
 export async function GET(request) {
   try {
@@ -55,10 +56,6 @@ export async function GET(request) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Products API error:", error);
-    return NextResponse.json(
-      { success: false, message: "Terjadi kesalahan pada server" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
