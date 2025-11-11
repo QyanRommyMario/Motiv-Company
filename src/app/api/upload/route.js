@@ -65,8 +65,13 @@ export async function POST(request) {
     const extension = file.name.split(".").pop();
     const filename = `${timestamp}-${randomString}.${extension}`;
 
+    // VERCEL COMPATIBILITY: Use /tmp for serverless or public/uploads for local
+    const isVercel = process.env.VERCEL === "1";
+    const uploadsDir = isVercel
+      ? join("/tmp", "uploads")
+      : join(process.cwd(), "public", "uploads");
+
     // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), "public", "uploads");
     if (!existsSync(uploadsDir)) {
       await mkdir(uploadsDir, { recursive: true });
     }
@@ -75,18 +80,38 @@ export async function POST(request) {
     const filepath = join(uploadsDir, filename);
     await writeFile(filepath, buffer);
 
+    // IMPORTANT: For Vercel, files in /tmp are temporary
+    // Consider using cloud storage (Cloudinary, AWS S3, etc.) for production
+    // For now, we'll warn the user
+    if (isVercel) {
+      console.warn(
+        "⚠️  File uploaded to /tmp on Vercel - this is temporary! Consider using Cloudinary or S3."
+      );
+    }
+
     // Return public URL
-    const publicUrl = `/uploads/${filename}`;
+    // NOTE: On Vercel, /tmp files are not publicly accessible
+    // This is a limitation - you need cloud storage for production
+    const publicUrl = isVercel
+      ? `/api/uploads/${filename}` // We'll need to create API endpoint to serve from /tmp
+      : `/uploads/${filename}`;
 
     return NextResponse.json({
       success: true,
       message: "File uploaded successfully",
       url: publicUrl,
+      warning: isVercel
+        ? "File is temporary on Vercel. Please configure cloud storage for production."
+        : null,
     });
   } catch (error) {
     console.error("Error uploading file:", error);
     return NextResponse.json(
-      { success: false, message: "Failed to upload file" },
+      {
+        success: false,
+        message: "Failed to upload file",
+        error: error.message,
+      },
       { status: 500 }
     );
   }
