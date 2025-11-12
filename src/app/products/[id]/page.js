@@ -92,16 +92,16 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 pt-16">
         <Navbar />
         <Loading fullScreen />
       </div>
     );
   }
 
-  if (error || !product) {
+  if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 pt-16">
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
@@ -122,10 +122,10 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-16">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-24 sm:pt-28 lg:pt-32">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Breadcrumb */}
         <nav className="mb-4 sm:mb-6 text-xs sm:text-sm overflow-x-auto">
           <ol className="flex items-center space-x-2 text-gray-600 whitespace-nowrap">

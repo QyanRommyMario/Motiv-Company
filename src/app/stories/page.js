@@ -35,7 +35,7 @@ export default function StoriesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-16">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-32 pb-12">
@@ -63,10 +63,10 @@ export default function StoriesPage() {
               <Link key={story.id} href={`/stories/${story.id}`}>
                 <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 h-full cursor-pointer group">
                   {/* Image */}
-                  {story.imageUrl && (
+                  {story.featuredImage && (
                     <div className="aspect-video relative bg-gray-200 overflow-hidden">
                       <img
-                        src={story.imageUrl}
+                        src={story.featuredImage}
                         alt={story.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />

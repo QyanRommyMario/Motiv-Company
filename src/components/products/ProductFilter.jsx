@@ -49,24 +49,24 @@ export default function ProductFilter({ onFilterChange }) {
   };
 
   return (
-    <div className="bg-white border border-[#E5E7EB] p-8 mb-12">
-      <h3 className="text-xs uppercase tracking-widest text-[#9CA3AF] mb-6 letter-spacing-widest">
+    <div className="bg-white border border-[#E5E7EB] p-4 sm:p-6 md:p-8 mb-8 md:mb-12">
+      <h3 className="text-xs uppercase tracking-widest text-[#9CA3AF] mb-4 sm:mb-6">
         Filter Products
       </h3>
 
       {/* Search */}
-      <form onSubmit={handleSearchSubmit} className="mb-6">
-        <div className="flex gap-3">
+      <form onSubmit={handleSearchSubmit} className="mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <input
             type="text"
             placeholder="Search products..."
             value={searchTerm}
             onChange={handleSearchChange}
-            className="flex-1 px-4 py-3 border border-[#E5E7EB] bg-white text-[#1A1A1A] focus:outline-none focus:border-[#1A1A1A] transition-colors text-sm"
+            className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border border-[#E5E7EB] bg-white text-[#1A1A1A] focus:outline-none focus:border-[#1A1A1A] transition-colors text-sm"
           />
           <button
             type="submit"
-            className="bg-[#1A1A1A] text-white px-8 py-3 uppercase tracking-widest text-xs font-medium hover:opacity-90 transition-opacity"
+            className="bg-[#1A1A1A] text-white px-6 sm:px-8 py-2.5 sm:py-3 uppercase tracking-widest text-xs font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
           >
             Search
           </button>
@@ -74,14 +74,14 @@ export default function ProductFilter({ onFilterChange }) {
       </form>
 
       {/* Categories */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <label className="block text-xs uppercase tracking-widest text-[#6B7280] mb-3">
           Category
         </label>
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => handleCategoryChange("")}
-            className={`px-6 py-2.5 text-xs uppercase tracking-wider font-medium transition-all border ${
+            className={`px-4 sm:px-6 py-2 sm:py-2.5 text-xs uppercase tracking-wider font-medium transition-all border ${
               selectedCategory === ""
                 ? "bg-[#1A1A1A] text-white border-[#1A1A1A]"
                 : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#1A1A1A] hover:text-[#1A1A1A]"
@@ -93,7 +93,7 @@ export default function ProductFilter({ onFilterChange }) {
             <button
               key={category}
               onClick={() => handleCategoryChange(category)}
-              className={`px-6 py-2.5 text-xs uppercase tracking-wider font-medium transition-all border ${
+              className={`px-4 sm:px-6 py-2 sm:py-2.5 text-xs uppercase tracking-wider font-medium transition-all border ${
                 selectedCategory === category
                   ? "bg-[#1A1A1A] text-white border-[#1A1A1A]"
                   : "bg-white text-[#6B7280] border-[#E5E7EB] hover:border-[#1A1A1A] hover:text-[#1A1A1A]"

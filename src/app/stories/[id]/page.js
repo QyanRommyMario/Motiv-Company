@@ -52,7 +52,7 @@ export default function StoryDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 pt-16">
         <Navbar />
         <div className="flex justify-center items-center py-20">
           <Loading size="lg" />
@@ -66,10 +66,10 @@ export default function StoryDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-16">
       <Navbar />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-32 pb-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-12">
         {/* Back Button */}
         <button
           onClick={() => router.push("/stories")}
@@ -94,10 +94,10 @@ export default function StoryDetailPage() {
         {/* Story Content */}
         <article className="bg-white rounded-lg shadow-md overflow-hidden">
           {/* Featured Image */}
-          {story.imageUrl && (
+          {story.featuredImage && (
             <div className="w-full aspect-video relative bg-gray-200">
               <img
-                src={story.imageUrl}
+                src={story.featuredImage}
                 alt={story.title}
                 className="w-full h-full object-cover"
               />

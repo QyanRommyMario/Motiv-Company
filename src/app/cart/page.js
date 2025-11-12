@@ -137,7 +137,7 @@ export default function CartPage() {
   const isB2B = session?.user?.role === "B2B";
 
   return (
-    <div className="min-h-screen bg-[#FDFCFA]">
+    <div className="min-h-screen bg-[#FDFCFA] pt-16">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pt-20 sm:pt-24 lg:pt-28">

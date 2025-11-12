@@ -49,16 +49,16 @@ function ProductsContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCFA]">
+    <div className="min-h-screen bg-[#FDFCFA] pt-16">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
         {/* Header */}
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-[#1A1A1A] mb-4 tracking-tight">
+        <div className="mb-8 md:mb-12 text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-[#1A1A1A] mb-3 md:mb-4 tracking-tight">
             Our Collection
           </h1>
-          <p className="text-[#6B7280] text-lg">
+          <p className="text-[#6B7280] text-base md:text-lg">
             Discover our carefully curated selection of premium coffee
           </p>
         </div>
@@ -68,7 +68,7 @@ function ProductsContent() {
 
         {/* Results count */}
         {!loading && (
-          <div className="mb-6 text-sm text-[#9CA3AF] uppercase tracking-wider">
+          <div className="mb-4 md:mb-6 text-xs sm:text-sm text-[#9CA3AF] uppercase tracking-wider">
             {products.length} Product{products.length !== 1 ? "s" : ""}
             {filters.category && ` — ${filters.category}`}
             {filters.search && ` — "${filters.search}"`}

@@ -157,8 +157,8 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDFCFA]">
-      <div className="max-w-7xl mx-auto px-6 pt-32 pb-20">
+    <div className="min-h-screen bg-[#FDFCFA] pt-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
         {/* Header Section - Elegant & Minimal */}
         <div className="mb-16">
           <div className="flex items-start justify-between mb-8">
