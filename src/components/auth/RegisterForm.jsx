@@ -7,12 +7,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Alert from "@/components/ui/Alert";
 import Loading from "@/components/ui/Loading";
 
 export default function RegisterForm() {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
@@ -41,14 +44,14 @@ export default function RegisterForm() {
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      setError("Password tidak cocok");
+      setError(t("passwordMismatch"));
       setIsLoading(false);
       return;
     }
 
     // Validate password length
     if (formData.password.length < 6) {
-      setError("Password minimal 6 karakter");
+      setError(t("passwordTooShort"));
       setIsLoading(false);
       return;
     }
@@ -82,7 +85,7 @@ export default function RegisterForm() {
       }, 2000);
     } catch (error) {
       console.error("Register error:", error);
-      setError("Terjadi kesalahan. Silakan coba lagi.");
+      setError(tCommon("error"));
       setIsLoading(false);
     }
   };
@@ -91,7 +94,7 @@ export default function RegisterForm() {
     return (
       <Alert
         type="success"
-        message="Registrasi berhasil! Anda akan diarahkan ke halaman login..."
+        message={t("registerSuccess")}
       />
     );
   }
@@ -103,7 +106,7 @@ export default function RegisterForm() {
       )}
 
       <Input
-        label="Nama Lengkap"
+        label={t("name")}
         type="text"
         name="name"
         value={formData.name}
@@ -114,7 +117,7 @@ export default function RegisterForm() {
       />
 
       <Input
-        label="Email"
+        label={t("email")}
         type="email"
         name="email"
         value={formData.email}
@@ -126,7 +129,7 @@ export default function RegisterForm() {
 
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Password
+          {t("password")}
           <span className="text-red-500 ml-1">*</span>
         </label>
         <div className="relative">
@@ -136,7 +139,7 @@ export default function RegisterForm() {
             value={formData.password}
             onChange={handleChange}
             required
-            placeholder="Minimal 6 karakter"
+            placeholder={t("passwordPlaceholder")}
             disabled={isLoading}
             className="w-full px-4 py-2 pr-10 border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent border-gray-300"
           />
@@ -163,7 +166,7 @@ export default function RegisterForm() {
 
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Konfirmasi Password
+          {t("confirmPassword")}
           <span className="text-red-500 ml-1">*</span>
         </label>
         <div className="relative">
@@ -173,7 +176,7 @@ export default function RegisterForm() {
             value={formData.confirmPassword}
             onChange={handleChange}
             required
-            placeholder="Ulangi password"
+            placeholder={t("confirmPasswordPlaceholder")}
             disabled={isLoading}
             className="w-full px-4 py-2 pr-10 border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent border-gray-300"
           />
@@ -207,10 +210,10 @@ export default function RegisterForm() {
         {isLoading ? (
           <span className="flex items-center justify-center">
             <Loading size="sm" />
-            <span className="ml-2">Mendaftar...</span>
+            <span className="ml-2">{t("registering")}</span>
           </span>
         ) : (
-          "Daftar"
+          t("registerButton")
         )}
       </Button>
     </form>

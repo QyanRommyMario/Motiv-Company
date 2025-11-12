@@ -9,8 +9,12 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function Navbar() {
+  const t = useTranslations("nav");
+  const tAdmin = useTranslations("admin");
   const { data: session, status } = useSession();
   const [cartCount, setCartCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -83,7 +87,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Dashboard
+                  {tAdmin("dashboard")}
                 </Link>
                 <Link
                   href="/admin/products"
@@ -93,7 +97,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Products
+                  {tAdmin("products")}
                 </Link>
                 <Link
                   href="/admin/orders"
@@ -103,7 +107,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Orders
+                  {tAdmin("orders")}
                 </Link>
                 <Link
                   href="/admin/vouchers"
@@ -113,7 +117,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Vouchers
+                  {tAdmin("vouchers")}
                 </Link>
                 <Link
                   href="/admin/b2b"
@@ -123,7 +127,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  B2B Requests
+                  {tAdmin("b2bRequests")}
                 </Link>
               </>
             ) : session?.user?.role === "B2B" ? (
@@ -137,7 +141,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Products
+                  {t("products")}
                 </Link>
                 <Link
                   href="/stories"
@@ -147,7 +151,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Stories
+                  {t("stories")}
                 </Link>
                 <Link
                   href="/profile/orders"
@@ -260,7 +264,10 @@ export default function Navbar() {
           </div>
 
           {/* Right Side - Auth & Cart */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+            
             {status === "loading" ? (
               <div className="w-20 h-6 bg-gray-200 animate-pulse rounded"></div>
             ) : session ? (
@@ -306,7 +313,7 @@ export default function Navbar() {
                         B2B
                       </span>
                     )}
-                    <span>Account</span>
+                    <span>{t("profile")}</span>
                     <svg
                       className="ml-1 w-4 h-4"
                       fill="none"
@@ -349,7 +356,7 @@ export default function Navbar() {
                         disabled={isSigningOut}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
                       >
-                        {isSigningOut ? "Signing out..." : "Sign Out"}
+                        {isSigningOut ? t("signingOut") : t("logout")}
                       </button>
                     </div>
                   </div>
@@ -360,7 +367,7 @@ export default function Navbar() {
                 href="/login"
                 className="text-sm uppercase tracking-widest font-medium text-[#1A1A1A] hover:opacity-70 transition-opacity border border-[#1A1A1A] px-6 py-2.5 hover:bg-[#1A1A1A] hover:text-white"
               >
-                Login
+                {t("login")}
               </Link>
             )}
           </div>
@@ -545,7 +552,7 @@ export default function Navbar() {
                 disabled={isSigningOut}
                 className="block w-full text-left text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors disabled:opacity-50"
               >
-                {isSigningOut ? "Signing out..." : "Sign Out"}
+                {isSigningOut ? t("signingOut") : t("logout")}
               </button>
             ) : (
               <Link
@@ -553,7 +560,7 @@ export default function Navbar() {
                 className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Login
+                {t("login")}
               </Link>
             )}
           </div>

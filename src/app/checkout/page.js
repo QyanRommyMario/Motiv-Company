@@ -164,7 +164,9 @@ export default function CheckoutPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
         {/* Page Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+            Checkout
+          </h1>
           <p className="text-sm sm:text-base text-gray-600">
             Lengkapi informasi pengiriman untuk menyelesaikan pesanan
           </p>

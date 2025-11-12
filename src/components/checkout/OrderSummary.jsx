@@ -37,7 +37,10 @@ export default function OrderSummary({
           const price = item.price || variant?.price || product?.price || 0;
 
           return (
-            <div key={item.id} className="flex gap-2 sm:gap-3 text-xs sm:text-sm">
+            <div
+              key={item.id}
+              className="flex gap-2 sm:gap-3 text-xs sm:text-sm"
+            >
               {product?.images?.[0] && (
                 <img
                   src={product.images[0]}
@@ -95,7 +98,9 @@ export default function OrderSummary({
       {/* Total */}
       <div className="border-t border-gray-300 mt-3 sm:mt-4 pt-3 sm:pt-4 shrink-0">
         <div className="flex justify-between items-center">
-          <span className="text-base sm:text-lg font-semibold text-gray-900">Total</span>
+          <span className="text-base sm:text-lg font-semibold text-gray-900">
+            Total
+          </span>
           <span className="text-lg sm:text-xl font-bold text-gray-900">
             Rp {total.toLocaleString("id-ID")}
           </span>

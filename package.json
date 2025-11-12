@@ -26,6 +26,7 @@
     "midtrans-client": "^1.4.3",
     "next": "16.0.0",
     "next-auth": "^4.24.5",
+    "next-intl": "^4.5.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-hot-toast": "^2.4.1",

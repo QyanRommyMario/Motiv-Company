@@ -8,12 +8,15 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Alert from "@/components/ui/Alert";
 import Loading from "@/components/ui/Loading";
 
 export default function LoginForm() {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
@@ -44,7 +47,7 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
-        setError("Email atau password salah");
+        setError(t("invalidCredentials"));
         setIsLoading(false);
         return;
       }
@@ -55,7 +58,7 @@ export default function LoginForm() {
       }
     } catch (error) {
       console.error("Login error:", error);
-      setError("Terjadi kesalahan. Silakan coba lagi.");
+      setError(tCommon("error"));
       setIsLoading(false);
     }
   };
@@ -70,7 +73,7 @@ export default function LoginForm() {
 
       <div>
         <label className="block text-xs uppercase tracking-widest text-[#6B7280] mb-2">
-          Email Address
+          {t("email")}
         </label>
         <input
           type="email"
@@ -86,7 +89,7 @@ export default function LoginForm() {
 
       <div>
         <label className="block text-xs uppercase tracking-widest text-[#6B7280] mb-2">
-          Password
+          {t("password")}
         </label>
         <div className="relative">
           <input
@@ -146,10 +149,10 @@ export default function LoginForm() {
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            <span>Signing In...</span>
+            <span>{tCommon("loading")}</span>
           </span>
         ) : (
-          "Sign In"
+          t("loginButton")
         )}
       </button>
     </form>

@@ -8,6 +8,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Navbar from "@/components/layout/Navbar";
 import CartItem from "@/components/cart/CartItem";
 import CartSummary from "@/components/cart/CartSummary";
@@ -16,6 +17,8 @@ import Loading from "@/components/ui/Loading";
 import Alert from "@/components/ui/Alert";
 
 export default function CartPage() {
+  const t = useTranslations("cart");
+  const tCommon = useTranslations("common");
   const { data: session, status } = useSession();
   const router = useRouter();
   const [cartItems, setCartItems] = useState([]);

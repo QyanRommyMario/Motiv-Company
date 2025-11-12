@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import Navbar from "@/components/layout/Navbar";
 
 export default function B2CDashboard({ session }) {
+  const t = useTranslations("landing");
   const [stories, setStories] = useState([]);
   const [loadingStories, setLoadingStories] = useState(true);
 
@@ -46,7 +48,7 @@ export default function B2CDashboard({ session }) {
 
             <div className="relative">
               <p className="text-white/70 uppercase tracking-[0.35em] text-base md:text-lg font-light">
-                Premium Coffee Experience
+                {t("hero.subtitle")}
               </p>
               <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-24 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
             </div>
@@ -54,7 +56,7 @@ export default function B2CDashboard({ session }) {
         </div>
 
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 text-xs uppercase tracking-[0.2em] flex flex-col items-center gap-2">
-          <span>Scroll</span>
+          <span>{t("scroll")}</span>
           <svg
             className="w-6 h-6 animate-bounce"
             fill="none"
@@ -78,7 +80,7 @@ export default function B2CDashboard({ session }) {
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-20">
               <h2 className="text-5xl lg:text-6xl font-['Playfair_Display'] text-[#1A1A1A] leading-tight font-bold">
-                Stories
+                {t("stories.title")}
               </h2>
             </div>
 
@@ -137,7 +139,7 @@ export default function B2CDashboard({ session }) {
                 href="/stories"
                 className="inline-block px-10 py-4 bg-[#1A1A1A] text-white uppercase tracking-[0.2em] text-sm font-semibold hover:bg-[#6B7280] transition-all duration-300 shadow-lg"
               >
-                View All Stories
+                {t("stories.viewAll")}
               </Link>
             </div>
           </div>
@@ -148,17 +150,16 @@ export default function B2CDashboard({ session }) {
       <section className="relative py-32 bg-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-5xl lg:text-6xl font-['Playfair_Display'] text-[#1A1A1A] mb-8 leading-tight font-bold">
-            Experience the Difference
+            {t("cta.title")}
           </h2>
           <p className="text-[#6B7280] text-lg mb-10 leading-relaxed">
-            Join thousands of coffee enthusiasts who trust MOTIV for their daily
-            ritual
+            {t("cta.subtitle")}
           </p>
           <Link
             href="/products"
             className="inline-block bg-[#1A1A1A] text-white px-10 py-4 text-base uppercase tracking-[0.2em] hover:bg-black transition-all duration-300 font-medium shadow-lg hover:shadow-xl"
           >
-            Shop Collection
+            {t("cta.button")}
           </Link>
         </div>
       </section>
@@ -167,14 +168,14 @@ export default function B2CDashboard({ session }) {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center space-y-4">
             <h3 className="text-2xl font-['Playfair_Display'] text-white tracking-[0.15em] font-bold">
-              MOTIV
+              {t("footer.brand")}
             </h3>
             <p className="text-white/40 text-sm uppercase tracking-[0.25em]">
-              Premium Coffee Experience
+              {t("footer.tagline")}
             </p>
             <div className="pt-6 border-t border-white/10">
               <p className="text-white/30 text-xs uppercase tracking-[0.2em]">
-                © 2025 MOTIV. All Rights Reserved.
+                {t("footer.copyright")}
               </p>
             </div>
           </div>

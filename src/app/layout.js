@@ -3,6 +3,9 @@ import "./globals.css";
 import AuthProvider from "@/components/auth/SessionProvider";
 import AuthErrorBoundary from "@/components/auth/AuthErrorBoundary";
 import { ToastProvider } from "@/components/ui/Toast";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { cookies } from "next/headers";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -24,18 +27,25 @@ export const metadata = {
     "Belanja kopi premium dengan harga terbaik. Fitur B2B dan B2C tersedia.",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Get locale from cookie or default to 'en'
+  const cookieStore = await cookies();
+  const locale = cookieStore.get('NEXT_LOCALE')?.value || 'en';
+  const messages = await getMessages({ locale });
+
   return (
-    <html lang="id" data-scroll-behavior="smooth">
+    <html lang={locale} data-scroll-behavior="smooth">
       <body
         className={`${inter.variable} ${playfair.variable} antialiased`}
         suppressHydrationWarning
       >
-        <AuthErrorBoundary>
-          <AuthProvider>
-            <ToastProvider>{children}</ToastProvider>
-          </AuthProvider>
-        </AuthErrorBoundary>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <AuthErrorBoundary>
+            <AuthProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </AuthProvider>
+          </AuthErrorBoundary>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

@@ -7,11 +7,13 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Navbar from "@/components/layout/Navbar";
 import ProductGrid from "@/components/products/ProductGrid";
 import ProductFilter from "@/components/products/ProductFilter";
 
 function ProductsContent() {
+  const t = useTranslations("products");
   const searchParams = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,10 +58,10 @@ function ProductsContent() {
         {/* Header */}
         <div className="mb-8 md:mb-12 text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-[#1A1A1A] mb-3 md:mb-4 tracking-tight">
-            Our Collection
+            {t("title")}
           </h1>
           <p className="text-[#6B7280] text-base md:text-lg">
-            Discover our carefully curated selection of premium coffee
+            {t("subtitle")}
           </p>
         </div>
 
@@ -69,7 +71,7 @@ function ProductsContent() {
         {/* Results count */}
         {!loading && (
           <div className="mb-4 md:mb-6 text-xs sm:text-sm text-[#9CA3AF] uppercase tracking-wider">
-            {products.length} Product{products.length !== 1 ? "s" : ""}
+            {products.length} {t("productCount", { count: products.length })}
             {filters.category && ` — ${filters.category}`}
             {filters.search && ` — "${filters.search}"`}
           </div>
