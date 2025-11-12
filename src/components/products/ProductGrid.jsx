@@ -5,10 +5,13 @@
  * Displays products in a responsive grid
  */
 
+import { useTranslations } from "next-intl";
 import ProductCard from "./ProductCard";
 import Loading from "@/components/ui/Loading";
 
 export default function ProductGrid({ products, loading }) {
+  const t = useTranslations("products");
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -22,10 +25,10 @@ export default function ProductGrid({ products, loading }) {
       <div className="text-center py-20">
         <div className="text-6xl mb-4">☕</div>
         <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          Produk Tidak Ditemukan
+          {t("noProducts")}
         </h3>
         <p className="text-gray-600">
-          Coba ubah filter atau kata kunci pencarian Anda
+          {t("noProductsMessage")}
         </p>
       </div>
     );

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({ variant = "light" }) {
   const [locale, setLocale] = useState(() => {
     if (typeof window !== "undefined") {
       return document.cookie
@@ -34,21 +34,26 @@ export default function LanguageSwitcher() {
     });
   };
 
+  // Styling variants
+  const buttonStyles = variant === "dark" 
+    ? "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 text-white"
+    : "border border-[#E5E7EB] hover:border-[#1A1A1A] text-[#6B7280] hover:text-[#1A1A1A]";
+
   return (
     <div className="relative">
       {/* Language Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all"
+        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${buttonStyles}`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         disabled={isPending}
       >
-        <span className="text-white text-sm font-medium">
+        <span className="text-sm font-medium uppercase tracking-widest">
           {currentLang?.code.toUpperCase()}
         </span>
         <motion.svg
-          className="w-4 h-4 text-white"
+          className="w-4 h-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

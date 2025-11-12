@@ -28,11 +28,13 @@
     "stories": "Stories",
     "cart": "Cart",
     "profile": "Account",
+    "addresses": "Addresses",
     "login": "Login",
     "register": "Register",
     "logout": "Sign Out",
     "signingOut": "Signing out...",
-    "admin": "Admin Dashboard"
+    "admin": "Admin Dashboard",
+    "becomeB2B": "Become B2B"
   },
   "products": {
     "title": "Our Collection",
@@ -49,7 +51,8 @@
     "variants": "Variants",
     "description": "Description",
     "features": "Features",
-    "noProducts": "No products found",
+    "noProducts": "No Products Found",
+    "noProductsMessage": "Try changing your filters or search keywords",
     "loading": "Loading products..."
   },
   "cart": {

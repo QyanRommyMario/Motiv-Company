@@ -73,7 +73,7 @@ export default function GuestLanding() {
             </motion.div>
             <div className="flex gap-3 sm:gap-4 items-center">
               {/* Language Switcher */}
-              <LanguageSwitcher />
+              <LanguageSwitcher variant="dark" />
               
               <motion.div
                 whileHover={{ scale: 1.08, y: -2 }}

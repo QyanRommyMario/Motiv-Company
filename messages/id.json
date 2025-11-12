@@ -28,11 +28,13 @@
     "stories": "Cerita",
     "cart": "Keranjang",
     "profile": "Akun",
+    "addresses": "Alamat",
     "login": "Masuk",
     "register": "Daftar",
     "logout": "Keluar",
     "signingOut": "Keluar...",
-    "admin": "Dashboard Admin"
+    "admin": "Dashboard Admin",
+    "becomeB2B": "Jadi Mitra B2B"
   },
   "products": {
     "title": "Koleksi Kami",
@@ -49,7 +51,8 @@
     "variants": "Varian",
     "description": "Deskripsi",
     "features": "Fitur",
-    "noProducts": "Produk tidak ditemukan",
+    "noProducts": "Produk Tidak Ditemukan",
+    "noProductsMessage": "Coba ubah filter atau kata kunci pencarian Anda",
     "loading": "Memuat produk..."
   },
   "cart": {

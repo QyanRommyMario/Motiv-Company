@@ -161,7 +161,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Orders
+                  {tAdmin("orders")}
                 </Link>
                 <Link
                   href="/profile/addresses"
@@ -171,7 +171,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Addresses
+                  {t("addresses")}
                 </Link>
                 <Link
                   href="/vouchers"
@@ -181,7 +181,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Vouchers
+                  {tAdmin("vouchers")}
                 </Link>
               </>
             ) : session?.user?.role === "B2C" ? (
@@ -195,7 +195,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Products
+                  {t("products")}
                 </Link>
                 <Link
                   href="/stories"
@@ -205,7 +205,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Stories
+                  {t("stories")}
                 </Link>
                 <Link
                   href="/profile/orders"
@@ -215,7 +215,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Orders
+                  {tAdmin("orders")}
                 </Link>
                 <Link
                   href="/profile/addresses"
@@ -225,7 +225,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Addresses
+                  {t("addresses")}
                 </Link>
                 <Link
                   href="/vouchers"
@@ -235,7 +235,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Vouchers
+                  {tAdmin("vouchers")}
                 </Link>
                 <Link
                   href="/b2b/register"
@@ -245,7 +245,7 @@ export default function Navbar() {
                       : "text-[#6B7280] hover:text-[#1A1A1A]"
                   }`}
                 >
-                  Become B2B
+                  {t("becomeB2B")}
                 </Link>
               </>
             ) : (
@@ -258,7 +258,7 @@ export default function Navbar() {
                     : "text-[#6B7280] hover:text-[#1A1A1A]"
                 }`}
               >
-                Products
+                {t("products")}
               </Link>
             )}
           </div>
@@ -407,6 +407,11 @@ export default function Navbar() {
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200">
           <div className="px-6 py-4 space-y-4">
+            {/* Language Switcher - Mobile */}
+            <div className="pb-4 border-b border-gray-200">
+              <LanguageSwitcher />
+            </div>
+            
             {session?.user?.role === "ADMIN" ? (
               // Admin Navigation
               <>
@@ -415,35 +420,35 @@ export default function Navbar() {
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Dashboard
+                  {tAdmin("dashboard")}
                 </Link>
                 <Link
                   href="/admin/products"
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Products
+                  {tAdmin("products")}
                 </Link>
                 <Link
                   href="/admin/orders"
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Orders
+                  {tAdmin("orders")}
                 </Link>
                 <Link
                   href="/admin/vouchers"
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Vouchers
+                  {tAdmin("vouchers")}
                 </Link>
                 <Link
                   href="/admin/b2b"
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  B2B Requests
+                  {tAdmin("b2bRequests")}
                 </Link>
               </>
             ) : session?.user?.role === "B2B" ? (
@@ -454,35 +459,35 @@ export default function Navbar() {
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Products
+                  {t("products")}
                 </Link>
                 <Link
                   href="/cart"
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Cart {cartCount > 0 && `(${cartCount})`}
+                  {t("cart")} {cartCount > 0 && `(${cartCount})`}
                 </Link>
                 <Link
                   href="/profile/orders"
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Orders
+                  {tAdmin("orders")}
                 </Link>
                 <Link
                   href="/profile/addresses"
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Addresses
+                  {t("addresses")}
                 </Link>
                 <Link
                   href="/vouchers"
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Vouchers
+                  {tAdmin("vouchers")}
                 </Link>
               </>
             ) : session?.user?.role === "B2C" ? (
@@ -493,42 +498,42 @@ export default function Navbar() {
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Products
+                  {t("products")}
                 </Link>
                 <Link
                   href="/cart"
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Cart {cartCount > 0 && `(${cartCount})`}
+                  {t("cart")} {cartCount > 0 && `(${cartCount})`}
                 </Link>
                 <Link
                   href="/profile/orders"
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Orders
+                  {tAdmin("orders")}
                 </Link>
                 <Link
                   href="/profile/addresses"
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Addresses
+                  {t("addresses")}
                 </Link>
                 <Link
                   href="/vouchers"
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Vouchers
+                  {tAdmin("vouchers")}
                 </Link>
                 <Link
                   href="/b2b/register"
                   className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Become B2B Partner
+                  {t("becomeB2B")}
                 </Link>
               </>
             ) : (
@@ -538,7 +543,7 @@ export default function Navbar() {
                 className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Products
+                {t("products")}
               </Link>
             )}
 
