@@ -174,7 +174,7 @@ export default function B2CDashboard({ session }) {
             </p>
             <div className="pt-6 border-t border-white/10">
               <p className="text-white/30 text-xs uppercase tracking-[0.2em]">
-                © 2024 MOTIV. All Rights Reserved.
+                © 2025 MOTIV. All Rights Reserved.
               </p>
             </div>
           </div>
