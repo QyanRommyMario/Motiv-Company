@@ -22,6 +22,7 @@
 
 1. Navigate to **"Customers"** menu
 2. **Check:**
+
    - ⏱️ Page loads in **<1 second**
    - 📊 Shows 20 customers by default
    - 🔢 Pagination controls visible at bottom
@@ -39,6 +40,7 @@
 
 1. Navigate to **"Orders"** menu
 2. **Check:**
+
    - ⏱️ Page loads in **<1 second**
    - 📦 Shows 20 orders by default
    - 🎯 Filter by status works (PENDING, PAID, DELIVERED)
@@ -58,11 +60,11 @@
 2. **Check:**
    - ⏱️ Page loads in **<1 second**
    - 📊 All stats cards show numbers:
-     * Total Orders
-     * Total Revenue
-     * Total Products
-     * Total Users
-     * Pending Orders
+     - Total Orders
+     - Total Revenue
+     - Total Products
+     - Total Users
+     - Pending Orders
    - 📋 "Recent Orders" table shows 10 items
    - ⚠️ "Low Stock Products" shows products with stock < 10
    - 🏆 "Top Selling Products" displays correctly
@@ -85,12 +87,12 @@
 
 ### Expected Performance
 
-| Page | Before Optimization | After Optimization | Target |
-|------|--------------------|--------------------|--------|
-| **Customers** | 5-10 seconds | <500ms | ✅ 90% faster |
-| **Orders** | 2-3 seconds | <300ms | ✅ 85% faster |
-| **Dashboard** | 1-2 seconds | <400ms | ✅ 70% faster |
-| **Products** | <1 second | <300ms | ✅ Already fast |
+| Page          | Before Optimization | After Optimization | Target          |
+| ------------- | ------------------- | ------------------ | --------------- |
+| **Customers** | 5-10 seconds        | <500ms             | ✅ 90% faster   |
+| **Orders**    | 2-3 seconds         | <300ms             | ✅ 85% faster   |
+| **Dashboard** | 1-2 seconds         | <400ms             | ✅ 70% faster   |
+| **Products**  | <1 second           | <300ms             | ✅ Already fast |
 
 ---
 
@@ -99,19 +101,23 @@
 ### Step-by-Step:
 
 1. **Open DevTools:**
+
    - Press `F12` or `Ctrl+Shift+I`
    - Go to **"Network"** tab
 
 2. **Clear Cache:**
+
    - Right-click → "Clear browser cache"
    - Check **"Disable cache"** option
 
 3. **Test Load Time:**
+
    - Navigate to **Customers** page
    - Look at **"DOMContentLoaded"** time at bottom
    - Should be **<1 second**
 
 4. **Check API Response Time:**
+
    - Find request: `GET /api/admin/customers?page=1&limit=20`
    - Click on it → Go to **"Timing"** tab
    - **"Waiting (TTFB)"** should be **<500ms**
@@ -131,33 +137,33 @@ Open browser DevTools Console (F12 → Console) and run:
 
 ```javascript
 // Test Customers API
-console.time('Customers API');
-fetch('/api/admin/customers?page=1&limit=20')
-  .then(r => r.json())
-  .then(data => {
-    console.timeEnd('Customers API');
-    console.log('Total customers:', data.pagination.total);
-    console.log('Returned:', data.customers.length);
+console.time("Customers API");
+fetch("/api/admin/customers?page=1&limit=20")
+  .then((r) => r.json())
+  .then((data) => {
+    console.timeEnd("Customers API");
+    console.log("Total customers:", data.pagination.total);
+    console.log("Returned:", data.customers.length);
   });
 
 // Test Orders API
-console.time('Orders API');
-fetch('/api/admin/orders?page=1&limit=20')
-  .then(r => r.json())
-  .then(data => {
-    console.timeEnd('Orders API');
-    console.log('Total orders:', data.pagination.total);
-    console.log('Returned:', data.orders.length);
+console.time("Orders API");
+fetch("/api/admin/orders?page=1&limit=20")
+  .then((r) => r.json())
+  .then((data) => {
+    console.timeEnd("Orders API");
+    console.log("Total orders:", data.pagination.total);
+    console.log("Returned:", data.orders.length);
   });
 
 // Test Stats API
-console.time('Stats API');
-fetch('/api/admin/stats')
-  .then(r => r.json())
-  .then(data => {
-    console.timeEnd('Stats API');
-    console.log('Total Revenue:', data.stats.overview.totalRevenue);
-    console.log('Total Orders:', data.stats.overview.totalOrders);
+console.time("Stats API");
+fetch("/api/admin/stats")
+  .then((r) => r.json())
+  .then((data) => {
+    console.timeEnd("Stats API");
+    console.log("Total Revenue:", data.stats.overview.totalRevenue);
+    console.log("Total Orders:", data.stats.overview.totalOrders);
   });
 ```
 
@@ -166,6 +172,7 @@ fetch('/api/admin/stats')
 ## 6. Expected Console Output
 
 ### ✅ Good Performance:
+
 ```
 Customers API: 347.23ms
 Total customers: 143
@@ -181,6 +188,7 @@ Total Orders: 256
 ```
 
 ### ❌ Poor Performance (if optimization failed):
+
 ```
 Customers API: 5234.56ms  ← TOO SLOW
 Orders API: 3421.89ms     ← TOO SLOW
@@ -194,11 +202,13 @@ Stats API: 2109.34ms      ← TOO SLOW
 ### Issue 1: Page Still Slow
 
 **Check:**
+
 1. Vercel deployment finished? (check https://vercel.com)
 2. Browser cache cleared?
 3. Internet connection stable?
 
 **Solution:**
+
 - Wait 2-3 minutes after deployment
 - Hard refresh: `Ctrl+Shift+R` (Windows) or `Cmd+Shift+R` (Mac)
 
@@ -207,10 +217,12 @@ Stats API: 2109.34ms      ← TOO SLOW
 ### Issue 2: Pagination Not Working
 
 **Check:**
+
 1. Frontend updated to use new pagination format?
 2. Console shows any errors?
 
 **Solution:**
+
 - Check browser console for errors
 - Frontend may need updates to support new response format
 
@@ -219,10 +231,12 @@ Stats API: 2109.34ms      ← TOO SLOW
 ### Issue 3: Data Incorrect
 
 **Check:**
+
 1. "Total Spent" matches actual order totals?
 2. "Total Customers" count correct?
 
 **Solution:**
+
 - Database aggregation should match manual calculation
 - If mismatch, check order status filters
 
@@ -233,17 +247,20 @@ Stats API: 2109.34ms      ← TOO SLOW
 After testing, report these metrics:
 
 1. **Load Times:**
-   - [ ] Customers page: _____ ms
-   - [ ] Orders page: _____ ms
-   - [ ] Dashboard: _____ ms
-   - [ ] Products page: _____ ms
+
+   - [ ] Customers page: **\_** ms
+   - [ ] Orders page: **\_** ms
+   - [ ] Dashboard: **\_** ms
+   - [ ] Products page: **\_** ms
 
 2. **API Response Times:**
-   - [ ] GET /api/admin/customers: _____ ms
-   - [ ] GET /api/admin/orders: _____ ms
-   - [ ] GET /api/admin/stats: _____ ms
+
+   - [ ] GET /api/admin/customers: **\_** ms
+   - [ ] GET /api/admin/orders: **\_** ms
+   - [ ] GET /api/admin/stats: **\_** ms
 
 3. **Data Accuracy:**
+
    - [ ] Total customers count correct? Yes/No
    - [ ] Order totals accurate? Yes/No
    - [ ] Dashboard stats correct? Yes/No
@@ -263,7 +280,7 @@ Your optimization is successful if:
 ✅ API responses in **<500ms**  
 ✅ Pagination works smoothly  
 ✅ Data accuracy maintained  
-✅ No console errors  
+✅ No console errors
 
 ---
 
