@@ -20,6 +20,28 @@ const nextConfig = {
     }
     return config;
   },
+  // Headers for CSP - Allow Midtrans Snap
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://app.sandbox.midtrans.com https://app.midtrans.com",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https: blob:",
+              "font-src 'self' data:",
+              "connect-src 'self' https://api.sandbox.midtrans.com https://api.midtrans.com https://*.supabase.co",
+              "frame-src 'self' https://app.sandbox.midtrans.com https://app.midtrans.com",
+            ].join("; "),
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
