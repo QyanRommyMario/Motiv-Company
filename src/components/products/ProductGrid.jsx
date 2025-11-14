@@ -11,7 +11,7 @@ import Loading from "@/components/ui/Loading";
 
 export default function ProductGrid({ products, loading }) {
   const t = useTranslations("products");
-  
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -27,9 +27,7 @@ export default function ProductGrid({ products, loading }) {
         <h3 className="text-xl font-semibold text-gray-900 mb-2">
           {t("noProducts")}
         </h3>
-        <p className="text-gray-600">
-          {t("noProductsMessage")}
-        </p>
+        <p className="text-gray-600">{t("noProductsMessage")}</p>
       </div>
     );
   }

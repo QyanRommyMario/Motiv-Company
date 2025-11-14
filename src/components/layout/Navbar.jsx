@@ -267,7 +267,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-6">
             {/* Language Switcher */}
             <LanguageSwitcher />
-            
+
             {status === "loading" ? (
               <div className="w-20 h-6 bg-gray-200 animate-pulse rounded"></div>
             ) : session ? (
@@ -411,7 +411,7 @@ export default function Navbar() {
             <div className="pb-4 border-b border-gray-200">
               <LanguageSwitcher />
             </div>
-            
+
             {session?.user?.role === "ADMIN" ? (
               // Admin Navigation
               <>

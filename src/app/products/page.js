@@ -60,9 +60,7 @@ function ProductsContent() {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold text-[#1A1A1A] mb-3 md:mb-4 tracking-tight">
             {t("title")}
           </h1>
-          <p className="text-[#6B7280] text-base md:text-lg">
-            {t("subtitle")}
-          </p>
+          <p className="text-[#6B7280] text-base md:text-lg">{t("subtitle")}</p>
         </div>
 
         {/* Filter */}

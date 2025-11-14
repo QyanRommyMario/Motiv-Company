@@ -30,7 +30,7 @@ export const metadata = {
 export default async function RootLayout({ children }) {
   // Get locale from cookie or default to 'en'
   const cookieStore = await cookies();
-  const locale = cookieStore.get('NEXT_LOCALE')?.value || 'en';
+  const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
   const messages = await getMessages({ locale });
 
   return (

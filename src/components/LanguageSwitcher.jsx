@@ -6,10 +6,12 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function LanguageSwitcher({ variant = "light" }) {
   const [locale, setLocale] = useState(() => {
     if (typeof window !== "undefined") {
-      return document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("NEXT_LOCALE="))
-        ?.split("=")[1] || "en";
+      return (
+        document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("NEXT_LOCALE="))
+          ?.split("=")[1] || "en"
+      );
     }
     return "en";
   });
@@ -35,9 +37,10 @@ export default function LanguageSwitcher({ variant = "light" }) {
   };
 
   // Styling variants
-  const buttonStyles = variant === "dark" 
-    ? "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 text-white"
-    : "border border-[#E5E7EB] hover:border-[#1A1A1A] text-[#6B7280] hover:text-[#1A1A1A]";
+  const buttonStyles =
+    variant === "dark"
+      ? "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 text-white"
+      : "border border-[#E5E7EB] hover:border-[#1A1A1A] text-[#6B7280] hover:text-[#1A1A1A]";
 
   return (
     <div className="relative">
@@ -91,46 +94,48 @@ export default function LanguageSwitcher({ variant = "light" }) {
               transition={{ duration: 0.2 }}
             >
               {/* Sort languages: current language first */}
-              {[...languages].sort((a, b) => {
-                if (a.code === locale) return -1;
-                if (b.code === locale) return 1;
-                return 0;
-              }).map((lang) => (
-                <motion.button
-                  key={lang.code}
-                  onClick={() => changeLanguage(lang.code)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                    locale === lang.code
-                      ? "bg-black text-white"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                  whileHover={{ x: 5 }}
-                  transition={{ duration: 0.2 }}
-                  disabled={isPending}
-                >
-                  <div className="flex-1">
-                    <div className="font-medium">{lang.name}</div>
-                  </div>
-                  {locale === lang.code && (
-                    <motion.svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </motion.svg>
-                  )}
-                </motion.button>
-              ))}
+              {[...languages]
+                .sort((a, b) => {
+                  if (a.code === locale) return -1;
+                  if (b.code === locale) return 1;
+                  return 0;
+                })
+                .map((lang) => (
+                  <motion.button
+                    key={lang.code}
+                    onClick={() => changeLanguage(lang.code)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+                      locale === lang.code
+                        ? "bg-black text-white"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                    whileHover={{ x: 5 }}
+                    transition={{ duration: 0.2 }}
+                    disabled={isPending}
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium">{lang.name}</div>
+                    </div>
+                    {locale === lang.code && (
+                      <motion.svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </motion.svg>
+                    )}
+                  </motion.button>
+                ))}
             </motion.div>
           </>
         )}
