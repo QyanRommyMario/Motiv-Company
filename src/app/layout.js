@@ -6,6 +6,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { cookies } from "next/headers";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister"; // 1. Import ini
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,14 +22,30 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
+// Konfigurasi Viewport PWA
+export const viewport = {
+  themeColor: "#1A1A1A",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
+// Konfigurasi Metadata PWA
 export const metadata = {
   title: "MOTIV Coffee - E-Commerce Kopi Premium",
-  description:
-    "Belanja kopi premium dengan harga terbaik. Fitur B2B dan B2C tersedia.",
+  description: "Belanja kopi premium dengan harga terbaik.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MOTIV Coffee",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default async function RootLayout({ children }) {
-  // Get locale from cookie or default to 'en'
   const cookieStore = await cookies();
   const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
   const messages = await getMessages({ locale });
@@ -42,7 +59,11 @@ export default async function RootLayout({ children }) {
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthErrorBoundary>
             <AuthProvider>
-              <ToastProvider>{children}</ToastProvider>
+              <ToastProvider>
+                {/* 2. Pasang komponen di sini (di dalam body) */}
+                <ServiceWorkerRegister />
+                {children}
+              </ToastProvider>
             </AuthProvider>
           </AuthErrorBoundary>
         </NextIntlClientProvider>

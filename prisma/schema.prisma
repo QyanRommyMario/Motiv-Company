@@ -201,8 +201,10 @@ model ShippingAddress {
   name        String
   phone       String
   address     String
-  city        String
-  province    String
+  city        String    // Nama Kota
+  cityId      String?   // ID Kota (RajaOngkir)
+  province    String    // Nama Provinsi
+  provinceId  String?   // ID Provinsi (RajaOngkir)
   country     String    @default("Indonesia")
   postalCode  String
   isDefault   Boolean   @default(false)
