@@ -1,70 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-/**
- * ShippingCalculator Component
- * Calculates shipping cost based on courier and service selection
- * TODO: Integrate with RajaOngkir API or shipping provider
- */
-
-// Mock courier data - replace with real API
+// Daftar Kurir yang didukung
 const COURIERS = [
-  {
-    code: "jne",
-    name: "JNE",
-    services: [
-      { code: "REG", name: "Reguler", estimasi: "2-3 hari", cost: 15000 },
-      { code: "YES", name: "YES (1 hari)", estimasi: "1 hari", cost: 25000 },
-      {
-        code: "OKE",
-        name: "OKE (2-4 hari)",
-        estimasi: "2-4 hari",
-        cost: 12000,
-      },
-    ],
-  },
-  {
-    code: "tiki",
-    name: "TIKI",
-    services: [
-      { code: "REG", name: "Reguler", estimasi: "3-4 hari", cost: 14000 },
-      {
-        code: "ONS",
-        name: "Over Night Service",
-        estimasi: "1 hari",
-        cost: 28000,
-      },
-      { code: "ECO", name: "Economy", estimasi: "4-5 hari", cost: 10000 },
-    ],
-  },
-  {
-    code: "pos",
-    name: "POS Indonesia",
-    services: [
-      {
-        code: "PAKETPOS",
-        name: "Paket Pos",
-        estimasi: "3-5 hari",
-        cost: 11000,
-      },
-      { code: "EXPRESS", name: "Express", estimasi: "1-2 hari", cost: 20000 },
-    ],
-  },
-  {
-    code: "sicepat",
-    name: "SiCepat",
-    services: [
-      { code: "REG", name: "Reguler", estimasi: "2-3 hari", cost: 13000 },
-      { code: "BEST", name: "Best", estimasi: "1-2 hari", cost: 18000 },
-      {
-        code: "GOKIL",
-        name: "Gokil (Same Day)",
-        estimasi: "Same Day",
-        cost: 35000,
-      },
-    ],
-  },
+  { code: "jne", name: "JNE" },
+  { code: "pos", name: "POS Indonesia" },
+  { code: "tiki", name: "TIKI" },
+  { code: "sicepat", name: "SiCepat" }, // Komerce biasanya support ini juga
+  { code: "jnt", name: "J&T" }, // Komerce biasanya support ini juga
 ];
 
 export default function ShippingCalculator({
@@ -73,35 +17,92 @@ export default function ShippingCalculator({
   onSelectShipping,
 }) {
   const [selectedCourier, setSelectedCourier] = useState(null);
-  const [selectedService, setSelectedService] = useState(null);
+  const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [selectedServiceCode, setSelectedServiceCode] = useState(null);
 
-  const handleSelectService = (courier, service) => {
+  // Reset state jika alamat tujuan berubah
+  useEffect(() => {
+    setServices([]);
+    setSelectedCourier(null);
+    setSelectedServiceCode(null);
+    setError("");
+  }, [destination]);
+
+  const checkOngkir = async (courier) => {
     setSelectedCourier(courier);
-    setSelectedService(service);
+    setLoading(true);
+    setServices([]);
+    setError("");
+    setSelectedServiceCode(null);
+
+    // DEBUG: Cek apa isi destination di console browser
+    console.log("📍 Cek Ongkir ke Address Object:", destination);
+
+    // Gunakan cityId jika ada (dari database baru), atau fallback ke properti lain jika ada
+    // Pastikan field ini sesuai dengan apa yang disimpan di database ShippingAddress
+    const destId = destination?.cityId;
+
+    if (!destId) {
+      setError(
+        "Alamat tidak valid (ID Kota hilang). Silakan kembali ke menu Alamat, edit alamat ini, dan pilih Kota dari dropdown."
+      );
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/shipping/cost", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          destination: destId, // Kirim ID yang sudah dipastikan ada
+          weight: weight,
+          courier: courier.code,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setServices(data.data.costs);
+      } else {
+        // Tampilkan pesan error detail dari backend
+        setError(data.message || "Gagal cek ongkir");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Terjadi kesalahan jaringan");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectService = (service) => {
+    setSelectedServiceCode(service.service);
+    const cost = service.cost[0];
     onSelectShipping({
-      courier: courier.name,
-      courierCode: courier.code,
-      service: service.name,
-      serviceCode: service.code,
-      cost: service.cost,
-      estimasi: service.estimasi,
+      courier: selectedCourier.name,
+      courierCode: selectedCourier.code,
+      service: service.service,
+      cost: cost.value,
+      estimasi: cost.etd ? `${cost.etd} HARI` : "-",
     });
   };
 
   if (!destination) {
     return (
-      <div className="border border-gray-300 rounded-lg p-6 text-center">
-        <p className="text-gray-500">
-          Pilih alamat pengiriman terlebih dahulu untuk menghitung ongkir
-        </p>
+      <div className="p-4 bg-gray-50 border rounded text-center text-gray-500 text-sm">
+        Pilih alamat pengiriman terlebih dahulu.
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      {/* Info Route Pengiriman */}
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 text-sm">
         <div className="flex items-start gap-3">
           <svg
             className="w-5 h-5 text-blue-600 mt-0.5"
@@ -113,105 +114,140 @@ export default function ShippingCalculator({
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
             />
           </svg>
-          <div className="text-sm text-blue-900">
-            <p className="font-medium mb-1">Tujuan Pengiriman:</p>
-            <p>
-              {destination.city}, {destination.province}
+          <div>
+            <p className="text-blue-900 font-bold mb-1">Tujuan Pengiriman:</p>
+            <p className="text-blue-800">
+              {destination.city}{" "}
+              {destination.postalCode ? `(${destination.postalCode})` : ""},{" "}
+              {destination.province}
             </p>
-            <p className="text-xs text-blue-700 mt-1">
-              Berat: {weight}g (~{Math.ceil(weight / 1000)}kg)
+            <p className="text-xs text-blue-600 mt-1">
+              Berat Paket: {weight} gram
             </p>
           </div>
         </div>
       </div>
 
-      {loading && (
-        <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          <p className="text-gray-600 mt-2">Menghitung ongkir...</p>
-        </div>
-      )}
-
-      {!loading && (
-        <div className="space-y-3">
-          <h3 className="font-semibold text-gray-900">Pilih Kurir & Layanan</h3>
-
-          {COURIERS.map((courier) => (
-            <div
-              key={courier.code}
-              className="border border-gray-300 rounded-lg p-4"
+      {/* Pilihan Tombol Kurir */}
+      <div>
+        <label className="block text-sm font-semibold mb-2 text-gray-800">
+          Pilih Kurir
+        </label>
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+          {COURIERS.map((c) => (
+            <button
+              key={c.code}
+              onClick={() => checkOngkir(c)}
+              disabled={loading}
+              className={`py-2 px-1 border rounded-lg text-sm font-medium transition flex flex-col items-center justify-center ${
+                selectedCourier?.code === c.code
+                  ? "bg-gray-900 text-white border-gray-900 shadow-md"
+                  : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300"
+              }`}
             >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
-                  <span className="text-xs font-bold text-gray-600">
-                    {courier.code.toUpperCase()}
-                  </span>
-                </div>
-                <span className="font-semibold text-gray-900">
-                  {courier.name}
-                </span>
-              </div>
-
-              <div className="space-y-2 ml-15">
-                {courier.services.map((service) => {
-                  const isSelected =
-                    selectedCourier?.code === courier.code &&
-                    selectedService?.code === service.code;
-
-                  return (
-                    <div
-                      key={service.code}
-                      className={`border rounded-lg p-3 cursor-pointer transition ${
-                        isSelected
-                          ? "border-gray-900 bg-gray-100"
-                          : "border-gray-200 hover:border-gray-400"
-                      }`}
-                      onClick={() => handleSelectService(courier, service)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="radio"
-                            checked={isSelected}
-                            onChange={() =>
-                              handleSelectService(courier, service)
-                            }
-                            className="w-4 h-4 text-gray-900"
-                          />
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {service.name}
-                            </p>
-                            <p className="text-xs text-gray-600">
-                              Estimasi: {service.estimasi}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-gray-900">
-                            Rp {service.cost.toLocaleString("id-ID")}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+              <span className="uppercase tracking-wider">{c.name}</span>
+            </button>
           ))}
         </div>
+      </div>
+
+      {/* Loading State */}
+      {loading && (
+        <div className="text-center py-6">
+          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+          <p className="text-xs text-gray-500 mt-2">Menghitung ongkir...</p>
+        </div>
       )}
 
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600">
-        <p>
-          💡 <span className="font-medium">Tips:</span> Biaya pengiriman
-          dihitung berdasarkan berat dan jarak. Pilih layanan yang sesuai dengan
-          kebutuhan Anda.
-        </p>
-      </div>
+      {/* Error Message */}
+      {error && (
+        <div className="p-3 bg-red-50 text-red-700 text-sm rounded border border-red-200 flex items-start gap-2">
+          <svg
+            className="w-4 h-4 mt-0.5 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Daftar Layanan (Service List) */}
+      {!loading && services.length > 0 && (
+        <div className="space-y-2 mt-2 animate-fade-in">
+          <p className="text-sm font-semibold text-gray-800">
+            Layanan Tersedia:
+          </p>
+          {services.map((svc, idx) => {
+            const cost = svc.cost[0];
+            const isSelected = selectedServiceCode === svc.service;
+            return (
+              <div
+                key={`${svc.service}-${idx}`}
+                onClick={() => handleSelectService(svc)}
+                className={`flex justify-between items-center p-4 border rounded-lg cursor-pointer transition hover:shadow-sm ${
+                  isSelected
+                    ? "border-green-600 bg-green-50 ring-1 ring-green-600"
+                    : "border-gray-200 bg-white hover:border-gray-400"
+                }`}
+              >
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-gray-900">
+                      {svc.service}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      ({svc.description})
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1 flex items-center gap-1">
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    Estimasi: {cost.etd || "-"} hari
+                  </div>
+                </div>
+                <div className="font-bold text-gray-900 text-lg">
+                  Rp {cost.value.toLocaleString("id-ID")}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* State jika kosong */}
+      {!loading && selectedCourier && services.length === 0 && !error && (
+        <div className="text-center py-4 text-gray-500 text-sm italic bg-gray-50 rounded border border-gray-100">
+          Layanan tidak tersedia untuk rute ini.
+        </div>
+      )}
     </div>
   );
 }

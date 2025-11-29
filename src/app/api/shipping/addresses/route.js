@@ -51,13 +51,17 @@ export async function POST(request) {
     }
 
     const body = await request.json();
+
+    // PERUBAHAN DISINI: Menambahkan cityId dan provinceId
     const {
       label,
       name,
       phone,
       address,
       city,
+      cityId, // Baru
       province,
+      provinceId, // Baru
       country,
       postalCode,
       isDefault,
@@ -70,11 +74,17 @@ export async function POST(request) {
       !phone ||
       !address ||
       !city ||
+      !cityId || // Validasi Baru
       !province ||
+      !provinceId || // Validasi Baru
       !postalCode
     ) {
       return NextResponse.json(
-        { success: false, message: "Semua field harus diisi" },
+        {
+          success: false,
+          message:
+            "Semua field harus diisi termasuk Kota dan Provinsi dari dropdown",
+        },
         { status: 400 }
       );
     }
@@ -86,7 +96,9 @@ export async function POST(request) {
       phone,
       address,
       city,
+      cityId, // Simpan ID
       province,
+      provinceId, // Simpan ID
       country: country || "Indonesia",
       postalCode,
       isDefault: isDefault || false,
