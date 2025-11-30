@@ -5,7 +5,6 @@ import ShippingAddressModel from "@/models/ShippingAddressModel";
 
 /**
  * GET /api/shipping/addresses
- * Get user's shipping addresses
  */
 export async function GET() {
   try {
@@ -37,7 +36,6 @@ export async function GET() {
 
 /**
  * POST /api/shipping/addresses
- * Create new shipping address
  */
 export async function POST(request) {
   try {
@@ -52,38 +50,36 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    // PERUBAHAN DISINI: Menambahkan cityId dan provinceId
     const {
       label,
       name,
       phone,
       address,
       city,
-      cityId, // Baru
+      cityId,
       province,
-      provinceId, // Baru
+      provinceId,
       country,
       postalCode,
       isDefault,
     } = body;
 
-    // Validation
+    // [PERBAIKAN] Hapus cityId & provinceId dari validasi wajib
+    // Agar tidak error 400 jika data ID belum tersedia
     if (
       !label ||
       !name ||
       !phone ||
       !address ||
       !city ||
-      !cityId || // Validasi Baru
       !province ||
-      !provinceId || // Validasi Baru
       !postalCode
     ) {
       return NextResponse.json(
         {
           success: false,
           message:
-            "Semua field harus diisi termasuk Kota dan Provinsi dari dropdown",
+            "Semua field harus diisi (Label, Nama, HP, Alamat, Kota, Provinsi, Kode Pos)",
         },
         { status: 400 }
       );
@@ -96,15 +92,14 @@ export async function POST(request) {
       phone,
       address,
       city,
-      cityId, // Simpan ID
+      cityId: cityId || null, // Boleh null
       province,
-      provinceId, // Simpan ID
+      provinceId: provinceId || null, // Boleh null
       country: country || "Indonesia",
       postalCode,
       isDefault: isDefault || false,
     });
 
-    // If this is set as default, unset others
     if (isDefault) {
       await ShippingAddressModel.setAsDefault(newAddress.id, session.user.id);
     }

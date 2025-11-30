@@ -27,13 +27,11 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              // Tambahkan *.gtflabs.io dan *.midtrans.com di script-src
+              // IZINKAN gtflabs.io (CDN Midtrans) DI SINI
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://app.sandbox.midtrans.com https://app.midtrans.com https://*.gtflabs.io https://*.midtrans.com",
-              // Tambahkan *.gtflabs.io di style-src
               "style-src 'self' 'unsafe-inline' https://*.gtflabs.io https://*.midtrans.com",
               "img-src 'self' data: https: blob: https://*.gtflabs.io https://*.midtrans.com",
               "font-src 'self' data: https://*.gtflabs.io https://*.midtrans.com",
-              // Tambahkan *.gtflabs.io di connect-src
               "connect-src 'self' https://api.sandbox.midtrans.com https://api.midtrans.com https://app.sandbox.midtrans.com https://app.midtrans.com https://*.supabase.co https://*.gtflabs.io https://*.midtrans.com",
               "frame-src 'self' https://app.sandbox.midtrans.com https://app.midtrans.com",
             ].join("; "),
