@@ -33,7 +33,6 @@ export default function PaymentPage() {
 
     if (status === "authenticated") {
       const orderIdFromUrl = searchParams.get("orderId");
-
       if (orderIdFromUrl) {
         fetchExistingOrder(orderIdFromUrl);
       } else {
@@ -42,7 +41,6 @@ export default function PaymentPage() {
     }
   }, [status, searchParams]);
 
-  // --- [PERBAIKAN UTAMA DI SINI] ---
   const loadCheckoutSession = async () => {
     try {
       const data = sessionStorage.getItem("checkoutData");
@@ -53,21 +51,34 @@ export default function PaymentPage() {
 
       const parsedData = JSON.parse(data);
 
-      // FIX: Jika Shipping Address Object hilang (cuma ada ID), ambil dari API!
+      // --- [FITUR SELF-HEALING ALAMAT] ---
+      // Jika ID ada tapi Datanya hilang, ambil lagi dari server
       if (parsedData.shippingAddressId && !parsedData.shippingAddress) {
-        console.log("⚠️ Detail alamat hilang, mengambil ulang dari server...");
+        console.log("⚠️ Detail alamat hilang, mencoba memulihkan...");
         try {
           const res = await fetch(
             `/api/shipping/addresses/${parsedData.shippingAddressId}`
           );
           const json = await res.json();
-          if (json.success) {
-            parsedData.shippingAddress = json.data; // Isi ulang data yang hilang
-            sessionStorage.setItem("checkoutData", JSON.stringify(parsedData)); // Simpan perbaikan
+
+          if (json.success && json.data) {
+            parsedData.shippingAddress = json.data;
+            sessionStorage.setItem("checkoutData", JSON.stringify(parsedData));
+          } else {
+            console.error("❌ Gagal memulihkan alamat.");
+            alert("Data alamat tidak valid. Mohon pilih alamat kembali.");
+            router.push("/checkout");
+            return;
           }
         } catch (e) {
-          console.error("Gagal memulihkan alamat:", e);
+          console.error("Error fetching address:", e);
+          router.push("/checkout");
+          return;
         }
+      } else if (!parsedData.shippingAddressId) {
+        // Jika ID juga tidak ada, lempar balik
+        router.push("/checkout");
+        return;
       }
 
       setCheckoutData(parsedData);
@@ -318,6 +329,7 @@ export default function PaymentPage() {
                 </span>
               </div>
 
+              {/* ... Bagian Voucher (biarkan seperti sebelumnya) ... */}
               {!voucherApplied ? (
                 <div className="border border-gray-200 rounded p-4 bg-gray-50">
                   <label className="block text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">
@@ -388,7 +400,6 @@ export default function PaymentPage() {
                 Informasi Pengiriman
               </h3>
               <div className="text-sm text-gray-700 space-y-1.5">
-                {/* Tampilkan data, jika masih null tampilkan Loading/Fallback */}
                 <p className="font-semibold text-gray-900">
                   {checkoutData?.shippingAddress?.name || "Memuat..."}
                 </p>
@@ -397,6 +408,12 @@ export default function PaymentPage() {
                 <p>
                   {checkoutData?.shippingAddress?.city},{" "}
                   {checkoutData?.shippingAddress?.postalCode}
+                </p>
+
+                {/* [MENAMPILKAN KEMBALI KURIR YANG HILANG] */}
+                <p className="text-gray-900 font-semibold mt-3 uppercase tracking-wide text-xs">
+                  {checkoutData?.shipping?.courier} -{" "}
+                  {checkoutData?.shipping?.service}
                 </p>
               </div>
             </div>
