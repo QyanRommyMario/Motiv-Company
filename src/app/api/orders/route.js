@@ -29,7 +29,7 @@ export async function POST(request) {
     }
 
     // 2. Ambil Data Terbaru dari Database
-    // Jangan percaya data harga dari frontend/body request!
+    // Kita ambil harga asli dari database, lalu hitung ulang diskonnya di sini.
     const cartItems = await prisma.cartItem.findMany({
       where: { userId: session.user.id },
       include: { product: true, variant: true },
@@ -41,10 +41,9 @@ export async function POST(request) {
         { status: 400 }
       );
 
-    // --- LOGIKA HARGA BARU (FIXED) ---
-    // Midtrans menolak jika Total Harga != Sum(Harga Item).
-    // Solusinya: Bulatkan harga satuan (Math.round) SEBELUM dikali quantity.
+    // --- LOGIKA UTAMA HARGA KONSISTEN (BACKEND = FRONTEND) ---
 
+    // Cek Status B2B User
     const isB2B = session.user.role === "B2B" && session.user.discount > 0;
     const userDiscount = isB2B ? session.user.discount : 0;
 
@@ -53,13 +52,13 @@ export async function POST(request) {
     const orderItems = cartItems.map((item) => {
       let price = item.variant.price;
 
-      // Terapkan Diskon B2B
+      // [WAJIB] Terapkan Diskon B2B jika berhak (Sama seperti di Frontend)
       if (isB2B) {
         const discountAmount = (price * userDiscount) / 100;
         price = price - discountAmount;
       }
 
-      // [PENTING] Bulatkan harga satuan agar jadi Integer murni
+      // [WAJIB] Bulatkan harga agar Midtrans menerima (Integer only)
       price = Math.round(price);
 
       subtotal += price * item.quantity;
@@ -68,14 +67,14 @@ export async function POST(request) {
         productId: item.productId,
         variantId: item.variantId,
         quantity: item.quantity,
-        price: price, // Simpan harga bulat ini ke DB
+        price: price, // Harga final (diskon + bulat) disimpan ke DB
       };
     });
 
     // Ongkir juga dibulatkan
     const shippingCost = Math.round(body.shipping.cost || 0);
 
-    // Validasi Voucher
+    // Validasi Voucher (Diskon tambahan)
     let voucherDiscount = 0;
     if (body.voucherCode) {
       const voucherCheck = await VoucherModel.validate(
@@ -87,8 +86,7 @@ export async function POST(request) {
       }
     }
 
-    // Total Akhir = Subtotal + Ongkir - Voucher
-    // Karena semua komponen sudah dibulatkan, total ini pasti valid.
+    // Total Akhir
     const total = subtotal + shippingCost - voucherDiscount;
 
     // 3. Simpan Order ke Database
@@ -115,14 +113,13 @@ export async function POST(request) {
       courierService: body.shipping.service,
       shippingCost,
       subtotal,
-      discount: voucherDiscount,
+      discount: voucherDiscount, // Diskon voucher saja
       total,
       voucherCode: body.voucherCode || null,
-      items: orderItems, // Gunakan items yang sudah dihitung & dibulatkan
+      items: orderItems, // Items dengan harga yang sudah benar (B2B applied)
     });
 
     // 4. Minta Token ke Midtrans
-    // Ambil ulang order lengkap dengan relasi item & user
     const fullOrder = await prisma.order.findUnique({
       where: { id: order.id },
       include: {
@@ -133,20 +130,18 @@ export async function POST(request) {
 
     let midtransData;
     try {
-      // Panggil Service Midtrans
+      // Panggil Service Midtrans yang sudah diperbaiki
       midtransData = await MidtransService.createTransaction(fullOrder);
     } catch (midtransError) {
       console.error("❌ Midtrans Error:", midtransError.message);
 
       // Hapus order jika gagal connect ke Midtrans agar user bisa coba lagi
-      // Ini mencegah order 'nyangkut' di status PENDING tanpa token pembayaran
       await prisma.order.delete({ where: { id: order.id } });
 
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Gagal koneksi ke pembayaran. Cek Server Key Anda atau hitungan harga.",
+          message: "Gagal koneksi ke pembayaran. Cek Server Key Anda.",
           error: midtransError.message,
         },
         { status: 500 }
@@ -159,7 +154,7 @@ export async function POST(request) {
       transactionId: fullOrder.orderNumber,
       orderNumber: fullOrder.orderNumber,
       grossAmount: total,
-      snapToken: midtransData.token, // Token sukses didapat
+      snapToken: midtransData.token,
       snapRedirectUrl: midtransData.redirect_url,
     });
 
