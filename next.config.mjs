@@ -18,27 +18,9 @@ const nextConfig = {
     }
     return config;
   },
+  // KITA MATIKAN CSP UNTUK SEMENTARA AGAR MIDTRANS TIDAK DIBLOKIR
   async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              // [PERBAIKAN] Tambahkan *.gtflabs.io dan *.midtrans.com
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://app.sandbox.midtrans.com https://app.midtrans.com https://*.gtflabs.io https://*.midtrans.com",
-              "style-src 'self' 'unsafe-inline' https://*.gtflabs.io https://*.midtrans.com",
-              "img-src 'self' data: https: blob: https://*.gtflabs.io https://*.midtrans.com",
-              "font-src 'self' data: https://*.gtflabs.io https://*.midtrans.com",
-              "connect-src 'self' https://api.sandbox.midtrans.com https://api.midtrans.com https://app.sandbox.midtrans.com https://app.midtrans.com https://*.supabase.co https://*.gtflabs.io https://*.midtrans.com",
-              "frame-src 'self' https://app.sandbox.midtrans.com https://app.midtrans.com",
-            ].join("; "),
-          },
-        ],
-      },
-    ];
+    return [];
   },
 };
 

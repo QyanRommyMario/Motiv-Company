@@ -35,17 +35,15 @@ export default function PaymentPage() {
       const orderIdFromUrl = searchParams.get("orderId");
 
       if (orderIdFromUrl) {
-        // MODE 1: Bayar Tagihan Lama (Dari Riwayat Pesanan)
         fetchExistingOrder(orderIdFromUrl);
       } else {
-        // MODE 2: Checkout Baru (Dari Keranjang)
         loadCheckoutSession();
       }
     }
   }, [status, searchParams]);
 
-  // Load dari Session Storage (Checkout Baru)
-  const loadCheckoutSession = () => {
+  // --- [PERBAIKAN UTAMA DI SINI] ---
+  const loadCheckoutSession = async () => {
     try {
       const data = sessionStorage.getItem("checkoutData");
       if (!data) {
@@ -54,6 +52,24 @@ export default function PaymentPage() {
       }
 
       const parsedData = JSON.parse(data);
+
+      // FIX: Jika Shipping Address Object hilang (cuma ada ID), ambil dari API!
+      if (parsedData.shippingAddressId && !parsedData.shippingAddress) {
+        console.log("⚠️ Detail alamat hilang, mengambil ulang dari server...");
+        try {
+          const res = await fetch(
+            `/api/shipping/addresses/${parsedData.shippingAddressId}`
+          );
+          const json = await res.json();
+          if (json.success) {
+            parsedData.shippingAddress = json.data; // Isi ulang data yang hilang
+            sessionStorage.setItem("checkoutData", JSON.stringify(parsedData)); // Simpan perbaikan
+          }
+        } catch (e) {
+          console.error("Gagal memulihkan alamat:", e);
+        }
+      }
+
       setCheckoutData(parsedData);
 
       if (parsedData.voucherCode) {
@@ -68,11 +84,9 @@ export default function PaymentPage() {
     }
   };
 
-  // Fetch dari API (Bayar Order Lama)
   const fetchExistingOrder = async (orderId) => {
     try {
       setLoading(true);
-      // Panggil API yang sudah diperbaiki di atas
       const res = await fetch(`/api/orders/${orderId}`);
       const json = await res.json();
 
@@ -84,7 +98,6 @@ export default function PaymentPage() {
 
       const order = json.data;
 
-      // Format data untuk tampilan
       const formattedData = {
         orderId: order.id,
         orderNumber: order.orderNumber,
@@ -103,11 +116,11 @@ export default function PaymentPage() {
           city: order.shippingCity,
           postalCode: order.shippingPostalCode,
         },
-        snapToken: order.snapToken, // Token dari database
+        snapToken: order.snapToken,
       };
 
       setCheckoutData(formattedData);
-      setExistingSnapToken(order.snapToken); // Simpan token agar siap pakai
+      setExistingSnapToken(order.snapToken);
 
       if (order.voucherCode) {
         setVoucherCode(order.voucherCode);
@@ -192,7 +205,6 @@ export default function PaymentPage() {
     try {
       let token = existingSnapToken;
 
-      // Jika belum ada token (Checkout Baru), buat order dulu
       if (!token) {
         const response = await fetch("/api/orders", {
           method: "POST",
@@ -208,22 +220,17 @@ export default function PaymentPage() {
           return;
         }
 
-        // [PERBAIKAN UTAMA] Ambil token dengan fallback
-        // Cek 'token' (dari Midtrans langsung) atau 'snapToken' (dari DB)
         token = data.data.payment.token || data.data.payment.snapToken;
       }
 
-      // --- EKSEKUSI SNAP ---
       if (token && typeof window.snap !== "undefined") {
         window.snap.pay(token, {
           onSuccess: function (result) {
-            console.log("Payment success:", result);
             sessionStorage.removeItem("checkoutData");
             const orderIdTarget = checkoutData.orderNumber || result.order_id;
             router.push(`/checkout/success?orderId=${orderIdTarget}`);
           },
           onPending: function (result) {
-            console.log("Payment pending:", result);
             sessionStorage.removeItem("checkoutData");
             const orderIdTarget = checkoutData.orderNumber || result.order_id;
             router.push(
@@ -311,7 +318,6 @@ export default function PaymentPage() {
                 </span>
               </div>
 
-              {/* Voucher Section */}
               {!voucherApplied ? (
                 <div className="border border-gray-200 rounded p-4 bg-gray-50">
                   <label className="block text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">
@@ -382,8 +388,9 @@ export default function PaymentPage() {
                 Informasi Pengiriman
               </h3>
               <div className="text-sm text-gray-700 space-y-1.5">
+                {/* Tampilkan data, jika masih null tampilkan Loading/Fallback */}
                 <p className="font-semibold text-gray-900">
-                  {checkoutData?.shippingAddress?.name}
+                  {checkoutData?.shippingAddress?.name || "Memuat..."}
                 </p>
                 <p>{checkoutData?.shippingAddress?.phone}</p>
                 <p>{checkoutData?.shippingAddress?.address}</p>

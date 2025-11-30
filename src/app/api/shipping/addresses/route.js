@@ -3,31 +3,19 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import ShippingAddressModel from "@/models/ShippingAddressModel";
 
-/**
- * GET /api/shipping/addresses
- * Get user's shipping addresses
- */
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
+    if (!session?.user?.id)
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
       );
-    }
-
     const addresses = await ShippingAddressModel.getUserAddresses(
       session.user.id
     );
-
-    return NextResponse.json({
-      success: true,
-      data: addresses,
-    });
+    return NextResponse.json({ success: true, data: addresses });
   } catch (error) {
-    console.error("Error fetching addresses:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }
@@ -35,23 +23,16 @@ export async function GET() {
   }
 }
 
-/**
- * POST /api/shipping/addresses
- * Create new shipping address
- */
 export async function POST(request) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
+    if (!session?.user?.id)
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
       );
-    }
 
     const body = await request.json();
-
     const {
       label,
       name,
@@ -66,9 +47,7 @@ export async function POST(request) {
       isDefault,
     } = body;
 
-    // [PERBAIKAN] Validasi dilonggarkan
-    // Kita hapus !cityId dan !provinceId dari pengecekan wajib
-    // agar backend tidak menolak request jika ID tersebut kosong.
+    // [VALIDASI DILONGGARKAN] Hapus cek cityId & provinceId
     if (
       !label ||
       !name ||
@@ -82,7 +61,7 @@ export async function POST(request) {
         {
           success: false,
           message:
-            "Semua field harus diisi (Label, Nama, HP, Alamat, Kota, Provinsi, Kode Pos)",
+            "Field wajib: Label, Nama, HP, Alamat, Kota, Provinsi, Kode Pos",
         },
         { status: 400 }
       );
@@ -95,18 +74,16 @@ export async function POST(request) {
       phone,
       address,
       city,
-      cityId: cityId || null, // Boleh null jika tidak ada
+      cityId: cityId || null,
       province,
-      provinceId: provinceId || null, // Boleh null jika tidak ada
+      provinceId: provinceId || null,
       country: country || "Indonesia",
       postalCode,
       isDefault: isDefault || false,
     });
 
-    // If this is set as default, unset others
-    if (isDefault) {
+    if (isDefault)
       await ShippingAddressModel.setAsDefault(newAddress.id, session.user.id);
-    }
 
     return NextResponse.json({
       success: true,
@@ -114,7 +91,6 @@ export async function POST(request) {
       data: newAddress,
     });
   } catch (error) {
-    console.error("Error creating address:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }
