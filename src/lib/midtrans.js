@@ -5,47 +5,40 @@
 
 const midtransClient = require("midtrans-client");
 
-// Debugging: Cek apakah env variable terbaca
+// Debugging: Cek env variable
 const isProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
 const serverKey = process.env.MIDTRANS_SERVER_KEY;
 const clientKey = process.env.MIDTRANS_CLIENT_KEY;
 
-// Log status koneksi (Masking key untuk keamanan)
 console.log("🔌 Initializing Midtrans Service:", {
   mode: isProduction ? "PRODUCTION" : "SANDBOX",
-  serverKey: serverKey ? "✅ Loaded" : "❌ MISSING",
-  clientKey: clientKey ? "✅ Loaded" : "❌ MISSING",
+  serverKeyStatus: serverKey ? "Loaded" : "MISSING",
 });
 
-// Initialize Snap API client
 const snap = new midtransClient.Snap({
-  isProduction: isProduction,
-  serverKey: serverKey,
-  clientKey: clientKey,
+  isProduction,
+  serverKey,
+  clientKey,
 });
 
-// Initialize Core API client
 const core = new midtransClient.CoreApi({
-  isProduction: isProduction,
-  serverKey: serverKey,
-  clientKey: clientKey,
+  isProduction,
+  serverKey,
+  clientKey,
 });
 
 export class MidtransService {
-  /**
-   * Create Snap transaction token
-   */
   static async createTransaction(order) {
     try {
-      // 1. Susun Item Details terlebih dahulu
+      // 1. Buat daftar item dasar
       const itemDetails = order.items.map((item) => ({
         id: item.variant.sku || item.variant.id,
-        price: Math.round(item.price),
+        price: Math.round(item.price), // Pastikan bulat
         quantity: item.quantity,
-        name: `${item.product.name} - ${item.variant.name}`.substring(0, 50), // Midtrans limit name length
+        name: `${item.product.name} - ${item.variant.name}`.substring(0, 50),
       }));
 
-      // Tambahkan Ongkir
+      // 2. Tambah Ongkir (jika ada)
       if (order.shippingCost > 0) {
         itemDetails.push({
           id: "SHIPPING",
@@ -55,28 +48,27 @@ export class MidtransService {
         });
       }
 
-      // Tambahkan Diskon (sebagai item dengan harga negatif)
+      // 3. Tambah Diskon (jika ada)
       if (order.discount > 0) {
         itemDetails.push({
           id: "DISCOUNT",
           price: -Math.round(order.discount),
           quantity: 1,
-          name: "Diskon",
+          name: "Diskon Voucher",
         });
       }
 
-      // 2. Hitung Gross Amount dari Item Details (Wajib Sama Persis)
-      // Ini mencegah error "gross_amount is not equal to the sum of item_details"
-      const grossAmount = itemDetails.reduce(
-        (sum, item) => sum + item.price * item.quantity,
+      // 4. Hitung Ulang Gross Amount dari Item Details
+      // Ini adalah pengaman terakhir agar Total == Sum(Items)
+      const calculatedGrossAmount = itemDetails.reduce(
+        (acc, item) => acc + item.price * item.quantity,
         0
       );
 
-      // 3. Siapkan Parameter Transaksi
       const parameter = {
         transaction_details: {
           order_id: order.orderNumber,
-          gross_amount: grossAmount,
+          gross_amount: calculatedGrossAmount, // Gunakan hasil hitung ulang
         },
         customer_details: {
           first_name: order.user.name,
@@ -99,7 +91,6 @@ export class MidtransService {
         itemsCount: parameter.item_details.length,
       });
 
-      // 4. Create Snap transaction
       const transaction = await snap.createTransaction(parameter);
 
       return {
@@ -112,7 +103,7 @@ export class MidtransService {
     }
   }
 
-  // ... (Method lain seperti getTransactionStatus dll biarkan tetap sama)
+  // ... (Method lain seperti getTransactionStatus dll biarkan sama)
   static async getTransactionStatus(orderId) {
     try {
       const statusResponse = await core.transaction.status(orderId);
@@ -121,35 +112,5 @@ export class MidtransService {
       console.error("Midtrans get status error:", error);
       throw error;
     }
-  }
-
-  static mapTransactionStatus(transactionStatus, fraudStatus) {
-    let orderStatus = "PENDING";
-    let paymentStatus = "UNPAID";
-
-    if (transactionStatus === "capture") {
-      if (fraudStatus === "accept") {
-        orderStatus = "PAID";
-        paymentStatus = "PAID";
-      } else if (fraudStatus === "challenge") {
-        orderStatus = "PENDING";
-        paymentStatus = "UNPAID";
-      }
-    } else if (transactionStatus === "settlement") {
-      orderStatus = "PAID";
-      paymentStatus = "PAID";
-    } else if (
-      transactionStatus === "deny" ||
-      transactionStatus === "cancel" ||
-      transactionStatus === "expire"
-    ) {
-      orderStatus = "CANCELLED";
-      paymentStatus = "FAILED";
-    } else if (transactionStatus === "pending") {
-      orderStatus = "PENDING";
-      paymentStatus = "UNPAID";
-    }
-
-    return { orderStatus, paymentStatus };
   }
 }

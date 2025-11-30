@@ -28,8 +28,7 @@ export async function POST(request) {
       );
     }
 
-    // 2. Ambil data terbaru dari DB untuk memastikan harga valid
-    // Jangan mengandalkan harga yang dikirim dari frontend!
+    // 2. Ambil data Keranjang dari DB
     const cartItems = await prisma.cartItem.findMany({
       where: { userId: session.user.id },
       include: { product: true, variant: true },
@@ -41,24 +40,24 @@ export async function POST(request) {
         { status: 400 }
       );
 
-    // --- LOGIKA PENGHITUNGAN HARGA (FIXED) ---
+    // --- LOGIKA HARGA BARU (WAJIB ADA) ---
 
-    // Cek apakah user B2B dan punya diskon
     const isB2B = session.user.role === "B2B" && session.user.discount > 0;
     const userDiscount = isB2B ? session.user.discount : 0;
 
-    // Hitung subtotal item per item & bulatkan
     let subtotal = 0;
+
+    // Hitung ulang item satu per satu dengan pembulatan DI AWAL
     const orderItems = cartItems.map((item) => {
       let price = item.variant.price;
 
-      // Terapkan diskon B2B jika ada
+      // Diskon B2B
       if (isB2B) {
         const discountAmount = (price * userDiscount) / 100;
         price = price - discountAmount;
       }
 
-      // PENTING: Pastikan harga bulat (Midtrans tidak terima desimal)
+      // [PENTING] Bulatkan harga satuan SEBELUM dikali quantity
       price = Math.round(price);
 
       subtotal += price * item.quantity;
@@ -67,11 +66,11 @@ export async function POST(request) {
         productId: item.productId,
         variantId: item.variantId,
         quantity: item.quantity,
-        price: price, // Harga satuan final yang sudah didiskon & dibulatkan
+        price: price, // Harga ini yang disimpan ke DB & dikirim ke Midtrans
       };
     });
 
-    // Pastikan ongkir bulat
+    // Ongkir juga dibulatkan
     const shippingCost = Math.round(body.shipping.cost || 0);
 
     // Validasi Voucher
@@ -86,18 +85,17 @@ export async function POST(request) {
       }
     }
 
-    // Total Akhir = Subtotal Item + Ongkir - Voucher
-    // Karena semua komponen sudah dibulatkan, total ini pasti valid/integer
+    // Total Akhir = (Harga Bulat * Qty) + Ongkir Bulat - Diskon Bulat
     const total = subtotal + shippingCost - voucherDiscount;
 
-    // 3. Simpan Order ke Database (Status: PENDING)
+    // 3. Simpan ke Database
     const shippingAddress = await prisma.shippingAddress.findUnique({
       where: { id: body.shippingAddressId },
     });
 
     if (!shippingAddress) {
       return NextResponse.json(
-        { message: "Alamat pengiriman tidak ditemukan" },
+        { message: "Alamat tidak valid" },
         { status: 400 }
       );
     }
@@ -117,11 +115,10 @@ export async function POST(request) {
       discount: voucherDiscount,
       total,
       voucherCode: body.voucherCode || null,
-      items: orderItems, // Gunakan items yang sudah dihitung harganya di backend
+      items: orderItems, // Gunakan items yang sudah dihitung & dibulatkan di atas
     });
 
     // 4. Minta Token ke Midtrans
-    // Kita ambil ulang order lengkap dari DB agar relasinya terbawa
     const fullOrder = await prisma.order.findUnique({
       where: { id: order.id },
       include: {
@@ -132,28 +129,24 @@ export async function POST(request) {
 
     let midtransData;
     try {
-      // MidtransService (yang sudah diperbaiki sebelumnya) akan menghitung ulang
-      // gross_amount dari item_details. Karena kita sudah membulatkan
-      // harga di tahap #2, perhitungan di MidtransService pasti akan cocok dengan `total`.
+      // Panggil Service Midtrans
       midtransData = await MidtransService.createTransaction(fullOrder);
     } catch (midtransError) {
       console.error("❌ Midtrans Error:", midtransError.message);
-
-      // Hapus order jika gagal connect ke Midtrans agar user bisa coba lagi
-      // dan tidak ada order gantung di status PENDING tanpa token
+      // Hapus order gagal agar tidak nyangkut
       await prisma.order.delete({ where: { id: order.id } });
-
       return NextResponse.json(
         {
           success: false,
-          message: "Gagal koneksi ke pembayaran. Cek Server Key Anda.",
+          message:
+            "Gagal memproses pembayaran. Cek Server Key atau Total Harga.",
           error: midtransError.message,
         },
         { status: 500 }
       );
     }
 
-    // 5. Simpan Data Transaksi Midtrans
+    // 5. Simpan Token Transaksi
     await TransactionModel.create({
       orderId: order.id,
       transactionId: fullOrder.orderNumber,
@@ -163,7 +156,7 @@ export async function POST(request) {
       snapRedirectUrl: midtransData.redirect_url,
     });
 
-    // 6. Bersihkan Keranjang
+    // 6. Kosongkan Keranjang
     await prisma.cartItem.deleteMany({ where: { userId: session.user.id } });
 
     return NextResponse.json({
