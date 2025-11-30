@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation"; // Tambah useSearchParams
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import CheckoutSteps from "@/components/checkout/CheckoutSteps";
 import Loading from "@/components/ui/Loading";
@@ -9,14 +9,14 @@ import Script from "next/script";
 
 export default function PaymentPage() {
   const router = useRouter();
-  const searchParams = useSearchParams(); // Hook untuk baca URL
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
 
   const [checkoutData, setCheckoutData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [snapReady, setSnapReady] = useState(false);
-  const [existingSnapToken, setExistingSnapToken] = useState(null); // State token lama
+  const [existingSnapToken, setExistingSnapToken] = useState(null);
 
   // Voucher state
   const [voucherCode, setVoucherCode] = useState("");
@@ -35,16 +35,16 @@ export default function PaymentPage() {
       const orderIdFromUrl = searchParams.get("orderId");
 
       if (orderIdFromUrl) {
-        // KASUS 1: Bayar Order Lama (Dari Riwayat Pesanan)
+        // MODE 1: Bayar Tagihan Lama (Dari Riwayat Pesanan)
         fetchExistingOrder(orderIdFromUrl);
       } else {
-        // KASUS 2: Checkout Baru (Dari Keranjang)
+        // MODE 2: Checkout Baru (Dari Keranjang)
         loadCheckoutSession();
       }
     }
   }, [status, searchParams]);
 
-  // Fungsi Load Data dari Session Storage (Checkout Baru)
+  // Load dari Session Storage (Checkout Baru)
   const loadCheckoutSession = () => {
     try {
       const data = sessionStorage.getItem("checkoutData");
@@ -68,10 +68,11 @@ export default function PaymentPage() {
     }
   };
 
-  // Fungsi Fetch Data dari API (Bayar Order Lama)
+  // Fetch dari API (Bayar Order Lama)
   const fetchExistingOrder = async (orderId) => {
     try {
       setLoading(true);
+      // Panggil API yang sudah diperbaiki di atas
       const res = await fetch(`/api/orders/${orderId}`);
       const json = await res.json();
 
@@ -83,10 +84,10 @@ export default function PaymentPage() {
 
       const order = json.data;
 
-      // Format data agar sesuai tampilan UI
+      // Format data untuk tampilan
       const formattedData = {
-        orderId: order.id, // ID Database
-        orderNumber: order.orderNumber, // ID Pesanan (ORD-...)
+        orderId: order.id,
+        orderNumber: order.orderNumber,
         subtotal: order.subtotal,
         total: order.total,
         discount: order.discount,
@@ -102,14 +103,12 @@ export default function PaymentPage() {
           city: order.shippingCity,
           postalCode: order.shippingPostalCode,
         },
-        // Jika order lama sudah punya token, simpan!
-        snapToken: order.snapToken,
+        snapToken: order.snapToken, // Token dari database
       };
 
       setCheckoutData(formattedData);
-      setExistingSnapToken(order.snapToken); // Simpan token untuk dipakai langsung
+      setExistingSnapToken(order.snapToken); // Simpan token agar siap pakai
 
-      // Jika ada voucher
       if (order.voucherCode) {
         setVoucherCode(order.voucherCode);
         setVoucherApplied(true);
@@ -124,14 +123,67 @@ export default function PaymentPage() {
     }
   };
 
-  // ... (handleApplyVoucher dan handleRemoveVoucher biarkan sama) ...
-  // Gunakan kode handleApplyVoucher & handleRemoveVoucher dari file Anda sebelumnya
-  // Saya singkat disini agar tidak terlalu panjang, tapi pastikan TETAP ADA.
   const handleApplyVoucher = async () => {
-    /* ... kode lama ... */
+    if (!voucherCode.trim()) {
+      setVoucherError("Mohon masukkan kode voucher");
+      return;
+    }
+    setVoucherLoading(true);
+    setVoucherError("");
+
+    try {
+      const subtotal = checkoutData?.subtotal || 0;
+      const response = await fetch("/api/vouchers/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: voucherCode, subtotal: subtotal }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        const discount = data.data.discount;
+        const newTotal =
+          subtotal + (checkoutData?.shipping?.cost || 0) - discount;
+        const updatedCheckoutData = {
+          ...checkoutData,
+          voucherCode: voucherCode.toUpperCase(),
+          discount: discount,
+          total: newTotal,
+        };
+        setCheckoutData(updatedCheckoutData);
+        sessionStorage.setItem(
+          "checkoutData",
+          JSON.stringify(updatedCheckoutData)
+        );
+        setVoucherApplied(true);
+        setVoucherDiscount(discount);
+        setVoucherError("");
+      } else {
+        setVoucherError(data.message || "Voucher tidak valid");
+      }
+    } catch (error) {
+      console.error("Error applying voucher:", error);
+      setVoucherError("Gagal menerapkan voucher");
+    } finally {
+      setVoucherLoading(false);
+    }
   };
+
   const handleRemoveVoucher = () => {
-    /* ... kode lama ... */
+    const subtotal = checkoutData?.subtotal || 0;
+    const newTotal = subtotal + (checkoutData?.shipping?.cost || 0);
+    const updatedCheckoutData = {
+      ...checkoutData,
+      voucherCode: null,
+      discount: 0,
+      total: newTotal,
+    };
+    setCheckoutData(updatedCheckoutData);
+    sessionStorage.setItem("checkoutData", JSON.stringify(updatedCheckoutData));
+    setVoucherCode("");
+    setVoucherApplied(false);
+    setVoucherDiscount(0);
+    setVoucherError("");
   };
 
   const handleProcessPayment = async () => {
@@ -140,10 +192,8 @@ export default function PaymentPage() {
     try {
       let token = existingSnapToken;
 
-      // Jika TIDAK ADA token lama (berarti ini Checkout Baru)
-      // Kita perlu create order dulu ke Backend
+      // Jika belum ada token (Checkout Baru), buat order dulu
       if (!token) {
-        // Create order via API (Hanya untuk Checkout Baru)
         const response = await fetch("/api/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -158,20 +208,22 @@ export default function PaymentPage() {
           return;
         }
 
-        // Ambil token baru
-        token = data.data.payment.snapToken;
+        // [PERBAIKAN UTAMA] Ambil token dengan fallback
+        // Cek 'token' (dari Midtrans langsung) atau 'snapToken' (dari DB)
+        token = data.data.payment.token || data.data.payment.snapToken;
       }
 
       // --- EKSEKUSI SNAP ---
       if (token && typeof window.snap !== "undefined") {
         window.snap.pay(token, {
           onSuccess: function (result) {
+            console.log("Payment success:", result);
             sessionStorage.removeItem("checkoutData");
-            // Redirect ke halaman sukses dengan ID Order
             const orderIdTarget = checkoutData.orderNumber || result.order_id;
             router.push(`/checkout/success?orderId=${orderIdTarget}`);
           },
           onPending: function (result) {
+            console.log("Payment pending:", result);
             sessionStorage.removeItem("checkoutData");
             const orderIdTarget = checkoutData.orderNumber || result.order_id;
             router.push(
@@ -189,7 +241,7 @@ export default function PaymentPage() {
           },
         });
       } else {
-        console.error("Snap Token missing or script not loaded");
+        console.error("Snap Token missing or script not loaded. Token:", token);
         alert("Sistem pembayaran belum siap. Mohon refresh halaman.");
         setProcessing(false);
       }
@@ -237,7 +289,6 @@ export default function PaymentPage() {
             </p>
           </div>
 
-          {/* Hanya tampilkan Steps jika Checkout Baru */}
           {!existingSnapToken && <CheckoutSteps currentStep={3} />}
 
           <div className="bg-white rounded-lg shadow-sm p-6">
@@ -245,7 +296,6 @@ export default function PaymentPage() {
               Ringkasan Pesanan
             </h2>
 
-            {/* ... (Tampilan Ringkasan Harga - Biarkan Sama) ... */}
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-gray-700">
                 <span>Subtotal</span>
@@ -260,7 +310,64 @@ export default function PaymentPage() {
                   {checkoutData?.shipping?.cost?.toLocaleString("id-ID") || 0}
                 </span>
               </div>
-              {/* ... (Logic Voucher Tampilan) ... */}
+
+              {/* Voucher Section */}
+              {!voucherApplied ? (
+                <div className="border border-gray-200 rounded p-4 bg-gray-50">
+                  <label className="block text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">
+                    Punya kode voucher?
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={voucherCode}
+                      onChange={(e) =>
+                        setVoucherCode(e.target.value.toUpperCase())
+                      }
+                      placeholder="Masukkan kode voucher"
+                      className="flex-1 px-4 py-3 border-2 border-gray-300 rounded uppercase font-mono font-semibold text-gray-900 bg-white"
+                      disabled={voucherLoading}
+                    />
+                    <button
+                      onClick={handleApplyVoucher}
+                      disabled={voucherLoading || !voucherCode.trim()}
+                      className="px-6 py-3 bg-gray-900 text-white rounded hover:bg-black disabled:bg-gray-400 font-semibold uppercase text-sm"
+                    >
+                      {voucherLoading ? "Memeriksa..." : "Gunakan"}
+                    </button>
+                  </div>
+                  {voucherError && (
+                    <p className="text-sm text-red-600 mt-2">{voucherError}</p>
+                  )}
+                </div>
+              ) : (
+                <div className="flex justify-between items-center bg-gray-50 border-2 border-gray-900 rounded p-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-gray-900 uppercase">
+                        Voucher "{voucherCode}" diterapkan
+                      </span>
+                      <span className="text-lg">✓</span>
+                    </div>
+                    <div className="text-sm text-gray-600 font-medium mt-1">
+                      Hemat Rp {voucherDiscount.toLocaleString("id-ID")}
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleRemoveVoucher}
+                    className="text-xs text-gray-700 hover:text-red-600 font-semibold uppercase"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              )}
+
+              {voucherApplied && (
+                <div className="flex justify-between text-gray-900 font-semibold">
+                  <span>Diskon Voucher</span>
+                  <span>- Rp {voucherDiscount.toLocaleString("id-ID")}</span>
+                </div>
+              )}
 
               <div className="border-t-2 border-gray-900 pt-4 flex justify-between text-xl font-bold text-gray-900">
                 <span className="uppercase tracking-wide">Total</span>
@@ -270,7 +377,6 @@ export default function PaymentPage() {
               </div>
             </div>
 
-            {/* Info Pengiriman */}
             <div className="bg-gray-50 border border-gray-200 rounded p-4 mb-6">
               <h3 className="font-bold text-gray-900 mb-3 uppercase tracking-wide">
                 Informasi Pengiriman
@@ -291,7 +397,6 @@ export default function PaymentPage() {
             <div className="flex gap-3">
               <button
                 onClick={handleProcessPayment}
-                // Button aktif jika Snap Ready
                 disabled={processing || !snapReady}
                 className="flex-1 px-6 py-4 bg-gray-900 text-white rounded hover:bg-black transition font-bold uppercase tracking-wider text-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
@@ -301,8 +406,6 @@ export default function PaymentPage() {
                   ? "Memuat Pembayaran..."
                   : "Bayar Sekarang"}
               </button>
-
-              {/* Jika order lama, tombol kembali ke Riwayat Order */}
               <button
                 onClick={() =>
                   router.push(
@@ -316,7 +419,6 @@ export default function PaymentPage() {
               </button>
             </div>
 
-            {/* Security Notice */}
             <div className="mt-6 bg-gray-50 border border-gray-200 rounded p-4 text-sm text-gray-600">
               <p className="font-bold text-gray-900 mb-2 uppercase tracking-wide">
                 Transaksi Aman
