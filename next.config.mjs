@@ -5,26 +5,19 @@ const withNextIntl = createNextIntlPlugin("./src/i18n.js");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
-  // Output standalone for better Vercel deployment
   output: "standalone",
-  // Moved from experimental.serverComponentsExternalPackages (deprecated in Next.js 16)
   serverExternalPackages: ["@prisma/client", "prisma"],
-  // Turbopack configuration for Prisma
   turbopack: {
     resolveAlias: {
-      // Force Prisma client resolution
       ".prisma/client": "./node_modules/.prisma/client",
     },
   },
-  // Webpack fallback for ensuring Prisma binaries are included
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Copy Prisma query engine to output
       config.externals = [...config.externals, "@prisma/client", "prisma"];
     }
     return config;
   },
-  // Headers for CSP - Allow Midtrans Snap
   async headers() {
     return [
       {
@@ -34,12 +27,14 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://app.sandbox.midtrans.com https://app.midtrans.com",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: https: blob:",
-              "font-src 'self' data:",
-              // PERBAIKAN DI SINI: Menambahkan URL app.midtrans ke connect-src agar tidak diblokir browser
-              "connect-src 'self' https://api.sandbox.midtrans.com https://api.midtrans.com https://app.sandbox.midtrans.com https://app.midtrans.com https://*.supabase.co",
+              // Tambahkan *.gtflabs.io dan *.midtrans.com di script-src
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://app.sandbox.midtrans.com https://app.midtrans.com https://*.gtflabs.io https://*.midtrans.com",
+              // Tambahkan *.gtflabs.io di style-src
+              "style-src 'self' 'unsafe-inline' https://*.gtflabs.io https://*.midtrans.com",
+              "img-src 'self' data: https: blob: https://*.gtflabs.io https://*.midtrans.com",
+              "font-src 'self' data: https://*.gtflabs.io https://*.midtrans.com",
+              // Tambahkan *.gtflabs.io di connect-src
+              "connect-src 'self' https://api.sandbox.midtrans.com https://api.midtrans.com https://app.sandbox.midtrans.com https://app.midtrans.com https://*.supabase.co https://*.gtflabs.io https://*.midtrans.com",
               "frame-src 'self' https://app.sandbox.midtrans.com https://app.midtrans.com",
             ].join("; "),
           },
