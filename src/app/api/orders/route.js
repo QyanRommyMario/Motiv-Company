@@ -28,7 +28,8 @@ export async function POST(request) {
       );
     }
 
-    // 2. Ambil data Keranjang dari DB
+    // 2. Ambil Data Terbaru dari Database
+    // Jangan percaya data harga dari frontend/body request!
     const cartItems = await prisma.cartItem.findMany({
       where: { userId: session.user.id },
       include: { product: true, variant: true },
@@ -40,24 +41,25 @@ export async function POST(request) {
         { status: 400 }
       );
 
-    // --- LOGIKA HARGA BARU (WAJIB ADA) ---
+    // --- LOGIKA HARGA BARU (FIXED) ---
+    // Midtrans menolak jika Total Harga != Sum(Harga Item).
+    // Solusinya: Bulatkan harga satuan (Math.round) SEBELUM dikali quantity.
 
     const isB2B = session.user.role === "B2B" && session.user.discount > 0;
     const userDiscount = isB2B ? session.user.discount : 0;
 
     let subtotal = 0;
 
-    // Hitung ulang item satu per satu dengan pembulatan DI AWAL
     const orderItems = cartItems.map((item) => {
       let price = item.variant.price;
 
-      // Diskon B2B
+      // Terapkan Diskon B2B
       if (isB2B) {
         const discountAmount = (price * userDiscount) / 100;
         price = price - discountAmount;
       }
 
-      // [PENTING] Bulatkan harga satuan SEBELUM dikali quantity
+      // [PENTING] Bulatkan harga satuan agar jadi Integer murni
       price = Math.round(price);
 
       subtotal += price * item.quantity;
@@ -66,7 +68,7 @@ export async function POST(request) {
         productId: item.productId,
         variantId: item.variantId,
         quantity: item.quantity,
-        price: price, // Harga ini yang disimpan ke DB & dikirim ke Midtrans
+        price: price, // Simpan harga bulat ini ke DB
       };
     });
 
@@ -85,17 +87,18 @@ export async function POST(request) {
       }
     }
 
-    // Total Akhir = (Harga Bulat * Qty) + Ongkir Bulat - Diskon Bulat
+    // Total Akhir = Subtotal + Ongkir - Voucher
+    // Karena semua komponen sudah dibulatkan, total ini pasti valid.
     const total = subtotal + shippingCost - voucherDiscount;
 
-    // 3. Simpan ke Database
+    // 3. Simpan Order ke Database
     const shippingAddress = await prisma.shippingAddress.findUnique({
       where: { id: body.shippingAddressId },
     });
 
     if (!shippingAddress) {
       return NextResponse.json(
-        { message: "Alamat tidak valid" },
+        { message: "Alamat pengiriman tidak ditemukan" },
         { status: 400 }
       );
     }
@@ -115,10 +118,11 @@ export async function POST(request) {
       discount: voucherDiscount,
       total,
       voucherCode: body.voucherCode || null,
-      items: orderItems, // Gunakan items yang sudah dihitung & dibulatkan di atas
+      items: orderItems, // Gunakan items yang sudah dihitung & dibulatkan
     });
 
     // 4. Minta Token ke Midtrans
+    // Ambil ulang order lengkap dengan relasi item & user
     const fullOrder = await prisma.order.findUnique({
       where: { id: order.id },
       include: {
@@ -133,13 +137,16 @@ export async function POST(request) {
       midtransData = await MidtransService.createTransaction(fullOrder);
     } catch (midtransError) {
       console.error("❌ Midtrans Error:", midtransError.message);
-      // Hapus order gagal agar tidak nyangkut
+
+      // Hapus order jika gagal connect ke Midtrans agar user bisa coba lagi
+      // Ini mencegah order 'nyangkut' di status PENDING tanpa token pembayaran
       await prisma.order.delete({ where: { id: order.id } });
+
       return NextResponse.json(
         {
           success: false,
           message:
-            "Gagal memproses pembayaran. Cek Server Key atau Total Harga.",
+            "Gagal koneksi ke pembayaran. Cek Server Key Anda atau hitungan harga.",
           error: midtransError.message,
         },
         { status: 500 }
@@ -152,11 +159,11 @@ export async function POST(request) {
       transactionId: fullOrder.orderNumber,
       orderNumber: fullOrder.orderNumber,
       grossAmount: total,
-      snapToken: midtransData.token,
+      snapToken: midtransData.token, // Token sukses didapat
       snapRedirectUrl: midtransData.redirect_url,
     });
 
-    // 6. Kosongkan Keranjang
+    // 6. Bersihkan Keranjang
     await prisma.cartItem.deleteMany({ where: { userId: session.user.id } });
 
     return NextResponse.json({
