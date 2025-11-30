@@ -196,12 +196,11 @@ export default function PaymentPage() {
           },
         });
       } else {
-        // Fallback: No Midtrans (for testing)
-        console.log("Midtrans not configured, using mock payment");
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
-        sessionStorage.removeItem("checkoutData");
-        router.push(`/checkout/success?orderId=${data.data.order.orderNumber}`);
+        console.error("Midtrans Snap not loaded properly or Token missing");
+        alert(
+          "Gagal memuat modul pembayaran. Pastikan koneksi lancar dan coba refresh halaman."
+        );
+        setProcessing(false);
       }
     } catch (err) {
       console.error("Error processing payment:", err);
@@ -220,14 +219,22 @@ export default function PaymentPage() {
 
   return (
     <>
-      {/* Load Midtrans Snap.js */}
+      {/* Load Midtrans Snap.js dengan Error Handling */}
       <Script
         src={
           process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL ||
           "https://app.sandbox.midtrans.com/snap/snap.js"
         }
         data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
-        onLoad={() => setSnapReady(true)}
+        strategy="lazyOnload"
+        onLoad={() => {
+          console.log("✅ Midtrans Snap script loaded!");
+          setSnapReady(true);
+        }}
+        onError={(e) => {
+          console.error("❌ Failed to load Midtrans Snap script", e);
+          alert("Gagal memuat sistem pembayaran. Mohon refresh halaman.");
+        }}
       />
 
       <div className="min-h-screen bg-gray-50 py-8">
@@ -359,43 +366,18 @@ export default function PaymentPage() {
               </div>
             </div>
 
-            {/* Payment Info */}
-            <div className="bg-gray-50 border border-gray-200 rounded p-4 mb-6">
-              <div className="flex items-start gap-3">
-                <svg
-                  className="w-5 h-5 text-gray-900 mt-0.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <div className="text-sm text-gray-700">
-                  <p className="font-bold text-gray-900 mb-2 uppercase tracking-wide">
-                    Metode Pembayaran
-                  </p>
-                  <p className="text-gray-600">
-                    Setelah klik "Bayar Sekarang", Anda akan diarahkan ke
-                    halaman pembayaran untuk memilih metode pembayaran (Transfer
-                    Bank, E-Wallet, Kartu Kredit, dll).
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Action Buttons */}
             <div className="flex gap-3">
               <button
                 onClick={handleProcessPayment}
-                disabled={processing}
+                disabled={processing || !snapReady}
                 className="flex-1 px-6 py-4 bg-gray-900 text-white rounded hover:bg-black transition font-bold uppercase tracking-wider text-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {processing ? "Memproses..." : "Bayar Sekarang"}
+                {processing
+                  ? "Memproses..."
+                  : !snapReady
+                  ? "Memuat Pembayaran..."
+                  : "Bayar Sekarang"}
               </button>
               <button
                 onClick={() => router.push("/checkout")}

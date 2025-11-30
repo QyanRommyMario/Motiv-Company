@@ -38,7 +38,8 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data:",
-              "connect-src 'self' https://api.sandbox.midtrans.com https://api.midtrans.com https://*.supabase.co",
+              // PERBAIKAN DI SINI: Menambahkan URL app.midtrans ke connect-src agar tidak diblokir browser
+              "connect-src 'self' https://api.sandbox.midtrans.com https://api.midtrans.com https://app.sandbox.midtrans.com https://app.midtrans.com https://*.supabase.co",
               "frame-src 'self' https://app.sandbox.midtrans.com https://app.midtrans.com",
             ].join("; "),
           },
