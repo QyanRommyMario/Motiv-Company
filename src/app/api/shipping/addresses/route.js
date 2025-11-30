@@ -5,6 +5,7 @@ import ShippingAddressModel from "@/models/ShippingAddressModel";
 
 /**
  * GET /api/shipping/addresses
+ * Get user's shipping addresses
  */
 export async function GET() {
   try {
@@ -36,6 +37,7 @@ export async function GET() {
 
 /**
  * POST /api/shipping/addresses
+ * Create new shipping address
  */
 export async function POST(request) {
   try {
@@ -64,8 +66,9 @@ export async function POST(request) {
       isDefault,
     } = body;
 
-    // [PERBAIKAN] Hapus cityId & provinceId dari validasi wajib
-    // Agar tidak error 400 jika data ID belum tersedia
+    // [PERBAIKAN] Validasi dilonggarkan
+    // Kita hapus !cityId dan !provinceId dari pengecekan wajib
+    // agar backend tidak menolak request jika ID tersebut kosong.
     if (
       !label ||
       !name ||
@@ -92,14 +95,15 @@ export async function POST(request) {
       phone,
       address,
       city,
-      cityId: cityId || null, // Boleh null
+      cityId: cityId || null, // Boleh null jika tidak ada
       province,
-      provinceId: provinceId || null, // Boleh null
+      provinceId: provinceId || null, // Boleh null jika tidak ada
       country: country || "Indonesia",
       postalCode,
       isDefault: isDefault || false,
     });
 
+    // If this is set as default, unset others
     if (isDefault) {
       await ShippingAddressModel.setAsDefault(newAddress.id, session.user.id);
     }

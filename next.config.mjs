@@ -27,7 +27,7 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              // IZINKAN gtflabs.io (CDN Midtrans) DI SINI
+              // [PERBAIKAN] Tambahkan *.gtflabs.io dan *.midtrans.com
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://app.sandbox.midtrans.com https://app.midtrans.com https://*.gtflabs.io https://*.midtrans.com",
               "style-src 'self' 'unsafe-inline' https://*.gtflabs.io https://*.midtrans.com",
               "img-src 'self' data: https: blob: https://*.gtflabs.io https://*.midtrans.com",
