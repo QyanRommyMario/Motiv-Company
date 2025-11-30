@@ -5,18 +5,34 @@
 
 const midtransClient = require("midtrans-client");
 
+// Debugging: Cek apakah env variable terbaca (Hanya tampil di terminal server)
+const isProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
+const serverKey = process.env.MIDTRANS_SERVER_KEY;
+const clientKey = process.env.MIDTRANS_CLIENT_KEY;
+
+// Log status koneksi (Masking key untuk keamanan di log)
+console.log("🔌 Initializing Midtrans Service:", {
+  mode: isProduction ? "PRODUCTION (Uang Asli)" : "SANDBOX (Testing)",
+  serverKeyStatus: serverKey
+    ? `Loaded (${serverKey.substring(0, 5)}...)`
+    : "MISSING/UNDEFINED",
+  clientKeyStatus: clientKey
+    ? `Loaded (${clientKey.substring(0, 5)}...)`
+    : "MISSING/UNDEFINED",
+});
+
 // Initialize Snap API client
 const snap = new midtransClient.Snap({
-  isProduction: process.env.MIDTRANS_IS_PRODUCTION === "true",
-  serverKey: process.env.MIDTRANS_SERVER_KEY,
-  clientKey: process.env.MIDTRANS_CLIENT_KEY,
+  isProduction: isProduction,
+  serverKey: serverKey,
+  clientKey: clientKey,
 });
 
 // Initialize Core API client (for transaction status check)
 const core = new midtransClient.CoreApi({
-  isProduction: process.env.MIDTRANS_IS_PRODUCTION === "true",
-  serverKey: process.env.MIDTRANS_SERVER_KEY,
-  clientKey: process.env.MIDTRANS_CLIENT_KEY,
+  isProduction: isProduction,
+  serverKey: serverKey,
+  clientKey: clientKey,
 });
 
 export class MidtransService {
@@ -80,6 +96,12 @@ export class MidtransService {
         });
       }
 
+      console.log("🚀 Sending request to Midtrans:", {
+        orderId: parameter.transaction_details.order_id,
+        grossAmount: parameter.transaction_details.gross_amount,
+        serverKeyUsed: serverKey ? "Present" : "MISSING",
+      });
+
       // Create Snap transaction
       const transaction = await snap.createTransaction(parameter);
 
@@ -88,7 +110,8 @@ export class MidtransService {
         redirect_url: transaction.redirect_url,
       };
     } catch (error) {
-      console.error("Midtrans create transaction error:", error);
+      console.error("❌ Midtrans create transaction error:", error);
+      // Pass error message to be handled by API route
       throw error;
     }
   }
