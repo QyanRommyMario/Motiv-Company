@@ -28,7 +28,8 @@ export async function POST(request) {
       );
     }
 
-    // 2. Hitung Total & Diskon
+    // 2. Ambil data terbaru dari DB untuk memastikan harga valid
+    // Jangan mengandalkan harga yang dikirim dari frontend!
     const cartItems = await prisma.cartItem.findMany({
       where: { userId: session.user.id },
       include: { product: true, variant: true },
@@ -40,28 +41,66 @@ export async function POST(request) {
         { status: 400 }
       );
 
-    const subtotal = cartItems.reduce(
-      (sum, item) => sum + item.variant.price * item.quantity,
-      0
-    );
-    const shippingCost = body.shipping.cost || 0;
+    // --- LOGIKA PENGHITUNGAN HARGA (FIXED) ---
+
+    // Cek apakah user B2B dan punya diskon
+    const isB2B = session.user.role === "B2B" && session.user.discount > 0;
+    const userDiscount = isB2B ? session.user.discount : 0;
+
+    // Hitung subtotal item per item & bulatkan
+    let subtotal = 0;
+    const orderItems = cartItems.map((item) => {
+      let price = item.variant.price;
+
+      // Terapkan diskon B2B jika ada
+      if (isB2B) {
+        const discountAmount = (price * userDiscount) / 100;
+        price = price - discountAmount;
+      }
+
+      // PENTING: Pastikan harga bulat (Midtrans tidak terima desimal)
+      price = Math.round(price);
+
+      subtotal += price * item.quantity;
+
+      return {
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: item.quantity,
+        price: price, // Harga satuan final yang sudah didiskon & dibulatkan
+      };
+    });
+
+    // Pastikan ongkir bulat
+    const shippingCost = Math.round(body.shipping.cost || 0);
 
     // Validasi Voucher
-    let discount = 0;
+    let voucherDiscount = 0;
     if (body.voucherCode) {
       const voucherCheck = await VoucherModel.validate(
         body.voucherCode,
         subtotal
       );
-      if (voucherCheck.valid) discount = voucherCheck.discount;
+      if (voucherCheck.valid) {
+        voucherDiscount = Math.round(voucherCheck.discount);
+      }
     }
 
-    const total = subtotal + shippingCost - discount;
+    // Total Akhir = Subtotal Item + Ongkir - Voucher
+    // Karena semua komponen sudah dibulatkan, total ini pasti valid/integer
+    const total = subtotal + shippingCost - voucherDiscount;
 
     // 3. Simpan Order ke Database (Status: PENDING)
     const shippingAddress = await prisma.shippingAddress.findUnique({
       where: { id: body.shippingAddressId },
     });
+
+    if (!shippingAddress) {
+      return NextResponse.json(
+        { message: "Alamat pengiriman tidak ditemukan" },
+        { status: 400 }
+      );
+    }
 
     const order = await OrderModel.create({
       userId: session.user.id,
@@ -75,18 +114,14 @@ export async function POST(request) {
       courierService: body.shipping.service,
       shippingCost,
       subtotal,
-      discount,
+      discount: voucherDiscount,
       total,
       voucherCode: body.voucherCode || null,
-      items: cartItems.map((item) => ({
-        productId: item.productId,
-        variantId: item.variantId,
-        quantity: item.quantity,
-        price: item.variant.price,
-      })),
+      items: orderItems, // Gunakan items yang sudah dihitung harganya di backend
     });
 
     // 4. Minta Token ke Midtrans
+    // Kita ambil ulang order lengkap dari DB agar relasinya terbawa
     const fullOrder = await prisma.order.findUnique({
       where: { id: order.id },
       include: {
@@ -97,11 +132,17 @@ export async function POST(request) {
 
     let midtransData;
     try {
+      // MidtransService (yang sudah diperbaiki sebelumnya) akan menghitung ulang
+      // gross_amount dari item_details. Karena kita sudah membulatkan
+      // harga di tahap #2, perhitungan di MidtransService pasti akan cocok dengan `total`.
       midtransData = await MidtransService.createTransaction(fullOrder);
     } catch (midtransError) {
       console.error("❌ Midtrans Error:", midtransError.message);
+
       // Hapus order jika gagal connect ke Midtrans agar user bisa coba lagi
+      // dan tidak ada order gantung di status PENDING tanpa token
       await prisma.order.delete({ where: { id: order.id } });
+
       return NextResponse.json(
         {
           success: false,
