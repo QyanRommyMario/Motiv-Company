@@ -18,7 +18,7 @@ const nextConfig = {
     }
     return config;
   },
-  // KITA MATIKAN CSP UNTUK SEMENTARA AGAR MIDTRANS TIDAK DIBLOKIR
+  // KITA KOSONGKAN HEADERS AGAR TIDAK ADA CSP YANG MEMBLOKIR
   async headers() {
     return [];
   },
