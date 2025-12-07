@@ -6,23 +6,23 @@ import { ToastProvider } from "@/components/ui/Toast";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { cookies } from "next/headers";
-import ServiceWorkerRegister from "@/components/ServiceWorkerRegister"; // 1. Import ini
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
+// OPTIMASI FONT: Tambahkan display: 'swap'
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
+  display: "swap", // <-- PENTING
 });
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "900"],
-  display: "swap",
+  display: "swap", // <-- PENTING
 });
 
-// Konfigurasi Viewport PWA
 export const viewport = {
   themeColor: "#1A1A1A",
   width: "device-width",
@@ -31,7 +31,6 @@ export const viewport = {
   userScalable: false,
 };
 
-// Konfigurasi Metadata PWA
 export const metadata = {
   title: "MOTIV Coffee - E-Commerce Kopi Premium",
   description: "Belanja kopi premium dengan harga terbaik.",
@@ -60,7 +59,6 @@ export default async function RootLayout({ children }) {
           <AuthErrorBoundary>
             <AuthProvider>
               <ToastProvider>
-                {/* 2. Pasang komponen di sini (di dalam body) */}
                 <ServiceWorkerRegister />
                 {children}
               </ToastProvider>
