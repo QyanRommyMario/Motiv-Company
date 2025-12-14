@@ -46,7 +46,6 @@ export default function OrderDetailPage() {
       console.log("🔍 Fetching order detail:", orderId);
 
       const response = await fetch(`/api/orders/${orderId}`);
-      console.log("📡 Response status:", response.status);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -54,14 +53,17 @@ export default function OrderDetailPage() {
         } else if (response.status === 403) {
           throw new Error("Anda tidak memiliki akses ke pesanan ini");
         }
-        const errorData = await response.json().catch(() => ({}));
-        console.error("❌ Error response:", errorData);
         throw new Error("Gagal memuat detail pesanan");
       }
 
-      const data = await response.json();
-      console.log("✅ Order loaded:", data);
-      setOrder(data.order);
+      const result = await response.json();
+
+      // [PERBAIKAN UTAMA] Membaca data dari result.data
+      if (result.success && result.data) {
+        setOrder(result.data);
+      } else {
+        throw new Error("Format data pesanan tidak valid");
+      }
     } catch (error) {
       console.error("❌ Error fetching order:", error);
       setError(error.message);
@@ -71,13 +73,19 @@ export default function OrderDetailPage() {
   };
 
   const handlePayment = () => {
-    // Redirect ke halaman payment dengan order ID
     router.push(`/checkout/payment?orderId=${order.id}`);
   };
 
   const handleContactSupport = () => {
-    // TODO: Implement contact support
-    alert("Fitur hubungi customer service akan segera hadir");
+    alert("Hubungi Admin: 0812-3456-7890 (WhatsApp)");
+  };
+
+  // Helper untuk memformat teks pembayaran manual
+  const formatPaymentType = (type) => {
+    if (type === "qris_manual") return "QRIS Manual (Konfirmasi Otomatis)";
+    if (type === "credit_card") return "Kartu Kredit";
+    if (type === "bank_transfer") return "Transfer Bank";
+    return type || "Belum dipilih";
   };
 
   if (status === "loading" || loading) {
@@ -90,7 +98,7 @@ export default function OrderDetailPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gray-50 py-8 pt-24">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-white rounded-lg shadow-md border border-gray-200 p-12 text-center">
             <h3 className="text-2xl font-bold text-gray-900 mb-3">{error}</h3>
@@ -210,7 +218,7 @@ export default function OrderDetailPage() {
                     key={index}
                     className="flex gap-4 pb-4 border-b border-gray-200 last:border-0 hover:bg-gray-50 p-3 rounded-lg transition-colors"
                   >
-                    <div className="w-20 h-20 bg-gray-100 rounded-lg shrink-0 overflow-hidden">
+                    <div className="w-20 h-20 bg-gray-100 rounded-lg shrink-0 overflow-hidden relative">
                       {item.variant?.product?.images?.[0] ? (
                         <img
                           src={item.variant.product.images[0]}
@@ -218,10 +226,8 @@ export default function OrderDetailPage() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                          <span className="text-gray-400 text-xs">
-                            No Image
-                          </span>
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400 text-xs">
+                          No Image
                         </div>
                       )}
                     </div>
@@ -291,14 +297,14 @@ export default function OrderDetailPage() {
                     </p>
                   )}
                 </div>
-                {order.shippingCourier && (
+                {order.courierName && (
                   <>
                     <div>
                       <p className="text-sm font-medium text-gray-600 mb-2">
                         Kurir
                       </p>
                       <p className="font-semibold text-gray-900 uppercase">
-                        {order.shippingCourier}
+                        {order.courierName}
                       </p>
                     </div>
                     <div>
@@ -306,7 +312,7 @@ export default function OrderDetailPage() {
                         Layanan
                       </p>
                       <p className="font-medium text-gray-900">
-                        {order.shippingService}
+                        {order.courierService}
                       </p>
                     </div>
                   </>
@@ -340,7 +346,7 @@ export default function OrderDetailPage() {
                       Metode Pembayaran
                     </p>
                     <p className="font-semibold text-gray-900">
-                      {order.transaction.paymentType || "Belum dipilih"}
+                      {formatPaymentType(order.transaction.paymentType)}
                     </p>
                   </div>
                   {order.transaction.vaNumber && (

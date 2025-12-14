@@ -5,7 +5,7 @@
 
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; // Pastikan path ini sesuai dengan project Anda
+import { authOptions } from "@/lib/auth";
 import { OrderModel } from "@/models/OrderModel";
 import { TransactionModel } from "@/models/TransactionModel";
 import { VoucherModel } from "@/models/VoucherModel";
@@ -210,7 +210,6 @@ export async function POST(request) {
   }
 }
 
-// Handler GET untuk list orders (Tidak diubah, tetap diperlukan)
 export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);
