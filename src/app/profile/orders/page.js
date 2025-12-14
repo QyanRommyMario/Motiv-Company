@@ -1,29 +1,28 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Navbar from "@/components/layout/Navbar";
-import OrderCard from "@/components/orders/OrderCard";
-import OrderFilter from "@/components/orders/OrderFilter";
+import { useRouter, useParams } from "next/navigation";
+import OrderStatus from "@/components/orders/OrderStatus";
+import OrderTimeline from "@/components/orders/OrderTimeline";
 import Loading from "@/components/ui/Loading";
+import { formatCurrency } from "@/lib/utils";
 
-export default function OrdersPage() {
+export default function OrderDetailPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [orders, setOrders] = useState([]);
+  const params = useParams();
+  const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    status: "",
-    days: "",
-    search: "",
-  });
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-  });
+  const [error, setError] = useState(null);
+  const [orderId, setOrderId] = useState(null);
+
+  // Handle params async resolution for Next.js 16
+  useEffect(() => {
+    if (params?.id) {
+      setOrderId(params.id);
+    }
+  }, [params]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -32,181 +31,432 @@ export default function OrdersPage() {
     }
   }, [status, router]);
 
-  // Fetch orders function
-  const fetchOrders = useCallback(async () => {
+  // Fetch order detail
+  useEffect(() => {
+    if (session && orderId) {
+      fetchOrderDetail();
+    }
+  }, [session, orderId]);
+
+  const fetchOrderDetail = async () => {
     try {
       setLoading(true);
+      setError(null);
 
-      // Build query params
-      const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-      });
-
-      if (filters.status) params.append("status", filters.status);
-      if (filters.days) params.append("days", filters.days);
-      if (filters.search) params.append("search", filters.search);
-
-      const response = await fetch(`/api/orders?${params.toString()}`);
+      const response = await fetch(`/api/orders/${orderId}`);
 
       if (!response.ok) {
-        throw new Error("Failed to fetch orders");
+        if (response.status === 404) {
+          throw new Error("Pesanan tidak ditemukan");
+        } else if (response.status === 403) {
+          throw new Error("Anda tidak memiliki akses ke pesanan ini");
+        }
+        throw new Error("Gagal memuat detail pesanan");
       }
 
       const result = await response.json();
 
-      if (result.success) {
-        const data = result.data;
-        setOrders(data.orders || []);
-        setPagination((prev) => ({
-          ...prev,
-          total: data.total || 0,
-          totalPages: Math.ceil((data.total || 0) / pagination.limit),
-        }));
+      // [PERBAIKAN DISINI]
+      // Backend mengirim { success: true, data: {...} }
+      // Sebelumnya tertulis result.order (salah), harusnya result.data
+      if (result.success && result.data) {
+        setOrder(result.data);
+      } else {
+        throw new Error("Format data pesanan tidak valid");
       }
     } catch (error) {
-      console.error("Error fetching orders:", error);
+      console.error("❌ Error fetching order:", error);
+      setError(error.message);
     } finally {
       setLoading(false);
     }
-  }, [filters, pagination.page, pagination.limit]);
-
-  // Fetch orders on mount and when filters change
-  useEffect(() => {
-    if (session) {
-      fetchOrders();
-    }
-  }, [session, fetchOrders]);
-
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-    setPagination((prev) => ({ ...prev, page: 1 })); // Reset to page 1
   };
 
-  const handlePageChange = (newPage) => {
-    setPagination((prev) => ({ ...prev, page: newPage }));
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const handlePayment = () => {
+    router.push(`/checkout/payment?orderId=${order.id}`);
   };
 
-  if (status === "loading") {
+  const handleContactSupport = () => {
+    alert("Hubungi Admin: 0812-3456-7890 (WhatsApp)");
+  };
+
+  // Helper untuk memformat teks pembayaran manual
+  const formatPaymentType = (type) => {
+    if (type === "qris_manual") return "QRIS Manual (Konfirmasi Otomatis)";
+    if (type === "credit_card") return "Kartu Kredit";
+    if (type === "bank_transfer") return "Transfer Bank";
+    return type || "-";
+  };
+
+  if (status === "loading" || loading) {
     return (
-      <>
-        <Navbar />
+      <div className="min-h-screen flex items-center justify-center">
         <Loading />
-      </>
+      </div>
     );
   }
 
-  if (!session) {
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 pt-24">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-12 text-center">
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">{error}</h3>
+            <button
+              onClick={() => router.push("/profile/orders")}
+              className="mt-6 px-8 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold uppercase tracking-wider"
+            >
+              Kembali ke Daftar Pesanan
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!order) {
     return null;
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-gray-50 py-8 pt-20 sm:pt-24 lg:pt-28">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-gray-900">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-              Pesanan Saya
-            </h1>
-            <p className="text-gray-900 font-medium text-sm sm:text-base">
-              Lihat dan kelola semua pesanan Anda
-            </p>
-          </div>
-
-          {/* Filter */}
-          <div className="mb-6">
-            <OrderFilter
-              filters={filters}
-              onFilterChange={handleFilterChange}
+    <div className="min-h-screen bg-gray-50 py-8 pt-24">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* Back Button */}
+        <button
+          onClick={() => router.push("/profile/orders")}
+          className="mb-6 flex items-center text-gray-600 hover:text-gray-900 transition-colors font-medium"
+        >
+          <svg
+            className="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
             />
+          </svg>
+          Kembali ke Daftar Pesanan
+        </button>
+
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-6">
+          <div className="flex justify-between items-start flex-wrap gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Detail Pesanan
+              </h1>
+              <p className="text-gray-900 font-medium">
+                Order #{order.orderNumber}
+              </p>
+              <p className="text-sm text-gray-600 mt-2">
+                {new Date(order.createdAt).toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            {order.status === "PENDING" && order.paymentStatus === "UNPAID" && (
+              <button
+                onClick={handlePayment}
+                className="px-8 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold uppercase tracking-wider"
+              >
+                Bayar Sekarang
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Single Column Layout */}
+        <div className="space-y-6">
+          {/* Order Status */}
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div className="bg-gray-900 px-6 py-4">
+              <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
+                Status Pesanan
+              </h2>
+            </div>
+            <div className="p-6">
+              <OrderStatus
+                currentStatus={order.status}
+                paymentStatus={order.paymentStatus}
+              />
+            </div>
           </div>
 
-          {/* Orders List */}
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loading />
+          {/* Timeline */}
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div className="bg-gray-900 px-6 py-4">
+              <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
+                Riwayat Pesanan
+              </h2>
             </div>
-          ) : orders.length === 0 ? (
-            <div className="bg-white rounded border border-gray-900 p-12 text-center shadow-lg">
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                Belum Ada Pesanan
-              </h3>
-              <p className="text-gray-900 mb-6 font-medium">
-                {filters.status || filters.days || filters.search
-                  ? "Tidak ada pesanan yang sesuai dengan filter"
-                  : "Anda belum memiliki pesanan. Mari mulai berbelanja!"}
-              </p>
-              <button
-                onClick={() => router.push("/products")}
-                className="px-8 py-3 bg-gray-900 text-white rounded hover:bg-gray-800 transition-colors font-bold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-              >
-                Mulai Belanja
-              </button>
+            <div className="p-6">
+              <OrderTimeline order={order} />
             </div>
-          ) : (
-            <>
-              {/* Results Info */}
-              <div className="mb-4 text-sm text-gray-900 font-semibold">
-                Menampilkan {orders.length} dari {pagination.total} pesanan
-              </div>
+          </div>
 
-              {/* Order Cards */}
-              <div className="space-y-4 mb-8">
-                {orders.map((order) => (
-                  <OrderCard key={order.id} order={order} />
+          {/* Products */}
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div className="bg-gray-900 px-6 py-4">
+              <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
+                Produk Dipesan
+              </h2>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                {order.items?.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex gap-4 pb-4 border-b border-gray-200 last:border-0 hover:bg-gray-50 p-3 rounded-lg transition-colors"
+                  >
+                    <div className="w-20 h-20 bg-gray-100 rounded-lg shrink-0 overflow-hidden relative">
+                      {item.variant?.product?.images?.[0] ? (
+                        <img
+                          src={item.variant.product.images[0]}
+                          alt={item.variant.product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400 text-xs">
+                          No Image
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 mb-1">
+                        {item.variant?.product?.name || "Product"}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        Ukuran: {item.variant?.size || "-"}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Jumlah:{" "}
+                        <span className="font-semibold">{item.quantity}x</span>
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-gray-900 mb-1">
+                        {formatCurrency(item.price)}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Total:{" "}
+                        <span className="font-bold text-gray-900">
+                          {formatCurrency(item.price * item.quantity)}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
                 ))}
               </div>
+            </div>
+          </div>
 
-              {/* Pagination */}
-              {pagination.totalPages > 1 && (
-                <div className="flex flex-wrap justify-center items-center gap-2">
-                  <button
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={pagination.page === 1}
-                    className="px-3 sm:px-4 py-2 border border-gray-900 text-gray-900 font-bold rounded hover:bg-gray-900 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                  >
-                    <span className="hidden sm:inline">Previous</span>
-                    <span className="sm:hidden">Prev</span>
-                  </button>
-
-                  <div className="flex gap-2">
-                    {Array.from(
-                      { length: pagination.totalPages },
-                      (_, i) => i + 1
-                    ).map((page) => (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`
-                        px-3 sm:px-4 py-2 rounded font-bold transition-all text-sm
-                        ${
-                          page === pagination.page
-                            ? "bg-gray-900 text-white shadow-md"
-                            : "border border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white"
-                        }
-                      `}
-                      >
-                        {page}
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={pagination.page === pagination.totalPages}
-                    className="px-3 sm:px-4 py-2 border border-gray-900 text-gray-900 font-bold rounded hover:bg-gray-900 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                  >
-                    Next
-                  </button>
+          {/* Shipping Info */}
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div className="bg-gray-900 px-6 py-4">
+              <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
+                Informasi Pengiriman
+              </h2>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-2">
+                    Penerima
+                  </p>
+                  <p className="font-semibold text-gray-900 text-lg">
+                    {order.recipientName || order.shippingName}
+                  </p>
                 </div>
-              )}
-            </>
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-2">
+                    Telepon
+                  </p>
+                  <p className="font-medium text-gray-900">
+                    {order.recipientPhone || order.shippingPhone}
+                  </p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-sm font-medium text-gray-600 mb-2">
+                    Alamat
+                  </p>
+                  <p className="text-gray-900">{order.shippingAddress}</p>
+                  {order.shippingCity && (
+                    <p className="text-gray-700 mt-1">
+                      {order.shippingCity}, {order.shippingProvince}{" "}
+                      {order.shippingPostalCode}
+                    </p>
+                  )}
+                </div>
+                {order.courierName && (
+                  <>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 mb-2">
+                        Kurir
+                      </p>
+                      <p className="font-semibold text-gray-900 uppercase">
+                        {order.courierName}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 mb-2">
+                        Layanan
+                      </p>
+                      <p className="font-medium text-gray-900">
+                        {order.courierService}
+                      </p>
+                    </div>
+                  </>
+                )}
+                {order.trackingNumber && (
+                  <div className="md:col-span-2 pt-4 border-t border-gray-200">
+                    <p className="text-sm font-medium text-gray-600 mb-2">
+                      Nomor Resi
+                    </p>
+                    <p className="font-mono font-bold text-gray-900 bg-gray-100 px-4 py-3 rounded inline-block">
+                      {order.trackingNumber}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Info */}
+          {order.transaction && (
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+              <div className="bg-gray-900 px-6 py-4">
+                <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
+                  Informasi Pembayaran
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-2">
+                      Metode Pembayaran
+                    </p>
+                    <p className="font-semibold text-gray-900">
+                      {formatPaymentType(order.transaction.paymentType)}
+                    </p>
+                  </div>
+                  {order.transaction.vaNumber && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 mb-2">
+                        VA Number
+                      </p>
+                      <p className="font-mono font-bold text-gray-900">
+                        {order.transaction.vaNumber}
+                      </p>
+                    </div>
+                  )}
+                  {order.transaction.bank && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 mb-2">
+                        Bank
+                      </p>
+                      <p className="font-semibold text-gray-900 uppercase">
+                        {order.transaction.bank}
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-2">
+                      Status Pembayaran
+                    </p>
+                    <span
+                      className={`inline-block px-3 py-1 rounded font-semibold uppercase tracking-wider text-xs ${
+                        order.paymentStatus === "PAID"
+                          ? "bg-green-100 text-green-800"
+                          : order.paymentStatus === "FAILED"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {order.paymentStatus === "PAID"
+                        ? "Sudah Dibayar"
+                        : order.paymentStatus === "FAILED"
+                        ? "Gagal"
+                        : "Belum Dibayar"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
+
+          {/* Price Summary */}
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div className="bg-gray-900 px-6 py-4">
+              <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
+                Ringkasan Pembayaran
+              </h2>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-gray-700">Subtotal Produk</span>
+                  <span className="font-semibold text-gray-900 text-lg">
+                    {formatCurrency(order.subtotal)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-gray-700">Biaya Pengiriman</span>
+                  <span className="font-semibold text-gray-900 text-lg">
+                    {formatCurrency(order.shippingCost)}
+                  </span>
+                </div>
+                {order.discount > 0 && (
+                  <div className="flex justify-between items-center py-2 bg-red-50 -mx-6 px-6 rounded">
+                    <span className="text-red-700 font-medium">Diskon</span>
+                    <span className="font-bold text-red-600 text-lg">
+                      -{formatCurrency(order.discount)}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center pt-4 border-t-2 border-gray-900">
+                  <span className="font-bold text-gray-900 text-xl">
+                    Total Pembayaran
+                  </span>
+                  <span className="font-bold text-2xl text-gray-900">
+                    {formatCurrency(order.total)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Help Section */}
+          <div className="bg-white rounded-lg shadow-md border-2 border-gray-900 overflow-hidden">
+            <div className="bg-gray-900 px-6 py-4">
+              <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
+                Butuh Bantuan?
+              </h2>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-700 mb-4">
+                Hubungi customer service kami jika ada pertanyaan tentang
+                pesanan Anda
+              </p>
+              <button
+                onClick={handleContactSupport}
+                className="w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold uppercase tracking-wider"
+              >
+                Hubungi CS
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
