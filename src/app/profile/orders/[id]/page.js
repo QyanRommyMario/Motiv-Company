@@ -17,21 +17,18 @@ export default function OrderDetailPage() {
   const [error, setError] = useState(null);
   const [orderId, setOrderId] = useState(null);
 
-  // Handle params async resolution for Next.js 16
   useEffect(() => {
     if (params?.id) {
       setOrderId(params.id);
     }
   }, [params]);
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login?callbackUrl=/profile/orders");
     }
   }, [status, router]);
 
-  // Fetch order detail
   useEffect(() => {
     if (session && orderId) {
       fetchOrderDetail();
@@ -42,8 +39,6 @@ export default function OrderDetailPage() {
     try {
       setLoading(true);
       setError(null);
-
-      console.log("🔍 Fetching order detail:", orderId);
 
       const response = await fetch(`/api/orders/${orderId}`);
 
@@ -58,7 +53,7 @@ export default function OrderDetailPage() {
 
       const result = await response.json();
 
-      // [PERBAIKAN UTAMA] Membaca data dari result.data
+      // [PERBAIKAN UTAMA] Pastikan membaca result.data
       if (result.success && result.data) {
         setOrder(result.data);
       } else {
@@ -80,7 +75,6 @@ export default function OrderDetailPage() {
     alert("Hubungi Admin: 0812-3456-7890 (WhatsApp)");
   };
 
-  // Helper untuk memformat teks pembayaran manual
   const formatPaymentType = (type) => {
     if (type === "qris_manual") return "QRIS Manual (Konfirmasi Otomatis)";
     if (type === "credit_card") return "Kartu Kredit";
