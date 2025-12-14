@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import CheckoutSteps from "@/components/checkout/CheckoutSteps";
 import Loading from "@/components/ui/Loading";
 import Script from "next/script";
+import Image from "next/image"; // Penting untuk menampilkan gambar QRIS
 
 export default function PaymentPage() {
   const router = useRouter();
@@ -15,10 +16,15 @@ export default function PaymentPage() {
   const [checkoutData, setCheckoutData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+
+  // Midtrans State
   const [snapReady, setSnapReady] = useState(false);
   const [existingSnapToken, setExistingSnapToken] = useState(null);
 
-  // Voucher state
+  // Payment Method State: Default ke 'MIDTRANS'
+  const [paymentMethod, setPaymentMethod] = useState("MIDTRANS");
+
+  // Voucher State
   const [voucherCode, setVoucherCode] = useState("");
   const [voucherApplied, setVoucherApplied] = useState(false);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
@@ -48,41 +54,32 @@ export default function PaymentPage() {
         router.push("/checkout");
         return;
       }
-
       const parsedData = JSON.parse(data);
 
-      // --- [FITUR SELF-HEALING ALAMAT] ---
-      // Jika ID ada tapi Datanya hilang, ambil lagi dari server
+      // Self-healing address logic: Cek jika detail alamat hilang
       if (parsedData.shippingAddressId && !parsedData.shippingAddress) {
-        console.log("⚠️ Detail alamat hilang, mencoba memulihkan...");
         try {
           const res = await fetch(
             `/api/shipping/addresses/${parsedData.shippingAddressId}`
           );
           const json = await res.json();
-
           if (json.success && json.data) {
             parsedData.shippingAddress = json.data;
             sessionStorage.setItem("checkoutData", JSON.stringify(parsedData));
           } else {
-            console.error("❌ Gagal memulihkan alamat.");
-            alert("Data alamat tidak valid. Mohon pilih alamat kembali.");
             router.push("/checkout");
             return;
           }
         } catch (e) {
-          console.error("Error fetching address:", e);
           router.push("/checkout");
           return;
         }
       } else if (!parsedData.shippingAddressId) {
-        // Jika ID juga tidak ada, lempar balik
         router.push("/checkout");
         return;
       }
 
       setCheckoutData(parsedData);
-
       if (parsedData.voucherCode) {
         setVoucherCode(parsedData.voucherCode);
         setVoucherApplied(true);
@@ -90,7 +87,6 @@ export default function PaymentPage() {
       }
       setLoading(false);
     } catch (err) {
-      console.error("Error loading session:", err);
       router.push("/checkout");
     }
   };
@@ -102,14 +98,13 @@ export default function PaymentPage() {
       const json = await res.json();
 
       if (!json.success) {
-        alert("Gagal memuat pesanan: " + json.message);
         router.push("/profile/orders");
         return;
       }
 
       const order = json.data;
 
-      const formattedData = {
+      setCheckoutData({
         orderId: order.id,
         orderNumber: order.orderNumber,
         subtotal: order.subtotal,
@@ -128,25 +123,26 @@ export default function PaymentPage() {
           postalCode: order.shippingPostalCode,
         },
         snapToken: order.snapToken,
-      };
-
-      setCheckoutData(formattedData);
+      });
       setExistingSnapToken(order.snapToken);
+
+      // Jika sudah ada token snap (order lama), paksa ke mode Midtrans
+      if (order.snapToken) {
+        setPaymentMethod("MIDTRANS");
+      }
 
       if (order.voucherCode) {
         setVoucherCode(order.voucherCode);
         setVoucherApplied(true);
         setVoucherDiscount(order.discount);
       }
-
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching order:", error);
-      alert("Terjadi kesalahan saat memuat pesanan");
       router.push("/profile/orders");
     }
   };
 
+  // Logic Voucher
   const handleApplyVoucher = async () => {
     if (!voucherCode.trim()) {
       setVoucherError("Mohon masukkan kode voucher");
@@ -154,7 +150,6 @@ export default function PaymentPage() {
     }
     setVoucherLoading(true);
     setVoucherError("");
-
     try {
       const subtotal = checkoutData?.subtotal || 0;
       const response = await fetch("/api/vouchers/validate", {
@@ -163,22 +158,18 @@ export default function PaymentPage() {
         body: JSON.stringify({ code: voucherCode, subtotal: subtotal }),
       });
       const data = await response.json();
-
       if (data.success) {
         const discount = data.data.discount;
         const newTotal =
           subtotal + (checkoutData?.shipping?.cost || 0) - discount;
-        const updatedCheckoutData = {
+        const updated = {
           ...checkoutData,
           voucherCode: voucherCode.toUpperCase(),
           discount: discount,
           total: newTotal,
         };
-        setCheckoutData(updatedCheckoutData);
-        sessionStorage.setItem(
-          "checkoutData",
-          JSON.stringify(updatedCheckoutData)
-        );
+        setCheckoutData(updated);
+        sessionStorage.setItem("checkoutData", JSON.stringify(updated));
         setVoucherApplied(true);
         setVoucherDiscount(discount);
         setVoucherError("");
@@ -186,7 +177,6 @@ export default function PaymentPage() {
         setVoucherError(data.message || "Voucher tidak valid");
       }
     } catch (error) {
-      console.error("Error applying voucher:", error);
       setVoucherError("Gagal menerapkan voucher");
     } finally {
       setVoucherLoading(false);
@@ -196,75 +186,92 @@ export default function PaymentPage() {
   const handleRemoveVoucher = () => {
     const subtotal = checkoutData?.subtotal || 0;
     const newTotal = subtotal + (checkoutData?.shipping?.cost || 0);
-    const updatedCheckoutData = {
+    const updated = {
       ...checkoutData,
       voucherCode: null,
       discount: 0,
       total: newTotal,
     };
-    setCheckoutData(updatedCheckoutData);
-    sessionStorage.setItem("checkoutData", JSON.stringify(updatedCheckoutData));
+    setCheckoutData(updated);
+    sessionStorage.setItem("checkoutData", JSON.stringify(updated));
     setVoucherCode("");
     setVoucherApplied(false);
     setVoucherDiscount(0);
     setVoucherError("");
   };
 
+  // Logic Proses Pembayaran
   const handleProcessPayment = async () => {
     setProcessing(true);
 
     try {
-      let token = existingSnapToken;
-
-      if (!token) {
+      if (paymentMethod === "MANUAL") {
+        // --- FLOW MANUAL (QRIS) + AUTO VERIFY ---
         const response = await fetch("/api/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(checkoutData),
+          body: JSON.stringify({
+            ...checkoutData,
+            paymentMethod: "MANUAL", // Kirim flag manual
+          }),
         });
 
         const data = await response.json();
 
-        if (!data.success) {
-          alert(data.message || "Gagal membuat order");
-          setProcessing(false);
-          return;
+        if (!data.success) throw new Error(data.message);
+
+        // Hapus session dan redirect ke halaman sukses
+        sessionStorage.removeItem("checkoutData");
+
+        // Redirect ke Success Page (Backend sudah meng-approve otomatis)
+        router.push(data.data.redirectUrl);
+      } else {
+        // --- FLOW OTOMATIS (MIDTRANS) ---
+        let token = existingSnapToken;
+
+        if (!token) {
+          const response = await fetch("/api/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...checkoutData,
+              paymentMethod: "MIDTRANS",
+            }),
+          });
+
+          const data = await response.json();
+          if (!data.success)
+            throw new Error(data.message || "Gagal membuat order");
+          token = data.data.payment.token;
         }
 
-        token = data.data.payment.token || data.data.payment.snapToken;
-      }
-
-      if (token && typeof window.snap !== "undefined") {
-        window.snap.pay(token, {
-          onSuccess: function (result) {
-            sessionStorage.removeItem("checkoutData");
-            const orderIdTarget = checkoutData.orderNumber || result.order_id;
-            router.push(`/checkout/success?orderId=${orderIdTarget}`);
-          },
-          onPending: function (result) {
-            sessionStorage.removeItem("checkoutData");
-            const orderIdTarget = checkoutData.orderNumber || result.order_id;
-            router.push(
-              `/checkout/success?orderId=${orderIdTarget}&status=pending`
-            );
-          },
-          onError: function (result) {
-            console.error("Payment error:", result);
-            alert("Pembayaran gagal. Silakan coba lagi.");
-            setProcessing(false);
-          },
-          onClose: function () {
-            console.log("Popup closed");
-            setProcessing(false);
-          },
-        });
-      } else {
-        console.error("Snap Token missing or script not loaded. Token:", token);
-        alert("Sistem pembayaran belum siap. Mohon refresh halaman.");
-        setProcessing(false);
+        if (token && window.snap) {
+          window.snap.pay(token, {
+            onSuccess: (result) => {
+              sessionStorage.removeItem("checkoutData");
+              const target = checkoutData.orderNumber || result.order_id;
+              router.push(`/checkout/success?orderId=${target}`);
+            },
+            onPending: (result) => {
+              sessionStorage.removeItem("checkoutData");
+              const target = checkoutData.orderNumber || result.order_id;
+              router.push(`/checkout/success?orderId=${target}&status=pending`);
+            },
+            onError: () => {
+              alert("Pembayaran gagal/dibatalkan");
+              setProcessing(false);
+            },
+            onClose: () => setProcessing(false),
+          });
+        } else {
+          alert(
+            "Sistem pembayaran otomatis belum siap (Token tidak ada). Coba refresh."
+          );
+          setProcessing(false);
+        }
       }
     } catch (err) {
-      console.error("Error processing payment:", err);
+      console.error(err);
       alert("Gagal memproses pembayaran: " + err.message);
       setProcessing(false);
     }
@@ -287,11 +294,7 @@ export default function PaymentPage() {
         }
         data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
         strategy="lazyOnload"
-        onLoad={() => {
-          console.log("✅ Snap Loaded");
-          setSnapReady(true);
-        }}
-        onError={(e) => console.error("❌ Snap Failed", e)}
+        onLoad={() => setSnapReady(true)}
       />
 
       <div className="min-h-screen bg-gray-50 py-8">
@@ -301,15 +304,72 @@ export default function PaymentPage() {
               Pembayaran
             </h1>
             <p className="text-gray-600">
-              {existingSnapToken
-                ? "Selesaikan pembayaran Anda"
-                : "Konfirmasi dan lakukan pembayaran"}
+              Pilih metode pembayaran yang Anda inginkan
             </p>
           </div>
 
           {!existingSnapToken && <CheckoutSteps currentStep={3} />}
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
+            {/* SELEKTOR METODE PEMBAYARAN */}
+            {/* Hanya tampil jika ini order baru (belum ada token snap) */}
+            {!existingSnapToken && (
+              <div className="mb-8">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">
+                  Pilih Metode Pembayaran
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Opsi 1: Otomatis */}
+                  <div
+                    onClick={() => setPaymentMethod("MIDTRANS")}
+                    className={`cursor-pointer p-4 border-2 rounded-xl transition-all ${
+                      paymentMethod === "MIDTRANS"
+                        ? "border-gray-900 bg-gray-50 ring-1 ring-gray-900"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-bold text-gray-900">
+                        Otomatis (Midtrans)
+                      </span>
+                      {paymentMethod === "MIDTRANS" && (
+                        <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      Virtual Account, GoPay, Kartu Kredit. (Memerlukan Pop-up).
+                    </p>
+                  </div>
+
+                  {/* Opsi 2: Manual QRIS */}
+                  <div
+                    onClick={() => setPaymentMethod("MANUAL")}
+                    className={`cursor-pointer p-4 border-2 rounded-xl transition-all ${
+                      paymentMethod === "MANUAL"
+                        ? "border-gray-900 bg-gray-50 ring-1 ring-gray-900"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-bold text-gray-900">
+                        QRIS Manual
+                      </span>
+                      {paymentMethod === "MANUAL" && (
+                        <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      Scan QRIS Statis. Verifikasi Langsung (Demo Mode).
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Ringkasan Pesanan
             </h2>
@@ -329,12 +389,9 @@ export default function PaymentPage() {
                 </span>
               </div>
 
-              {/* ... Bagian Voucher (biarkan seperti sebelumnya) ... */}
+              {/* AREA VOUCHER */}
               {!voucherApplied ? (
-                <div className="border border-gray-200 rounded p-4 bg-gray-50">
-                  <label className="block text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">
-                    Punya kode voucher?
-                  </label>
+                <div className="border border-gray-200 rounded p-4 bg-gray-50 my-4">
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -342,94 +399,119 @@ export default function PaymentPage() {
                       onChange={(e) =>
                         setVoucherCode(e.target.value.toUpperCase())
                       }
-                      placeholder="Masukkan kode voucher"
-                      className="flex-1 px-4 py-3 border-2 border-gray-300 rounded uppercase font-mono font-semibold text-gray-900 bg-white"
+                      placeholder="Kode Voucher"
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded uppercase font-mono text-sm"
                       disabled={voucherLoading}
                     />
                     <button
                       onClick={handleApplyVoucher}
                       disabled={voucherLoading || !voucherCode.trim()}
-                      className="px-6 py-3 bg-gray-900 text-white rounded hover:bg-black disabled:bg-gray-400 font-semibold uppercase text-sm"
+                      className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-black text-sm"
                     >
-                      {voucherLoading ? "Memeriksa..." : "Gunakan"}
+                      {voucherLoading ? "..." : "Gunakan"}
                     </button>
                   </div>
                   {voucherError && (
-                    <p className="text-sm text-red-600 mt-2">{voucherError}</p>
+                    <p className="text-xs text-red-600 mt-2">{voucherError}</p>
                   )}
                 </div>
               ) : (
-                <div className="flex justify-between items-center bg-gray-50 border-2 border-gray-900 rounded p-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-gray-900 uppercase">
-                        Voucher "{voucherCode}" diterapkan
-                      </span>
-                      <span className="text-lg">✓</span>
-                    </div>
-                    <div className="text-sm text-gray-600 font-medium mt-1">
-                      Hemat Rp {voucherDiscount.toLocaleString("id-ID")}
-                    </div>
+                <div className="flex justify-between text-green-700 font-medium my-2">
+                  <span>Diskon Voucher ({voucherCode})</span>
+                  <div className="flex items-center gap-2">
+                    <span>- Rp {voucherDiscount.toLocaleString("id-ID")}</span>
+                    <button
+                      onClick={handleRemoveVoucher}
+                      className="text-xs text-red-500 underline"
+                    >
+                      Hapus
+                    </button>
                   </div>
-                  <button
-                    onClick={handleRemoveVoucher}
-                    className="text-xs text-gray-700 hover:text-red-600 font-semibold uppercase"
-                  >
-                    Hapus
-                  </button>
-                </div>
-              )}
-
-              {voucherApplied && (
-                <div className="flex justify-between text-gray-900 font-semibold">
-                  <span>Diskon Voucher</span>
-                  <span>- Rp {voucherDiscount.toLocaleString("id-ID")}</span>
                 </div>
               )}
 
               <div className="border-t-2 border-gray-900 pt-4 flex justify-between text-xl font-bold text-gray-900">
-                <span className="uppercase tracking-wide">Total</span>
+                <span className="uppercase tracking-wide">
+                  Total Pembayaran
+                </span>
                 <span>
                   Rp {checkoutData?.total?.toLocaleString("id-ID") || 0}
                 </span>
               </div>
             </div>
 
-            <div className="bg-gray-50 border border-gray-200 rounded p-4 mb-6">
-              <h3 className="font-bold text-gray-900 mb-3 uppercase tracking-wide">
-                Informasi Pengiriman
-              </h3>
-              <div className="text-sm text-gray-700 space-y-1.5">
-                <p className="font-semibold text-gray-900">
-                  {checkoutData?.shippingAddress?.name || "Memuat..."}
-                </p>
-                <p>{checkoutData?.shippingAddress?.phone}</p>
-                <p>{checkoutData?.shippingAddress?.address}</p>
-                <p>
-                  {checkoutData?.shippingAddress?.city},{" "}
-                  {checkoutData?.shippingAddress?.postalCode}
+            {/* AREA TAMPILAN KHUSUS MANUAL (QRIS) */}
+            {paymentMethod === "MANUAL" && !existingSnapToken && (
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8 text-center animate-fadeIn">
+                <h3 className="font-bold text-lg text-blue-900 mb-2">
+                  Scan QRIS untuk Membayar
+                </h3>
+                <p className="text-sm text-blue-700 mb-4">
+                  Silakan scan kode di bawah menggunakan GoPay, OVO, Dana, atau
+                  Mobile Banking.
                 </p>
 
-                {/* [MENAMPILKAN KEMBALI KURIR YANG HILANG] */}
-                <p className="text-gray-900 font-semibold mt-3 uppercase tracking-wide text-xs">
-                  {checkoutData?.shipping?.courier} -{" "}
-                  {checkoutData?.shipping?.service}
-                </p>
+                <div className="w-64 h-64 bg-white mx-auto border-4 border-white shadow-md rounded-lg relative mb-6 overflow-hidden">
+                  {/* !!! PENTING: 
+                            Simpan gambar QRIS anda di folder: /public/qris-manual.jpg 
+                        */}
+                  <Image
+                    src="/qris-manual.jpg"
+                    alt="QRIS Motiv Company"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+
+                <div className="text-left bg-white p-4 rounded-lg border border-blue-100 max-w-md mx-auto">
+                  <p className="text-sm font-bold text-gray-800 mb-2">
+                    Instruksi Pembayaran:
+                  </p>
+                  <ol className="list-decimal list-inside text-sm text-gray-600 space-y-2">
+                    <li>Buka aplikasi pembayaran Anda.</li>
+                    <li>Scan QRIS di atas.</li>
+                    <li>
+                      Masukkan nominal:{" "}
+                      <span className="font-bold text-gray-900">
+                        Rp {checkoutData?.total?.toLocaleString("id-ID")}
+                      </span>{" "}
+                      (Harus Tepat).
+                    </li>
+                    <li>
+                      Pastikan penerima adalah <strong>MOTIV COMPANY</strong>.
+                    </li>
+                    <li>
+                      Klik tombol konfirmasi di bawah, sistem akan{" "}
+                      <strong>memverifikasi otomatis</strong>.
+                    </li>
+                  </ol>
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className="flex gap-3">
+            {/* TOMBOL AKSI */}
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button
                 onClick={handleProcessPayment}
-                disabled={processing || !snapReady}
-                className="flex-1 px-6 py-4 bg-gray-900 text-white rounded hover:bg-black transition font-bold uppercase tracking-wider text-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={
+                  processing || (paymentMethod === "MIDTRANS" && !snapReady)
+                }
+                className={`flex-1 py-4 px-6 rounded-lg font-bold text-white transition-all uppercase tracking-wide
+                    ${
+                      processing
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-gray-900 hover:bg-black shadow-lg hover:shadow-xl"
+                    }
+                `}
               >
                 {processing
                   ? "Memproses..."
-                  : !snapReady
-                  ? "Memuat Pembayaran..."
-                  : "Bayar Sekarang"}
+                  : paymentMethod === "MANUAL"
+                  ? "Saya Sudah Transfer (Konfirmasi Otomatis)"
+                  : "Bayar Sekarang (Midtrans)"}
               </button>
+
               <button
                 onClick={() =>
                   router.push(
@@ -437,22 +519,17 @@ export default function PaymentPage() {
                   )
                 }
                 disabled={processing}
-                className="px-6 py-4 border-2 border-gray-300 text-gray-700 rounded hover:border-gray-900 hover:bg-gray-50 transition font-semibold uppercase tracking-wide text-sm disabled:opacity-50"
+                className="px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold uppercase transition"
               >
                 Kembali
               </button>
             </div>
 
-            <div className="mt-6 bg-gray-50 border border-gray-200 rounded p-4 text-sm text-gray-600">
-              <p className="font-bold text-gray-900 mb-2 uppercase tracking-wide">
-                Transaksi Aman
-              </p>
-              <p>
-                Pembayaran diproses oleh Midtrans, payment gateway terpercaya di
-                Indonesia. Data pembayaran Anda dilindungi dengan enkripsi SSL
-                256-bit.
-              </p>
-            </div>
+            <p className="mt-4 text-center text-xs text-gray-400">
+              {paymentMethod === "MANUAL"
+                ? "Mode Demo: Pembayaran akan diverifikasi secara otomatis oleh sistem."
+                : "Pembayaran aman & terenkripsi oleh Midtrans Payment Gateway."}
+            </p>
           </div>
         </div>
       </div>
