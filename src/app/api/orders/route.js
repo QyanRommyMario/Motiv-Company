@@ -1,6 +1,6 @@
 /**
  * Orders API Route
- * Handles Order Creation: Supports Midtrans Snap & Auto-Approved Manual QRIS
+ * Production Ready: Manual Payment set to PENDING
  */
 
 import { NextResponse } from "next/server";
@@ -19,7 +19,7 @@ export async function POST(request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
-    const { paymentMethod } = body; // Menangkap metode: 'MIDTRANS' atau 'MANUAL'
+    const { paymentMethod } = body;
 
     // 1. Validasi Dasar
     if (!body.shippingAddressId || !body.shipping || !body.items?.length) {
@@ -83,7 +83,7 @@ export async function POST(request) {
 
     const total = subtotal + shippingCost - voucherDiscount;
 
-    // 3. Simpan Order ke Database (Status Awal: PENDING)
+    // 3. Simpan Order ke Database (Stok berkurang disini)
     const shippingAddress = await prisma.shippingAddress.findUnique({
       where: { id: body.shippingAddressId },
     });
@@ -114,29 +114,28 @@ export async function POST(request) {
     });
 
     // ==========================================
-    // 4. PERCABANGAN LOGIKA PEMBAYARAN
+    // 4. PERCABANGAN LOGIKA PEMBAYARAN (FIXED)
     // ==========================================
 
     if (paymentMethod === "MANUAL") {
-      // --- LOGIKA MANUAL (AUTO-VERIFY UNTUK DEMO) ---
+      // [PERBAIKAN] Logic Production: Set ke PENDING, bukan PAID.
 
-      // Update status order langsung jadi 'PROCESSING' dan 'PAID'
       await prisma.order.update({
         where: { id: order.id },
         data: {
-          status: "PROCESSING", // Order langsung diproses
-          paymentStatus: "PAID", // Pembayaran langsung lunas
+          status: "PENDING", // Menunggu Admin
+          paymentStatus: "UNPAID", // Belum dibayar
         },
       });
 
-      // Catat transaksi sebagai 'settlement' (Sukses) agar tercatat di history
+      // Catat transaksi manual pending
       await TransactionModel.create({
         orderId: order.id,
         transactionId: `MANUAL-${order.orderNumber}`,
         orderNumber: order.orderNumber,
         grossAmount: total,
-        paymentType: "qris_manual",
-        transactionStatus: "settlement", // Status sukses mirip Midtrans
+        paymentType: "manual_transfer",
+        transactionStatus: "pending",
         fraudStatus: "accept",
       });
 
@@ -148,7 +147,8 @@ export async function POST(request) {
         data: {
           order: { id: order.id, orderNumber: order.orderNumber },
           isManual: true,
-          redirectUrl: `/checkout/success?orderId=${order.orderNumber}`,
+          // Redirect ke detail order untuk instruksi transfer
+          redirectUrl: `/profile/orders/${order.id}`,
         },
       });
     } else {
@@ -166,7 +166,7 @@ export async function POST(request) {
         midtransData = await MidtransService.createTransaction(fullOrder);
       } catch (midtransError) {
         console.error("❌ Midtrans Error:", midtransError.message);
-        // Hapus order jika gagal connect ke Midtrans agar user bisa coba lagi
+        // Hapus order agar stok kembali jika gagal connect
         await prisma.order.delete({ where: { id: order.id } });
 
         return NextResponse.json(
@@ -179,7 +179,7 @@ export async function POST(request) {
         );
       }
 
-      // Simpan Token Transaksi (Status: PENDING)
+      // Simpan Token Transaksi
       await TransactionModel.create({
         orderId: order.id,
         transactionId: fullOrder.orderNumber,

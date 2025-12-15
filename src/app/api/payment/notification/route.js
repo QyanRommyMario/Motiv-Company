@@ -1,6 +1,6 @@
 /**
  * Midtrans Payment Notification Webhook
- * POST /api/payment/notification - Handle Midtrans notifications
+ * Production Ready: Handles Stock Reversal on Failure
  */
 
 import { NextResponse } from "next/server";
@@ -15,7 +15,7 @@ export async function POST(request) {
 
     console.log("Midtrans notification received:", notification);
 
-    // Verify notification signature
+    // 1. Verifikasi Signature
     const serverKey = process.env.MIDTRANS_SERVER_KEY;
     const orderId = notification.order_id;
     const statusCode = notification.status_code;
@@ -34,7 +34,7 @@ export async function POST(request) {
       );
     }
 
-    // Get transaction from database
+    // 2. Cari Transaksi
     const transaction = await TransactionModel.getByTransactionId(
       notification.order_id
     );
@@ -47,13 +47,13 @@ export async function POST(request) {
       );
     }
 
-    // Map Midtrans status to our status
+    // 3. Mapping Status
     const { orderStatus, paymentStatus } = MidtransService.mapTransactionStatus(
       notification.transaction_status,
       notification.fraud_status
     );
 
-    // Update transaction
+    // 4. Update Data Transaksi
     await TransactionModel.updateStatus(notification.order_id, {
       transactionStatus: notification.transaction_status,
       fraudStatus: notification.fraud_status,
@@ -65,32 +65,32 @@ export async function POST(request) {
         : null,
     });
 
-    // Update order status and payment status synchronously
-    const updateData = { paymentStatus };
-
-    // Only update order status if payment is successful (PAID)
-    // This prevents auto-advancing order status on failed/pending payments
-    if (paymentStatus === "PAID" && orderStatus === "PROCESSING") {
-      // Order status will be updated to PROCESSING only when payment is confirmed
-      await OrderModel.updateStatus(transaction.orderId, orderStatus);
-    } else {
-      // Just update payment status without changing order status
-      await OrderModel.updatePaymentStatus(transaction.orderId, paymentStatus);
-    }
-
-    // TODO: Send email notification to customer
+    // 5. Update Status Order (PENTING: Handle Restock)
     if (paymentStatus === "PAID") {
-      console.log(`Payment successful for order ${transaction.orderNumber}`);
-      // Stock already updated during order creation
-      // TODO: Implement email notification here
+      // Jika bayar sukses -> PROCESSING
+      await OrderModel.updatePaymentStatus(transaction.orderId, "PAID");
+
+      // Cek agar tidak mendowngrade status jika sudah SHIPPED dll
+      const currentOrder = await OrderModel.findById(transaction.orderId);
+      if (currentOrder.status === "PENDING") {
+        await OrderModel.updateStatus(transaction.orderId, "PROCESSING");
+      }
     } else if (paymentStatus === "FAILED" || paymentStatus === "EXPIRED") {
+      // Jika gagal/expired -> CANCELLED
+      // OrderModel.updateStatus("CANCELLED") akan otomatis mengembalikan stok (increment)
+      // sesuai logika di file OrderModel.js yang sudah Anda miliki.
+
+      await OrderModel.updatePaymentStatus(transaction.orderId, paymentStatus);
+      await OrderModel.updateStatus(transaction.orderId, "CANCELLED", {
+        cancellationReason: `Payment ${paymentStatus} by System (Midtrans)`,
+      });
+
       console.log(
-        `Payment ${paymentStatus.toLowerCase()} for order ${
-          transaction.orderNumber
-        }`
+        `Order ${transaction.orderNumber} dibatalkan & stok dikembalikan.`
       );
-      // TODO: Send payment failed/expired email notification
     }
+
+    // Status 'PENDING' dibiarkan saja (menunggu user bayar)
 
     return NextResponse.json({
       success: true,
@@ -109,7 +109,6 @@ export async function POST(request) {
   }
 }
 
-// GET endpoint untuk testing
 export async function GET() {
   return NextResponse.json({
     success: true,
