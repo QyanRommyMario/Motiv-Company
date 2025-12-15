@@ -19,22 +19,18 @@ export default function OrderDetailPage() {
   const [error, setError] = useState(null);
   const [orderId, setOrderId] = useState(null);
 
-  // Mengambil ID dari URL
   useEffect(() => {
     if (params?.id) {
       setOrderId(params.id);
     }
   }, [params]);
 
-  // Redirect jika user belum login
   useEffect(() => {
     if (status === "unauthenticated") {
-      // Callback URL disesuaikan agar kembali ke halaman detail ini setelah login
       router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
     }
   }, [status, router, pathname]);
 
-  // Fetch detail order
   useEffect(() => {
     if (session?.user && orderId) {
       fetchOrderDetail();
@@ -73,14 +69,21 @@ export default function OrderDetailPage() {
   };
 
   const handlePayment = () => {
-    // Pastikan order.id tersedia sebelum navigasi
     if (order?.id) {
       router.push(`/checkout/payment?orderId=${order.id}`);
     }
   };
 
   const handleContactSupport = () => {
-    window.open("https://wa.me/6281234567890", "_blank");
+    const message = `Halo Admin Motiv, saya butuh bantuan untuk Order #${order?.orderNumber}`;
+    window.open(
+      `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
+  };
+
+  const handlePrintInvoice = () => {
+    window.print();
   };
 
   const formatPaymentType = (type) => {
@@ -119,12 +122,12 @@ export default function OrderDetailPage() {
   if (!order) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 pt-24">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen bg-gray-50 py-8 pt-24 print:bg-white print:pt-0">
+      <div className="max-w-4xl mx-auto px-4 print:px-0 print:max-w-full">
         {/* Tombol Kembali */}
         <button
           onClick={() => router.push("/profile/orders")}
-          className="mb-6 flex items-center text-gray-600 hover:text-gray-900 transition-colors font-medium group"
+          className="mb-6 flex items-center text-gray-600 hover:text-gray-900 transition-colors font-medium group print:hidden"
         >
           <svg
             className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform"
@@ -143,7 +146,7 @@ export default function OrderDetailPage() {
         </button>
 
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-6 print:shadow-none print:border-0 print:p-0 print:mb-8">
           <div className="flex justify-between items-start flex-wrap gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -164,21 +167,43 @@ export default function OrderDetailPage() {
               </p>
             </div>
 
-            {/* Tombol Bayar (Hanya jika PENDING & UNPAID) */}
-            {order.status === "PENDING" && order.paymentStatus === "UNPAID" && (
+            <div className="flex gap-3 print:hidden">
               <button
-                onClick={handlePayment}
-                className="px-8 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                onClick={handlePrintInvoice}
+                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold flex items-center"
               >
-                Bayar Sekarang
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                  />
+                </svg>
+                Invoice
               </button>
-            )}
+
+              {order.status === "PENDING" &&
+                order.paymentStatus === "UNPAID" && (
+                  <button
+                    onClick={handlePayment}
+                    className="px-8 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  >
+                    Bayar Sekarang
+                  </button>
+                )}
+            </div>
           </div>
         </div>
 
         <div className="space-y-6">
           {/* Status Pesanan */}
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden print:hidden">
             <div className="bg-gray-900 px-6 py-4">
               <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
                 Status Pesanan
@@ -192,8 +217,8 @@ export default function OrderDetailPage() {
             </div>
           </div>
 
-          {/* Timeline / Riwayat */}
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          {/* Timeline */}
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden print:hidden">
             <div className="bg-gray-900 px-6 py-4">
               <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
                 Riwayat Pesanan
@@ -204,71 +229,77 @@ export default function OrderDetailPage() {
             </div>
           </div>
 
-          {/* Daftar Produk */}
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-            <div className="bg-gray-900 px-6 py-4">
-              <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
+          {/* Produk Dipesan */}
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden print:shadow-none print:border print:border-gray-900">
+            <div className="bg-gray-900 px-6 py-4 print:bg-white print:border-b print:border-gray-900">
+              <h2 className="text-lg font-semibold text-white uppercase tracking-wider print:text-gray-900 print:pl-0">
                 Produk Dipesan
               </h2>
             </div>
             <div className="p-6">
               <div className="space-y-4">
-                {order.items?.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex gap-4 pb-4 border-b border-gray-200 last:border-0 hover:bg-gray-50 p-3 rounded-lg transition-colors"
-                  >
-                    <div className="w-20 h-20 bg-gray-100 rounded-lg shrink-0 overflow-hidden relative border border-gray-200">
-                      {item.variant?.product?.images?.[0] ? (
-                        <img
-                          src={item.variant.product.images[0]}
-                          alt={item.variant.product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400 text-xs">
-                          No Image
-                        </div>
-                      )}
+                {order.items?.map((item, index) => {
+                  // [PERBAIKAN] Menggunakan item.product sebagai prioritas
+                  const product = item.product || item.variant?.product;
+                  const variant = item.variant;
+
+                  return (
+                    <div
+                      key={index}
+                      className="flex gap-4 pb-4 border-b border-gray-200 last:border-0 p-3 rounded-lg print:border-gray-300"
+                    >
+                      <div className="w-20 h-20 bg-gray-100 rounded-lg shrink-0 overflow-hidden relative border border-gray-200 print:hidden">
+                        {product?.images?.[0] ? (
+                          <img
+                            src={product.images[0]}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400 text-xs">
+                            No Image
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 mb-1">
+                          {product?.name || "Product"}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          Ukuran:{" "}
+                          <span className="font-medium text-gray-900">
+                            {variant?.size || "-"}
+                          </span>
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Jumlah:{" "}
+                          <span className="font-medium text-gray-900">
+                            {item.quantity}x
+                          </span>
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900 mb-1">
+                          {formatCurrency(item.price)}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Total:{" "}
+                          <span className="font-bold text-gray-900">
+                            {formatCurrency(item.price * item.quantity)}
+                          </span>
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 mb-1">
-                        {item.variant?.product?.name || "Product"}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        Ukuran:{" "}
-                        <span className="font-medium text-gray-900">
-                          {item.variant?.size || "-"}
-                        </span>
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Jumlah:{" "}
-                        <span className="font-medium text-gray-900">
-                          {item.quantity}x
-                        </span>
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-gray-900 mb-1">
-                        {formatCurrency(item.price)}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Total:{" "}
-                        <span className="font-bold text-gray-900">
-                          {formatCurrency(item.price * item.quantity)}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
 
           {/* Informasi Pengiriman */}
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-            <div className="bg-gray-900 px-6 py-4">
-              <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden print:shadow-none print:border print:border-gray-900 print:mt-4">
+            <div className="bg-gray-900 px-6 py-4 print:bg-white print:border-b print:border-gray-900">
+              <h2 className="text-lg font-semibold text-white uppercase tracking-wider print:text-gray-900 print:pl-0">
                 Informasi Pengiriman
               </h2>
             </div>
@@ -316,15 +347,43 @@ export default function OrderDetailPage() {
                       </p>
                     </div>
                     {order.trackingNumber && (
-                      <div>
+                      <div className="print:hidden">
+                        <p className="text-sm font-medium text-gray-600 mb-1">
+                          Nomor Resi (Klik untuk melacak)
+                        </p>
+                        <a
+                          href={`https://cekresi.com/?noresi=${order.trackingNumber}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 group hover:opacity-80 transition-opacity"
+                        >
+                          <p className="font-mono font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded border border-gray-300 group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-blue-700">
+                            {order.trackingNumber}
+                          </p>
+                          <svg
+                            className="w-4 h-4 text-gray-500 group-hover:text-blue-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
+                          </svg>
+                        </a>
+                      </div>
+                    )}
+                    {order.trackingNumber && (
+                      <div className="hidden print:block">
                         <p className="text-sm font-medium text-gray-600 mb-1">
                           Nomor Resi
                         </p>
-                        <div className="flex items-center gap-2">
-                          <p className="font-mono font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded">
-                            {order.trackingNumber}
-                          </p>
-                        </div>
+                        <p className="font-mono font-bold text-gray-900">
+                          {order.trackingNumber}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -333,73 +392,10 @@ export default function OrderDetailPage() {
             </div>
           </div>
 
-          {/* Informasi Pembayaran */}
-          {order.transaction && (
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-              <div className="bg-gray-900 px-6 py-4">
-                <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
-                  Informasi Pembayaran
-                </h2>
-              </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">
-                      Metode Pembayaran
-                    </p>
-                    <p className="font-semibold text-gray-900">
-                      {formatPaymentType(order.transaction.paymentType)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">
-                      Status Pembayaran
-                    </p>
-                    <span
-                      className={`inline-block px-3 py-1 rounded font-semibold uppercase tracking-wider text-xs ${
-                        order.paymentStatus === "PAID"
-                          ? "bg-green-100 text-green-800"
-                          : order.paymentStatus === "FAILED"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {order.paymentStatus === "PAID"
-                        ? "Sudah Dibayar"
-                        : order.paymentStatus === "FAILED"
-                        ? "Gagal"
-                        : "Belum Dibayar"}
-                    </span>
-                  </div>
-                  {order.transaction.vaNumber && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 mb-1">
-                        Nomor VA
-                      </p>
-                      <p className="font-mono font-bold text-gray-900 text-lg">
-                        {order.transaction.vaNumber}
-                      </p>
-                    </div>
-                  )}
-                  {order.transaction.bank && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 mb-1">
-                        Bank
-                      </p>
-                      <p className="font-semibold text-gray-900 uppercase">
-                        {order.transaction.bank}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Ringkasan Biaya */}
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-            <div className="bg-gray-900 px-6 py-4">
-              <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden print:shadow-none print:border print:border-gray-900 print:mt-4 print:break-inside-avoid">
+            <div className="bg-gray-900 px-6 py-4 print:bg-white print:border-b print:border-gray-900">
+              <h2 className="text-lg font-semibold text-white uppercase tracking-wider print:text-gray-900 print:pl-0">
                 Ringkasan Biaya
               </h2>
             </div>
@@ -418,14 +414,14 @@ export default function OrderDetailPage() {
                   </span>
                 </div>
                 {order.discount > 0 && (
-                  <div className="flex justify-between items-center text-red-600 bg-red-50 p-2 rounded">
+                  <div className="flex justify-between items-center text-red-600 bg-red-50 p-2 rounded print:bg-transparent print:p-0 print:text-gray-900">
                     <span>Diskon</span>
                     <span className="font-bold">
                       -{formatCurrency(order.discount)}
                     </span>
                   </div>
                 )}
-                <div className="pt-4 mt-4 border-t-2 border-gray-100 flex justify-between items-center">
+                <div className="pt-4 mt-4 border-t-2 border-gray-100 flex justify-between items-center print:border-gray-900">
                   <span className="font-bold text-gray-900 text-lg">
                     Total Pembayaran
                   </span>
@@ -438,7 +434,7 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Bantuan */}
-          <div className="bg-gray-900 rounded-lg shadow-lg overflow-hidden text-white">
+          <div className="bg-gray-900 rounded-lg shadow-lg overflow-hidden text-white print:hidden">
             <div className="p-8 text-center">
               <h2 className="text-xl font-bold mb-2">
                 Butuh Bantuan dengan Pesanan Ini?
@@ -454,6 +450,11 @@ export default function OrderDetailPage() {
                 <span className="mr-2">💬</span> Hubungi Customer Service
               </button>
             </div>
+          </div>
+
+          <div className="hidden print:block text-center mt-12 text-sm text-gray-600">
+            <p>Terima kasih telah berbelanja di Motiv Company</p>
+            <p>www.motivcompany.com</p>
           </div>
         </div>
       </div>
