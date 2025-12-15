@@ -1,8 +1,8 @@
 import { getRequestConfig } from "next-intl/server";
+import { cookies } from "next/headers";
 
 export default getRequestConfig(async () => {
-  // Get locale from cookie or default to 'en'
-  const { cookies } = await import("next/headers");
+  // Ambil locale dari cookie, fallback ke 'en'
   const cookieStore = await cookies();
   const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
 

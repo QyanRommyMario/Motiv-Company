@@ -8,19 +8,18 @@ import { getMessages } from "next-intl/server";
 import { cookies } from "next/headers";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
-// OPTIMASI FONT: Tambahkan display: 'swap'
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
-  display: "swap", // <-- PENTING
+  display: "swap",
 });
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "900"],
-  display: "swap", // <-- PENTING
+  display: "swap",
 });
 
 export const viewport = {
@@ -45,8 +44,11 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
+  // 1. Ambil locale dari cookie server-side
   const cookieStore = await cookies();
   const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
+
+  // 2. Ambil messages sesuai locale
   const messages = await getMessages({ locale });
 
   return (

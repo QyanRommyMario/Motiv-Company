@@ -1,42 +1,53 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function LanguageSwitcher({ variant = "light" }) {
-  const [locale, setLocale] = useState(() => {
-    if (typeof window !== "undefined") {
-      return (
-        document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("NEXT_LOCALE="))
-          ?.split("=")[1] || "en"
-      );
-    }
-    return "en";
-  });
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
+
+  // State lokal untuk tampilan UI segera
+  const [locale, setLocale] = useState("en");
+
+  // Load initial locale dari cookie saat mount
+  useEffect(() => {
+    const cookieLocale = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("NEXT_LOCALE="))
+      ?.split("=")[1];
+
+    if (cookieLocale) setLocale(cookieLocale);
+  }, []);
 
   const languages = [
     { code: "en", name: "English", flag: "🇺🇸" },
     { code: "id", name: "Indonesia", flag: "🇮🇩" },
   ];
 
-  const currentLang = languages.find((lang) => lang.code === locale);
+  const currentLang =
+    languages.find((lang) => lang.code === locale) || languages[0];
 
   const changeLanguage = (newLocale) => {
+    // 1. Tutup dropdown
+    setIsOpen(false);
+
+    // 2. Optimistic UI update
+    setLocale(newLocale);
+
     startTransition(() => {
-      // Set cookie
-      document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`;
-      setLocale(newLocale);
-      setIsOpen(false);
-      // Reload page to apply new locale
-      window.location.reload();
+      // 3. Set Cookie (Max-Age 1 tahun)
+      document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+
+      // 4. Refresh halaman agar server membaca cookie baru
+      router.refresh();
+      // Fallback reload keras jika router.refresh tidak cukup (opsional)
+      // window.location.reload();
     });
   };
 
-  // Styling variants
   const buttonStyles =
     variant === "dark"
       ? "bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 text-white"
@@ -44,7 +55,6 @@ export default function LanguageSwitcher({ variant = "light" }) {
 
   return (
     <div className="relative">
-      {/* Language Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${buttonStyles}`}
@@ -52,8 +62,9 @@ export default function LanguageSwitcher({ variant = "light" }) {
         whileTap={{ scale: 0.95 }}
         disabled={isPending}
       >
-        <span className="text-sm font-medium uppercase tracking-widest">
-          {currentLang?.code.toUpperCase()}
+        <span className="text-lg">{currentLang?.flag}</span>
+        <span className="text-sm font-medium uppercase tracking-widest hidden sm:inline">
+          {currentLang?.code}
         </span>
         <motion.svg
           className="w-4 h-4"
@@ -61,7 +72,6 @@ export default function LanguageSwitcher({ variant = "light" }) {
           stroke="currentColor"
           viewBox="0 0 24 24"
           animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.3 }}
         >
           <path
             strokeLinecap="round"
@@ -72,85 +82,40 @@ export default function LanguageSwitcher({ variant = "light" }) {
         </motion.svg>
       </motion.button>
 
-      {/* Dropdown Menu */}
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
-            <motion.div
+            <div
               className="fixed inset-0 z-40"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
             />
-
-            {/* Dropdown */}
             <motion.div
               className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50"
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
             >
-              {/* Sort languages: current language first */}
-              {[...languages]
-                .sort((a, b) => {
-                  if (a.code === locale) return -1;
-                  if (b.code === locale) return 1;
-                  return 0;
-                })
-                .map((lang) => (
-                  <motion.button
-                    key={lang.code}
-                    onClick={() => changeLanguage(lang.code)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                      locale === lang.code
-                        ? "bg-black text-white"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                    whileHover={{ x: 5 }}
-                    transition={{ duration: 0.2 }}
-                    disabled={isPending}
-                  >
-                    <div className="flex-1">
-                      <div className="font-medium">{lang.name}</div>
-                    </div>
-                    {locale === lang.code && (
-                      <motion.svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </motion.svg>
-                    )}
-                  </motion.button>
-                ))}
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => changeLanguage(lang.code)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+                    locale === lang.code
+                      ? "bg-gray-100 font-bold"
+                      : "hover:bg-gray-50"
+                  }`}
+                >
+                  <span className="text-xl">{lang.flag}</span>
+                  <span className="text-gray-900">{lang.name}</span>
+                  {locale === lang.code && (
+                    <span className="ml-auto text-green-600">✓</span>
+                  )}
+                </button>
+              ))}
             </motion.div>
           </>
         )}
       </AnimatePresence>
-
-      {/* Loading overlay */}
-      {isPending && (
-        <motion.div
-          className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-        </motion.div>
-      )}
     </div>
   );
 }
