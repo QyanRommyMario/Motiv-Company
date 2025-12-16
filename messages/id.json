@@ -1,167 +1,40 @@
 {
-  "landing": {
-    "hero": {
-      "title": "MOTIV",
-      "subtitle": "Pengalaman Kopi Premium",
-      "cta": "Jelajahi Kopi"
-    },
-    "scroll": "Gulir",
-    "stories": {
-      "title": "Cerita",
-      "readMore": "Baca Selengkapnya",
-      "viewAll": "Lihat Semua Cerita"
-    },
-    "cta": {
-      "title": "Rasakan Perbedaannya",
-      "subtitle": "Bergabunglah dengan ribuan pecinta kopi yang mempercayai MOTIV untuk ritual harian mereka",
-      "button": "Belanja Koleksi"
-    },
-    "footer": {
-      "brand": "MOTIV",
-      "tagline": "Pengalaman Kopi Premium",
-      "copyright": "2025 MOTIV. Hak Cipta Dilindungi."
-    }
+  "common": {
+    "search": "Cari",
+    "filter": "Filter",
+    "reset": "Reset",
+    "loading": "Memuat...",
+    "admin": "Admin",
+    "b2b": "B2B",
+    "guest": "Tamu"
   },
   "nav": {
     "home": "Beranda",
     "products": "Produk",
     "stories": "Cerita",
     "cart": "Keranjang",
-    "profile": "Akun",
-    "addresses": "Alamat",
+    "profile": "Profil",
     "login": "Masuk",
-    "register": "Daftar",
     "logout": "Keluar",
     "signingOut": "Keluar...",
-    "admin": "Dashboard Admin",
-    "becomeB2B": "Jadi Mitra B2B"
+    "addresses": "Alamat",
+    "becomeB2B": "Daftar B2B",
+    "b2bPartnerDiscount": "Partner B2B - Diskon {discount}%",
+    "roleAdministrator": "Administrator"
   },
   "products": {
-    "title": "Koleksi Kami",
-    "subtitle": "Temukan pilihan kopi premium yang dikurasi dengan hati-hati",
-    "productCount": "Produk",
+    "title": "Koleksi Kopi",
+    "subtitle": "Biji kopi pilihan dari petani lokal terbaik",
     "categories": "Kategori",
-    "allCategories": "Semua Kategori",
-    "sortBy": "Urutkan",
-    "priceAsc": "Harga: Rendah ke Tinggi",
-    "priceDesc": "Harga: Tinggi ke Rendah",
-    "newest": "Terbaru",
-    "addToCart": "Tambah ke Keranjang",
-    "outOfStock": "Stok Habis",
-    "variants": "Varian",
-    "description": "Deskripsi",
-    "features": "Fitur",
-    "noProducts": "Produk Tidak Ditemukan",
-    "noProductsMessage": "Coba ubah filter atau kata kunci pencarian Anda",
-    "loading": "Memuat produk..."
-  },
-  "cart": {
-    "title": "Keranjang Belanja",
-    "empty": "Keranjang Belanja Kosong",
-    "emptyMessage": "Yuk, mulai belanja dan tambahkan produk favorit Anda!",
-    "continueShopping": "Mulai Belanja",
-    "item": "Item",
-    "quantity": "Jumlah",
-    "price": "Harga",
-    "total": "Total",
-    "subtotal": "Subtotal",
-    "proceedToCheckout": "Lanjut ke Pembayaran",
-    "remove": "Hapus",
-    "update": "Perbarui"
-  },
-  "checkout": {
-    "title": "Pembayaran",
-    "shippingAddress": "Alamat Pengiriman",
-    "shippingMethod": "Metode Pengiriman",
-    "payment": "Pembayaran",
-    "orderSummary": "Ringkasan Pesanan",
-    "placeOrder": "Buat Pesanan",
-    "fullName": "Nama Lengkap",
-    "phone": "Nomor Telepon",
-    "address": "Alamat",
-    "city": "Kota",
-    "province": "Provinsi",
-    "postalCode": "Kode Pos",
-    "standard": "Pengiriman Standar",
-    "express": "Pengiriman Express",
-    "cardNumber": "Nomor Kartu",
-    "expiryDate": "Tanggal Kadaluarsa",
-    "cvv": "CVV"
-  },
-  "auth": {
-    "tagline": "Roaster Kopi Premium",
-    "welcomeBack": "Selamat Datang Kembali",
-    "newCustomer": "Pelanggan Baru?",
-    "createAccount": "Buat Akun",
-    "loginTitle": "Masuk ke Akun Anda",
-    "registerTitle": "Buat Akun Baru",
-    "email": "Alamat Email",
-    "password": "Kata Sandi",
-    "confirmPassword": "Konfirmasi Kata Sandi",
-    "name": "Nama Lengkap",
-    "loginButton": "Masuk",
-    "registerButton": "Daftar",
-    "forgotPassword": "Lupa Kata Sandi?",
-    "noAccount": "Belum punya akun?",
-    "haveAccount": "Sudah punya akun?",
-    "loginHere": "Masuk di sini",
-    "registerHere": "Daftar di sini",
-    "invalidCredentials": "Email atau password salah",
-    "passwordMismatch": "Password tidak cocok",
-    "passwordTooShort": "Password minimal 6 karakter",
-    "registerSuccess": "Registrasi berhasil! Mengarahkan ke halaman login...",
-    "registering": "Mendaftar...",
-    "passwordPlaceholder": "Minimal 6 karakter",
-    "confirmPasswordPlaceholder": "Ulangi password"
-  },
-  "profile": {
-    "title": "Profil Saya",
-    "personalInfo": "Informasi Pribadi",
-    "orderHistory": "Riwayat Pesanan",
-    "addresses": "Alamat Pengiriman",
-    "editProfile": "Edit Profil",
-    "changePassword": "Ubah Kata Sandi",
-    "save": "Simpan Perubahan",
-    "cancel": "Batal"
+    "allCategories": "Semua",
+    "productCount": "Produk Ditemukan",
+    "loadingProducts": "Sedang memuat produk..."
   },
   "admin": {
-    "dashboard": "Dashboard",
+    "dashboard": "Dasbor",
     "products": "Produk",
     "orders": "Pesanan",
-    "customers": "Pelanggan",
-    "stories": "Cerita",
     "vouchers": "Voucher",
-    "b2bRequests": "Permintaan B2B",
-    "stats": {
-      "totalRevenue": "Total Pendapatan",
-      "totalOrders": "Total Pesanan",
-      "totalCustomers": "Total Pelanggan",
-      "totalProducts": "Total Produk"
-    },
-    "addNew": "Tambah Baru",
-    "edit": "Edit",
-    "delete": "Hapus",
-    "view": "Lihat",
-    "approve": "Setuju",
-    "reject": "Tolak"
-  },
-  "common": {
-    "loading": "Memuat...",
-    "error": "Terjadi kesalahan",
-    "success": "Berhasil!",
-    "confirm": "Apakah Anda yakin?",
-    "yes": "Ya",
-    "no": "Tidak",
-    "search": "Cari...",
-    "filter": "Filter",
-    "reset": "Reset",
-    "apply": "Terapkan",
-    "close": "Tutup",
-    "back": "Kembali",
-    "backToHome": "Kembali ke Beranda",
-    "next": "Selanjutnya",
-    "previous": "Sebelumnya",
-    "viewMore": "Lihat Lebih Banyak",
-    "showLess": "Tampilkan Lebih Sedikit"
+    "b2bRequests": "Request B2B"
   }
 }
