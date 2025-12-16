@@ -2,25 +2,69 @@
   "common": {
     "search": "Cari",
     "filter": "Filter",
-    "reset": "Reset",
+    "reset": "Atur Ulang",
     "loading": "Memuat...",
     "admin": "Admin",
-    "b2b": "B2B",
-    "guest": "Tamu"
+    "b2b": "Mitra B2B",
+    "guest": "Tamu",
+    "backToHome": "Kembali ke Beranda"
+  },
+  "auth": {
+    "tagline": "Rasakan pengalaman kopi terbaik",
+    "welcomeBack": "Selamat Datang Kembali",
+    "newCustomer": "Pelanggan Baru?",
+    "createAccount": "Buat Akun",
+    "registerTitle": "Daftar Akun Baru",
+    "haveAccount": "Sudah punya akun?",
+    "loginHere": "Masuk di sini"
   },
   "nav": {
     "home": "Beranda",
     "products": "Produk",
-    "stories": "Cerita",
+    "stories": "Cerita Kami",
     "cart": "Keranjang",
     "profile": "Profil",
     "login": "Masuk",
     "logout": "Keluar",
-    "signingOut": "Keluar...",
-    "addresses": "Alamat",
-    "becomeB2B": "Daftar B2B",
-    "b2bPartnerDiscount": "Partner B2B - Diskon {discount}%",
+    "signingOut": "Sedang Keluar...",
+    "addresses": "Buku Alamat",
+    "becomeB2B": "Daftar Mitra B2B",
+    "b2bPartnerDiscount": "Mitra B2B - Diskon {discount}%",
     "roleAdministrator": "Administrator"
+  },
+  "landing": {
+    "hero": {
+      "subtitle": "KOPI SPESIALITAS DARI INDONESIA",
+      "cta": "BELANJA SEKARANG"
+    },
+    "stories": {
+      "title": "Cerita Kami",
+      "readMore": "Baca Selengkapnya",
+      "viewAll": "LIHAT SEMUA CERITA"
+    },
+    "cta": {
+      "title": "Siap Menyeduh?",
+      "subtitle": "Temukan biji kopi favoritmu sekarang dan rasakan bedanya.",
+      "button": "LIHAT PRODUK"
+    },
+    "footer": {
+      "brand": "MOTIV",
+      "tagline": "KOPI & CERITA",
+      "copyright": "© 2025 MOTIV COFFEE. HAK CIPTA DILINDUNGI."
+    }
+  },
+  "cart": {
+    "summaryTitle": "Ringkasan Belanja",
+    "totalItems": "Total Item",
+    "subtotal": "Subtotal",
+    "shipping": "Ongkos Kirim",
+    "shippingCalc": "Dihitung di checkout",
+    "total": "Total",
+    "checkout": "Lanjut ke Checkout",
+    "processing": "Memproses...",
+    "continue": "Lanjut Belanja",
+    "taxIncluded": "Harga sudah termasuk PPN 11%",
+    "b2bMessage": "✨ Anda mendapatkan harga khusus B2B!"
   },
   "products": {
     "title": "Koleksi Kopi",
@@ -28,13 +72,80 @@
     "categories": "Kategori",
     "allCategories": "Semua",
     "productCount": "Produk Ditemukan",
-    "loadingProducts": "Sedang memuat produk..."
+    "loadingProducts": "Sedang memuat data produk...",
+    "categoryList": {
+      "arabica": "Arabika",
+      "robusta": "Robusta",
+      "blend": "Campuran",
+      "instant": "Instan"
+    }
   },
   "admin": {
-    "dashboard": "Dasbor",
-    "products": "Produk",
-    "orders": "Pesanan",
+    "dashboard": "Dasbor Utama",
+    "products": "Kelola Produk",
+    "orders": "Pesanan Masuk",
     "vouchers": "Voucher",
-    "b2bRequests": "Request B2B"
+    "b2bRequests": "Permintaan B2B",
+    "sidebar": {
+      "dashboard": "Dasbor",
+      "products": "Produk",
+      "categories": "Kategori",
+      "orders": "Pesanan",
+      "customers": "Pelanggan",
+      "vouchers": "Voucher",
+      "stories": "Cerita",
+      "b2bRequests": "Request B2B",
+      "toWebsite": "Ke Website",
+      "logout": "Keluar"
+    },
+    "productPage": {
+      "title": "Manajemen Produk",
+      "subtitle": "Kelola produk kopi Anda - Total: {count} produk",
+      "addProduct": "Tambah Produk",
+      "searchLabel": "Cari Produk",
+      "searchPlaceholder": "Nama produk...",
+      "searchButton": "Cari",
+      "categoryLabel": "Kategori",
+      "allCategories": "Semua Kategori",
+      "noProducts": "Tidak ada produk",
+      "variantsAvailable": "Varian Tersedia",
+      "variantsMore": "varian lainnya",
+      "lowStock": "Beberapa varian stok menipis",
+      "edit": "Edit",
+      "delete": "Hapus",
+      "deleteModalTitle": "Hapus Produk?",
+      "deleteModalDesc": "Apakah Anda yakin ingin menghapus produk",
+      "deleteWarning": "Tindakan ini tidak dapat dibatalkan!",
+      "cancel": "Batal",
+      "confirmDelete": "Ya, Hapus",
+      "deleting": "Menghapus..."
+    },
+    "categories": {
+      "title": "Manajemen Kategori",
+      "subtitle": "Ringkasan kategori produk kopi",
+      "infoTitle": "Informasi Sistem Kategori",
+      "infoDesc": "Kategori ini digunakan untuk mengelompokkan jenis kopi secara otomatis.",
+      "product": "Produk",
+      "totalStock": "Total Stok",
+      "avgPrice": "Harga Rata-rata",
+      "detailsTitle": "Daftar Produk per Kategori",
+      "available": "produk tersedia",
+      "empty": "Belum ada produk dalam kategori ini",
+      "types": {
+        "arabica": {
+          "label": "Arabika",
+          "desc": "Kopi premium dengan cita rasa kompleks"
+        },
+        "robusta": {
+          "label": "Robusta",
+          "desc": "Kopi dengan rasa kuat dan pahit"
+        },
+        "blend": {
+          "label": "Campuran",
+          "desc": "Perpaduan harmonis biji kopi"
+        },
+        "instant": { "label": "Instan", "desc": "Kopi siap seduh yang praktis" }
+      }
+    }
   }
 }

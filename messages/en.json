@@ -5,36 +5,147 @@
     "reset": "Reset",
     "loading": "Loading...",
     "admin": "Admin",
-    "b2b": "B2B",
-    "guest": "Guest"
+    "b2b": "B2B Partner",
+    "guest": "Guest",
+    "backToHome": "Back to Home"
+  },
+  "auth": {
+    "tagline": "Experience coffee at its finest",
+    "welcomeBack": "Welcome Back",
+    "newCustomer": "New Customer?",
+    "createAccount": "Create Account",
+    "registerTitle": "Register New Account",
+    "haveAccount": "Already have an account?",
+    "loginHere": "Login here"
   },
   "nav": {
     "home": "Home",
     "products": "Products",
-    "stories": "Stories",
+    "stories": "Our Stories",
     "cart": "Cart",
     "profile": "Profile",
     "login": "Login",
     "logout": "Logout",
     "signingOut": "Signing out...",
-    "addresses": "Addresses",
+    "addresses": "Address Book",
     "becomeB2B": "Join B2B",
-    "b2bPartnerDiscount": "B2B Partner - {discount}% Discount",
+    "b2bPartnerDiscount": "B2B Partner - {discount}% Off",
     "roleAdministrator": "Administrator"
+  },
+  "landing": {
+    "hero": {
+      "subtitle": "SPECIALTY COFFEE FROM INDONESIA",
+      "cta": "SHOP NOW"
+    },
+    "stories": {
+      "title": "Our Stories",
+      "readMore": "Read More",
+      "viewAll": "VIEW ALL STORIES"
+    },
+    "cta": {
+      "title": "Ready to Brew?",
+      "subtitle": "Find your favorite beans now and taste the difference.",
+      "button": "VIEW PRODUCTS"
+    },
+    "footer": {
+      "brand": "MOTIV",
+      "tagline": "COFFEE & STORIES",
+      "copyright": "© 2025 MOTIV COFFEE. ALL RIGHTS RESERVED."
+    }
+  },
+  "cart": {
+    "summaryTitle": "Order Summary",
+    "totalItems": "Total Items",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping Cost",
+    "shippingCalc": "Calculated at checkout",
+    "total": "Total",
+    "checkout": "Proceed to Checkout",
+    "processing": "Processing...",
+    "continue": "Continue Shopping",
+    "taxIncluded": "Price includes 11% VAT",
+    "b2bMessage": "✨ You get special B2B pricing!"
   },
   "products": {
     "title": "Coffee Collection",
-    "subtitle": "Curated beans from the best local farmers",
+    "subtitle": "Premium beans sourced from the best local farmers",
     "categories": "Categories",
     "allCategories": "All",
     "productCount": "Products Found",
-    "loadingProducts": "Loading products..."
+    "loadingProducts": "Loading products...",
+    "categoryList": {
+      "arabica": "Arabica",
+      "robusta": "Robusta",
+      "blend": "Blend",
+      "instant": "Instant"
+    }
   },
   "admin": {
     "dashboard": "Dashboard",
-    "products": "Products",
-    "orders": "Orders",
+    "products": "Manage Products",
+    "orders": "Incoming Orders",
     "vouchers": "Vouchers",
-    "b2bRequests": "B2B Requests"
+    "b2bRequests": "B2B Requests",
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "categories": "Categories",
+      "orders": "Orders",
+      "customers": "Customers",
+      "vouchers": "Vouchers",
+      "stories": "Stories",
+      "b2bRequests": "B2B Requests",
+      "toWebsite": "To Website",
+      "logout": "Logout"
+    },
+    "productPage": {
+      "title": "Product Management",
+      "subtitle": "Manage your coffee products - Total: {count} products",
+      "addProduct": "Add Product",
+      "searchLabel": "Search Product",
+      "searchPlaceholder": "Product name...",
+      "searchButton": "Search",
+      "categoryLabel": "Category",
+      "allCategories": "All Categories",
+      "noProducts": "No products found",
+      "variantsAvailable": "Variants Available",
+      "variantsMore": "more variants",
+      "lowStock": "Some variants are running low",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteModalTitle": "Delete Product?",
+      "deleteModalDesc": "Are you sure you want to delete",
+      "deleteWarning": "This action cannot be undone!",
+      "cancel": "Cancel",
+      "confirmDelete": "Yes, Delete",
+      "deleting": "Deleting..."
+    },
+    "categories": {
+      "title": "Category Management",
+      "subtitle": "Overview of coffee product categories",
+      "infoTitle": "Category System Info",
+      "infoDesc": "These categories are used to group coffee types automatically.",
+      "product": "Product",
+      "totalStock": "Total Stock",
+      "avgPrice": "Average Price",
+      "detailsTitle": "Products per Category",
+      "available": "products available",
+      "empty": "No products in this category yet",
+      "types": {
+        "arabica": {
+          "label": "Arabica",
+          "desc": "Premium coffee with complex flavors"
+        },
+        "robusta": {
+          "label": "Robusta",
+          "desc": "Strong coffee with bold taste"
+        },
+        "blend": { "label": "Blend", "desc": "A harmonious mix of beans" },
+        "instant": {
+          "label": "Instant",
+          "desc": "Practical ready-to-brew coffee"
+        }
+      }
+    }
   }
 }

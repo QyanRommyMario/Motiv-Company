@@ -5,8 +5,12 @@ import AdminLayout from "@/components/layout/AdminLayout";
 import Loading from "@/components/ui/Loading";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function AdminProductsPage() {
+  const t = useTranslations("admin.productPage");
+  const tCommon = useTranslations("common");
+  const tCats = useTranslations("products.categoryList"); // Untuk terjemahan dropdown
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -56,17 +60,15 @@ export default function AdminProductsPage() {
       );
 
       if (response.ok) {
-        alert("Produk berhasil dihapus!");
         fetchProducts();
         setShowDeleteModal(false);
         setSelectedProduct(null);
       } else {
         const data = await response.json();
-        alert(data.message || "Gagal menghapus produk");
+        alert(data.message || "Error");
       }
     } catch (error) {
       console.error("Error deleting product:", error);
-      alert("Terjadi kesalahan");
     } finally {
       setDeleting(false);
     }
@@ -78,17 +80,25 @@ export default function AdminProductsPage() {
     return product.name.toLowerCase().includes(searchLower);
   });
 
+  // Helper untuk menampilkan kategori di kartu produk
+  const getCategoryLabel = (catValue) => {
+    if (!catValue) return "";
+    try {
+      return tCats(catValue.toLowerCase());
+    } catch {
+      return catValue;
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-[#1A1A1A]">
-              Manajemen Produk
-            </h1>
+            <h1 className="text-3xl font-bold text-[#1A1A1A]">{t("title")}</h1>
             <p className="text-[#6B7280] mt-2">
-              Kelola produk kopi Anda - Total: {filteredProducts.length} produk
+              {t("subtitle", { count: filteredProducts.length })}
             </p>
           </div>
           <Link
@@ -108,7 +118,7 @@ export default function AdminProductsPage() {
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            Tambah Produk
+            {t("addProduct")}
           </Link>
         </div>
 
@@ -118,7 +128,7 @@ export default function AdminProductsPage() {
             {/* Search */}
             <div>
               <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
-                Cari Produk
+                {t("searchLabel")}
               </label>
               <div className="flex gap-2">
                 <input
@@ -126,14 +136,14 @@ export default function AdminProductsPage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                  placeholder="Nama produk..."
+                  placeholder={t("searchPlaceholder")}
                   className="flex-1 px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-[#1A1A1A] placeholder:text-[#9CA3AF]"
                 />
                 <button
                   onClick={handleSearch}
                   className="px-6 py-2 bg-[#1A1A1A] text-white hover:bg-black transition-colors font-medium"
                 >
-                  Cari
+                  {t("searchButton")}
                 </button>
               </div>
             </div>
@@ -141,18 +151,18 @@ export default function AdminProductsPage() {
             {/* Category Filter */}
             <div>
               <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
-                Kategori
+                {t("categoryLabel")}
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-[#1A1A1A] font-medium bg-white"
               >
-                <option value="">Semua Kategori</option>
-                <option value="ARABICA">Arabica</option>
-                <option value="ROBUSTA">Robusta</option>
-                <option value="BLEND">Blend</option>
-                <option value="INSTANT">Instant</option>
+                <option value="">{t("allCategories")}</option>
+                <option value="ARABICA">{tCats("arabica")}</option>
+                <option value="ROBUSTA">{tCats("robusta")}</option>
+                <option value="BLEND">{tCats("blend")}</option>
+                <option value="INSTANT">{tCats("instant")}</option>
               </select>
             </div>
           </div>
@@ -178,7 +188,7 @@ export default function AdminProductsPage() {
                 d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
               />
             </svg>
-            <p className="text-[#6B7280] font-medium">Tidak ada produk</p>
+            <p className="text-[#6B7280] font-medium">{t("noProducts")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -207,11 +217,11 @@ export default function AdminProductsPage() {
                     </div>
                   )}
                   <span className="absolute top-3 right-3 px-3 py-1.5 bg-[#1A1A1A] text-white text-xs font-bold uppercase tracking-wider">
-                    {product.category}
+                    {getCategoryLabel(product.category)}
                   </span>
                 </div>
 
-                {/* Content - Flex grow to push buttons to bottom */}
+                {/* Content */}
                 <div className="p-5 flex flex-col flex-grow">
                   <h3 className="font-bold text-lg text-[#1A1A1A] mb-2">
                     {product.name}
@@ -223,7 +233,7 @@ export default function AdminProductsPage() {
                   {/* Variants */}
                   <div className="mb-4 flex-grow">
                     <p className="text-xs font-bold text-[#1A1A1A] mb-2 uppercase tracking-wider">
-                      {product.variants?.length || 0} Varian Tersedia
+                      {product.variants?.length || 0} {t("variantsAvailable")}
                     </p>
                     <div className="space-y-1.5">
                       {product.variants?.slice(0, 2).map((variant) => (
@@ -241,7 +251,7 @@ export default function AdminProductsPage() {
                       ))}
                       {product.variants?.length > 2 && (
                         <p className="text-xs text-[#6B7280] font-medium pl-3">
-                          +{product.variants.length - 2} varian lainnya
+                          +{product.variants.length - 2} {t("variantsMore")}
                         </p>
                       )}
                     </div>
@@ -261,11 +271,11 @@ export default function AdminProductsPage() {
                           clipRule="evenodd"
                         />
                       </svg>
-                      Beberapa varian stok menipis
+                      {t("lowStock")}
                     </div>
                   )}
 
-                  {/* Actions - Fixed positioning */}
+                  {/* Actions */}
                   <div className="flex gap-2 mt-4 pt-4 border-t border-[#E5E7EB]">
                     <Link
                       href={`/admin/products/${product.id}/edit`}
@@ -284,7 +294,7 @@ export default function AdminProductsPage() {
                           d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                         />
                       </svg>
-                      Edit
+                      {t("edit")}
                     </Link>
                     <button
                       onClick={() => {
@@ -306,7 +316,7 @@ export default function AdminProductsPage() {
                           d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                         />
                       </svg>
-                      Hapus
+                      {t("delete")}
                     </button>
                   </div>
                 </div>
@@ -334,17 +344,17 @@ export default function AdminProductsPage() {
                   />
                 </svg>
                 <h3 className="text-2xl font-bold text-[#1A1A1A] mb-3">
-                  Hapus Produk?
+                  {t("deleteModalTitle")}
                 </h3>
                 <p className="text-[#6B7280] mb-2">
-                  Apakah Anda yakin ingin menghapus produk{" "}
+                  {t("deleteModalDesc")}{" "}
                   <strong className="text-[#1A1A1A]">
                     {selectedProduct.name}
                   </strong>
                   ?
                 </p>
                 <p className="text-sm text-[#DC2626] font-semibold mt-3 bg-[#FEE2E2] py-2 px-4 border border-[#DC2626]">
-                  Tindakan ini tidak dapat dibatalkan!
+                  {t("deleteWarning")}
                 </p>
               </div>
 
@@ -357,14 +367,14 @@ export default function AdminProductsPage() {
                   className="flex-1 px-6 py-3 border-2 border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all font-semibold"
                   disabled={deleting}
                 >
-                  Batal
+                  {t("cancel")}
                 </button>
                 <button
                   onClick={handleDelete}
                   className="flex-1 px-6 py-3 bg-[#DC2626] text-white hover:bg-[#B91C1C] transition-colors disabled:opacity-50 font-semibold"
                   disabled={deleting}
                 >
-                  {deleting ? "Menghapus..." : "Ya, Hapus"}
+                  {deleting ? t("deleting") : t("confirmDelete")}
                 </button>
               </div>
             </div>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 // Professional SVG Icons
 const icons = {
@@ -21,7 +22,7 @@ const icons = {
       />
     </svg>
   ),
-  produk: (
+  products: (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -36,7 +37,7 @@ const icons = {
       />
     </svg>
   ),
-  kategori: (
+  categories: (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -51,7 +52,7 @@ const icons = {
       />
     </svg>
   ),
-  pesanan: (
+  orders: (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -66,7 +67,7 @@ const icons = {
       />
     </svg>
   ),
-  pelanggan: (
+  customers: (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -81,7 +82,7 @@ const icons = {
       />
     </svg>
   ),
-  voucher: (
+  vouchers: (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -96,7 +97,7 @@ const icons = {
       />
     </svg>
   ),
-  b2b: (
+  b2bRequests: (
     <svg
       className="w-5 h-5"
       fill="none"
@@ -159,18 +160,19 @@ const icons = {
 };
 
 const navigation = [
-  { name: "Dashboard", href: "/admin", icon: "dashboard" },
-  { name: "Produk", href: "/admin/products", icon: "produk" },
-  { name: "Kategori", href: "/admin/categories", icon: "kategori" },
-  { name: "Pesanan", href: "/admin/orders", icon: "pesanan" },
-  { name: "Pelanggan", href: "/admin/customers", icon: "pelanggan" },
-  { name: "Voucher", href: "/admin/vouchers", icon: "voucher" },
-  { name: "Stories", href: "/admin/stories", icon: "stories" },
-  { name: "B2B Requests", href: "/admin/b2b", icon: "b2b" },
+  { key: "dashboard", href: "/admin", icon: "dashboard" },
+  { key: "products", href: "/admin/products", icon: "products" },
+  { key: "categories", href: "/admin/categories", icon: "categories" },
+  { key: "orders", href: "/admin/orders", icon: "orders" },
+  { key: "customers", href: "/admin/customers", icon: "customers" },
+  { key: "vouchers", href: "/admin/vouchers", icon: "vouchers" },
+  { key: "stories", href: "/admin/stories", icon: "stories" },
+  { key: "b2bRequests", href: "/admin/b2b", icon: "b2bRequests" },
 ];
 
 export default function AdminSidebar({ user }) {
   const pathname = usePathname();
+  const t = useTranslations("admin.sidebar");
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/login" });
@@ -219,7 +221,6 @@ export default function AdminSidebar({ user }) {
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {navigation.map((item) => {
-          // Fix active state logic for exact and nested paths
           const isActive =
             item.href === "/admin"
               ? pathname === "/admin"
@@ -227,7 +228,7 @@ export default function AdminSidebar({ user }) {
 
           return (
             <Link
-              key={item.name}
+              key={item.key}
               href={item.href}
               className={`
                 flex items-center gap-3 px-4 py-3 transition-all duration-200
@@ -242,7 +243,7 @@ export default function AdminSidebar({ user }) {
                 {icons[item.icon]}
               </span>
               <span className="font-medium text-sm tracking-wide">
-                {item.name}
+                {t(item.key)}
               </span>
             </Link>
           );
@@ -256,14 +257,18 @@ export default function AdminSidebar({ user }) {
           className="flex items-center gap-3 px-4 py-3 text-white/70 hover:bg-white/5 hover:text-white transition-all duration-200"
         >
           <span className="text-white/70">{icons.home}</span>
-          <span className="font-medium text-sm tracking-wide">Ke Website</span>
+          <span className="font-medium text-sm tracking-wide">
+            {t("toWebsite")}
+          </span>
         </Link>
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3 text-white/70 hover:bg-white/5 hover:text-white transition-all duration-200"
         >
           <span className="text-white/70">{icons.logout}</span>
-          <span className="font-medium text-sm tracking-wide">Logout</span>
+          <span className="font-medium text-sm tracking-wide">
+            {t("logout")}
+          </span>
         </button>
       </div>
     </div>
