@@ -63,7 +63,7 @@ function ProductsContent() {
           <p className="text-[#6B7280] text-base md:text-lg">{t("subtitle")}</p>
         </div>
 
-        {/* Filter */}
+        {/* Filter digabungkan di sini, tidak hardcode */}
         <ProductFilter onFilterChange={handleFilterChange} />
 
         {/* Results count */}

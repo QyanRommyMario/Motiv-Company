@@ -15,6 +15,7 @@ export default function ProductFilter({ onFilterChange }) {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Mengambil kategori dari database/API agar tidak hardcode
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -92,6 +93,8 @@ export default function ProductFilter({ onFilterChange }) {
           >
             {t("allCategories")}
           </button>
+
+          {/* Rendering Kategori secara Dinamis */}
           {categories.map((category) => (
             <button
               key={category}

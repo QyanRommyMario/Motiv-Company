@@ -46,7 +46,6 @@ export default function Navbar() {
   const handleSignOut = async () => {
     try {
       setIsSigningOut(true);
-      // Use absolute URL to prevent port issues
       const baseUrl = window.location.origin;
       await signOut({
         callbackUrl: `${baseUrl}/`,
@@ -54,7 +53,6 @@ export default function Navbar() {
       });
     } catch (error) {
       console.error("Sign out error:", error);
-      // Force redirect on error
       window.location.href = "/";
     } finally {
       setIsSigningOut(false);
@@ -265,14 +263,12 @@ export default function Navbar() {
 
           {/* Right Side - Auth & Cart */}
           <div className="hidden md:flex items-center space-x-6">
-            {/* Language Switcher */}
             <LanguageSwitcher />
 
             {status === "loading" ? (
               <div className="w-20 h-6 bg-gray-200 animate-pulse rounded"></div>
             ) : session ? (
               <>
-                {/* Cart Icon - Only for B2C and B2B, not for Admin */}
                 {(session.user.role === "B2C" ||
                   session.user.role === "B2B") && (
                   <Link
@@ -300,7 +296,6 @@ export default function Navbar() {
                   </Link>
                 )}
 
-                {/* User Dropdown */}
                 <div className="relative group">
                   <button className="flex items-center space-x-2 text-sm uppercase tracking-widest font-medium text-[#6B7280] hover:text-[#1A1A1A] transition-colors">
                     {session?.user?.role === "ADMIN" && (
@@ -330,7 +325,6 @@ export default function Navbar() {
                   </button>
                   <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     <div className="py-2">
-                      {/* User Info */}
                       <div className="px-4 py-3 text-xs text-gray-500 border-b">
                         <div className="font-medium text-[#1A1A1A]">
                           {session?.user?.name || "User"}
@@ -349,8 +343,6 @@ export default function Navbar() {
                           </span>
                         )}
                       </div>
-
-                      {/* Sign Out Only */}
                       <button
                         onClick={handleSignOut}
                         disabled={isSigningOut}
@@ -407,13 +399,11 @@ export default function Navbar() {
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200">
           <div className="px-6 py-4 space-y-4">
-            {/* Language Switcher - Mobile */}
             <div className="pb-4 border-b border-gray-200">
               <LanguageSwitcher />
             </div>
 
             {session?.user?.role === "ADMIN" ? (
-              // Admin Navigation
               <>
                 <Link
                   href="/admin"
@@ -452,7 +442,6 @@ export default function Navbar() {
                 </Link>
               </>
             ) : session?.user?.role === "B2B" ? (
-              // B2B Navigation
               <>
                 <Link
                   href="/products"
@@ -491,7 +480,6 @@ export default function Navbar() {
                 </Link>
               </>
             ) : session?.user?.role === "B2C" ? (
-              // B2C Navigation
               <>
                 <Link
                   href="/products"
@@ -537,7 +525,6 @@ export default function Navbar() {
                 </Link>
               </>
             ) : (
-              // Guest Navigation
               <Link
                 href="/products"
                 className="block text-sm uppercase tracking-widest font-medium text-gray-700 hover:text-[#1A1A1A] transition-colors"
@@ -547,7 +534,6 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* Auth Actions */}
             {session ? (
               <button
                 onClick={() => {
