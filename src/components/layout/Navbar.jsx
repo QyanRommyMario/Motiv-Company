@@ -11,13 +11,23 @@ export default function Navbar() {
   const t = useTranslations("nav");
   const { data: session, status } = useSession();
   const [cartCount, setCartCount] = useState(0);
+  const [scrolled, setScrolled] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const pathname = usePathname();
 
+  const isGuestLanding = pathname === "/" && !session;
+
   useEffect(() => {
-    if (session && session.user.role !== "ADMIN") {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    if (session) {
       fetchCartCount();
     }
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [session]);
 
   const fetchCartCount = async () => {
@@ -42,69 +52,94 @@ export default function Navbar() {
       await signOut({ callbackUrl: "/", redirect: true });
     } catch (error) {
       console.error("Sign out error:", error);
-      window.location.href = "/";
     }
   };
 
-  const isActive = (path) => pathname === path;
+  const isActive = (path) => pathname === path || pathname?.startsWith(path);
+
+  const navBg = isGuestLanding
+    ? scrolled
+      ? "bg-black/90 backdrop-blur-md border-white/10"
+      : "bg-transparent border-transparent"
+    : "bg-[#FDFCFA]/95 backdrop-blur-sm border-[#E5E7EB]";
+
+  const textColor =
+    isGuestLanding && !scrolled ? "text-white" : "text-[#1A1A1A]";
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FDFCFA] border-b border-[#E5E7EB] backdrop-blur-sm bg-opacity-95">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 border-b ${navBg}`}
+    >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo */}
           <Link href="/" className="flex items-center group">
-            <span className="text-3xl font-display font-bold tracking-tight text-[#1A1A1A] group-hover:opacity-70 transition-opacity">
+            <span
+              className={`text-3xl font-display font-bold tracking-tight transition-colors duration-300 ${textColor}`}
+            >
               MOTIV
             </span>
           </Link>
 
-          {/* Center Nav */}
           <div className="hidden md:flex items-center space-x-10">
             <Link
               href="/products"
-              className={`text-sm uppercase tracking-widest font-medium ${
+              className={`text-sm uppercase tracking-widest font-medium transition-all ${
                 isActive("/products")
-                  ? "text-[#1A1A1A]"
-                  : "text-[#6B7280] hover:text-[#1A1A1A]"
-              }`}
+                  ? "opacity-100 font-bold"
+                  : "opacity-70 hover:opacity-100"
+              } ${textColor}`}
             >
               {t("products")}
             </Link>
             <Link
               href="/stories"
-              className={`text-sm uppercase tracking-widest font-medium ${
+              className={`text-sm uppercase tracking-widest font-medium transition-all ${
                 isActive("/stories")
-                  ? "text-[#1A1A1A]"
-                  : "text-[#6B7280] hover:text-[#1A1A1A]"
-              }`}
+                  ? "opacity-100 font-bold"
+                  : "opacity-70 hover:opacity-100"
+              } ${textColor}`}
             >
               {t("stories")}
             </Link>
+            <Link
+              href="/vouchers"
+              className={`text-sm uppercase tracking-widest font-medium transition-all ${
+                isActive("/vouchers")
+                  ? "opacity-100 font-bold"
+                  : "opacity-70 hover:opacity-100"
+              } ${textColor}`}
+            >
+              Vouchers
+            </Link>
           </div>
 
-          {/* Right Nav */}
           <div className="hidden md:flex items-center space-x-6">
-            <LanguageSwitcher />
+            <LanguageSwitcher
+              variant={isGuestLanding && !scrolled ? "dark" : "light"}
+            />
 
-            {/* Cart Icon (Hanya untuk non-admin) */}
-            {session?.user?.role !== "ADMIN" && (
-              <Link href="/cart" className="relative p-2">
-                <span className="text-sm uppercase tracking-widest font-medium text-[#6B7280] hover:text-[#1A1A1A]">
-                  {t("cart")} ({cartCount})
-                </span>
+            {session && session.user.role !== "ADMIN" && (
+              <Link
+                href="/cart"
+                className={`relative p-2 text-sm uppercase tracking-widest font-medium transition-colors ${textColor} hover:opacity-70`}
+              >
+                {t("cart")}
+                {cartCount > 0 && (
+                  <span className="ml-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full min-w-[18px] text-center inline-block">
+                    {cartCount}
+                  </span>
+                )}
               </Link>
             )}
 
             {status === "loading" ? (
-              <div className="w-20 h-6 bg-gray-200 animate-pulse rounded"></div>
+              <div className="w-16 h-6 bg-gray-200/20 animate-pulse rounded"></div>
             ) : session ? (
-              /* Profile Dropdown */
               <div className="relative group">
-                <button className="flex items-center space-x-1 text-sm uppercase tracking-widest font-medium text-[#1A1A1A] py-2">
-                  <span>
-                    {session.user.name?.split(" ")[0] || t("profile")}
-                  </span>
+                <button
+                  className={`flex items-center space-x-2 text-sm uppercase tracking-widest font-medium transition-colors ${textColor}`}
+                >
+                  <span>{session.user.name?.split(" ")[0] || "Account"}</span>
                   <svg
                     className="w-4 h-4 transition-transform group-hover:rotate-180"
                     fill="none"
@@ -120,53 +155,80 @@ export default function Navbar() {
                   </svg>
                 </button>
 
-                {/* Dropdown Menu */}
-                <div className="absolute right-0 mt-0 w-56 bg-white border border-gray-200 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[60]">
-                  <div className="py-2">
-                    {session.user.role === "ADMIN" ? (
-                      <Link
-                        href="/admin"
-                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100"
-                      >
-                        Dashboard Admin
-                      </Link>
-                    ) : (
-                      <>
-                        <Link
-                          href="/profile"
-                          className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          {t("myProfile")}
-                        </Link>
-                        <Link
-                          href="/profile/orders"
-                          className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          {t("myOrders")}
-                        </Link>
-                      </>
-                    )}
-                    <button
-                      onClick={handleSignOut}
-                      disabled={isSigningOut}
-                      className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                <div className="absolute right-0 mt-0 w-60 bg-white border border-gray-100 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[110] py-2 rounded-sm">
+                  {session.user.role === "ADMIN" ? (
+                    <Link
+                      href="/admin"
+                      className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 font-bold border-b border-gray-50"
                     >
-                      {isSigningOut ? t("signingOut") : t("logout")}
-                    </button>
-                  </div>
+                      ADMIN DASHBOARD
+                    </Link>
+                  ) : (
+                    <>
+                      <div className="px-4 py-2 mb-1 border-b border-gray-50">
+                        <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">
+                          Customer Menu
+                        </p>
+                      </div>
+                      <Link
+                        href="/profile"
+                        className={`block px-4 py-2 text-sm hover:bg-gray-50 ${
+                          isActive("/profile") && pathname === "/profile"
+                            ? "text-black font-bold"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        {t("profile")}
+                      </Link>
+                      <Link
+                        href="/profile/orders"
+                        className={`block px-4 py-2 text-sm hover:bg-gray-50 ${
+                          isActive("/profile/orders")
+                            ? "text-black font-bold"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        {t("myOrders")}
+                      </Link>
+                      <Link
+                        href="/profile/addresses"
+                        className={`block px-4 py-2 text-sm hover:bg-gray-50 ${
+                          isActive("/profile/addresses")
+                            ? "text-black font-bold"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        Saved Addresses
+                      </Link>
+                    </>
+                  )}
+
+                  <div className="h-px bg-gray-100 my-2"></div>
+
+                  <button
+                    onClick={handleSignOut}
+                    disabled={isSigningOut}
+                    className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 font-medium"
+                  >
+                    {isSigningOut ? "Signing out..." : t("logout")}
+                  </button>
                 </div>
               </div>
             ) : (
               <div className="flex items-center space-x-4">
                 <Link
                   href="/login"
-                  className="text-sm uppercase tracking-widest font-medium text-[#1A1A1A]"
+                  className={`text-sm uppercase tracking-widest font-medium transition-opacity hover:opacity-70 ${textColor}`}
                 >
                   {t("login")}
                 </Link>
                 <Link
                   href="/register"
-                  className="text-sm uppercase tracking-widest font-medium bg-[#1A1A1A] text-white px-5 py-2.5 hover:bg-opacity-90 transition-all"
+                  className={`text-sm uppercase tracking-widest font-medium px-6 py-2.5 transition-all ${
+                    isGuestLanding && !scrolled
+                      ? "bg-white text-black hover:bg-gray-200"
+                      : "bg-black text-white hover:bg-gray-800"
+                  }`}
                 >
                   {t("register")}
                 </Link>
