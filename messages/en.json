@@ -7,7 +7,11 @@
     "admin": "Admin",
     "b2b": "B2B Partner",
     "guest": "Guest",
-    "backToHome": "Back to Home"
+    "backToHome": "Back to Home",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit"
   },
   "auth": {
     "tagline": "Experience coffee at its finest",
@@ -16,7 +20,10 @@
     "createAccount": "Create Account",
     "registerTitle": "Register New Account",
     "haveAccount": "Already have an account?",
-    "loginHere": "Login here"
+    "loginHere": "Login here",
+    "loginButton": "Login Now",
+    "registerButton": "Register Now",
+    "forgotPassword": "Forgot Password?"
   },
   "nav": {
     "home": "Home",
@@ -25,6 +32,7 @@
     "cart": "Cart",
     "profile": "Profile",
     "login": "Login",
+    "register": "Register",
     "logout": "Logout",
     "signingOut": "Signing out...",
     "addresses": "Address Book",
@@ -73,6 +81,8 @@
     "allCategories": "All",
     "productCount": "Products Found",
     "loadingProducts": "Loading products...",
+    "viewDetail": "View Detail",
+    "addToCart": "Add to Cart",
     "categoryList": {
       "arabica": "Arabica",
       "robusta": "Robusta",
@@ -119,33 +129,6 @@
       "cancel": "Cancel",
       "confirmDelete": "Yes, Delete",
       "deleting": "Deleting..."
-    },
-    "categories": {
-      "title": "Category Management",
-      "subtitle": "Overview of coffee product categories",
-      "infoTitle": "Category System Info",
-      "infoDesc": "These categories are used to group coffee types automatically.",
-      "product": "Product",
-      "totalStock": "Total Stock",
-      "avgPrice": "Average Price",
-      "detailsTitle": "Products per Category",
-      "available": "products available",
-      "empty": "No products in this category yet",
-      "types": {
-        "arabica": {
-          "label": "Arabica",
-          "desc": "Premium coffee with complex flavors"
-        },
-        "robusta": {
-          "label": "Robusta",
-          "desc": "Strong coffee with bold taste"
-        },
-        "blend": { "label": "Blend", "desc": "A harmonious mix of beans" },
-        "instant": {
-          "label": "Instant",
-          "desc": "Practical ready-to-brew coffee"
-        }
-      }
     }
   }
 }

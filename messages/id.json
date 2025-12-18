@@ -7,7 +7,11 @@
     "admin": "Admin",
     "b2b": "Mitra B2B",
     "guest": "Tamu",
-    "backToHome": "Kembali ke Beranda"
+    "backToHome": "Kembali ke Beranda",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "edit": "Edit"
   },
   "auth": {
     "tagline": "Rasakan pengalaman kopi terbaik",
@@ -16,7 +20,10 @@
     "createAccount": "Buat Akun",
     "registerTitle": "Daftar Akun Baru",
     "haveAccount": "Sudah punya akun?",
-    "loginHere": "Masuk di sini"
+    "loginHere": "Masuk di sini",
+    "loginButton": "Masuk Sekarang",
+    "registerButton": "Daftar Sekarang",
+    "forgotPassword": "Lupa Kata Sandi?"
   },
   "nav": {
     "home": "Beranda",
@@ -25,6 +32,7 @@
     "cart": "Keranjang",
     "profile": "Profil",
     "login": "Masuk",
+    "register": "Daftar",
     "logout": "Keluar",
     "signingOut": "Sedang Keluar...",
     "addresses": "Buku Alamat",
@@ -73,6 +81,8 @@
     "allCategories": "Semua",
     "productCount": "Produk Ditemukan",
     "loadingProducts": "Sedang memuat data produk...",
+    "viewDetail": "Lihat Detail",
+    "addToCart": "Tambah ke Keranjang",
     "categoryList": {
       "arabica": "Arabika",
       "robusta": "Robusta",
@@ -119,33 +129,6 @@
       "cancel": "Batal",
       "confirmDelete": "Ya, Hapus",
       "deleting": "Menghapus..."
-    },
-    "categories": {
-      "title": "Manajemen Kategori",
-      "subtitle": "Ringkasan kategori produk kopi",
-      "infoTitle": "Informasi Sistem Kategori",
-      "infoDesc": "Kategori ini digunakan untuk mengelompokkan jenis kopi secara otomatis.",
-      "product": "Produk",
-      "totalStock": "Total Stok",
-      "avgPrice": "Harga Rata-rata",
-      "detailsTitle": "Daftar Produk per Kategori",
-      "available": "produk tersedia",
-      "empty": "Belum ada produk dalam kategori ini",
-      "types": {
-        "arabica": {
-          "label": "Arabika",
-          "desc": "Kopi premium dengan cita rasa kompleks"
-        },
-        "robusta": {
-          "label": "Robusta",
-          "desc": "Kopi dengan rasa kuat dan pahit"
-        },
-        "blend": {
-          "label": "Campuran",
-          "desc": "Perpaduan harmonis biji kopi"
-        },
-        "instant": { "label": "Instan", "desc": "Kopi siap seduh yang praktis" }
-      }
     }
   }
 }
