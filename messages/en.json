@@ -48,6 +48,7 @@
     "logout": "Logout",
     "signingOut": "Signing out...",
     "addresses": "Address Book",
+    "myOrders": "My Orders",
     "becomeB2B": "Join B2B",
     "b2bPartnerDiscount": "B2B Partner - {discount}% Off",
     "roleAdministrator": "Administrator"
@@ -82,9 +83,11 @@
     "total": "Total",
     "checkout": "Proceed to Checkout",
     "processing": "Processing...",
-    "continue": "Continue Shopping",
+    "continueShopping": "Continue Shopping",
+    "clearCart": "Clear Cart",
     "taxIncluded": "Price includes 11% VAT",
-    "b2bMessage": "✨ You get special B2B pricing!"
+    "b2bMessage": "✨ You get special B2B pricing!",
+    "emptyMessage": "Your shopping cart is empty"
   },
   "products": {
     "title": "Coffee Collection",
@@ -95,6 +98,8 @@
     "loadingProducts": "Loading products...",
     "viewDetail": "View Detail",
     "addToCart": "Add to Cart",
+    "noProducts": "No products found",
+    "noProductsMessage": "Sorry, the products you are looking for are not available.",
     "categoryList": {
       "arabica": "Arabica",
       "robusta": "Robusta",

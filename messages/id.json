@@ -48,6 +48,7 @@
     "logout": "Keluar",
     "signingOut": "Sedang Keluar...",
     "addresses": "Buku Alamat",
+    "myOrders": "Pesanan Saya",
     "becomeB2B": "Daftar Mitra B2B",
     "b2bPartnerDiscount": "Mitra B2B - Diskon {discount}%",
     "roleAdministrator": "Administrator"
@@ -82,9 +83,11 @@
     "total": "Total",
     "checkout": "Lanjut ke Checkout",
     "processing": "Memproses...",
-    "continue": "Lanjut Belanja",
+    "continueShopping": "Lanjut Belanja",
+    "clearCart": "Kosongkan Keranjang",
     "taxIncluded": "Harga sudah termasuk PPN 11%",
-    "b2bMessage": "✨ Anda mendapatkan harga khusus B2B!"
+    "b2bMessage": "✨ Anda mendapatkan harga khusus B2B!",
+    "emptyMessage": "Keranjang belanja Anda kosong"
   },
   "products": {
     "title": "Koleksi Kopi",
@@ -95,6 +98,8 @@
     "loadingProducts": "Sedang memuat data produk...",
     "viewDetail": "Lihat Detail",
     "addToCart": "Tambah ke Keranjang",
+    "noProducts": "Produk tidak ditemukan",
+    "noProductsMessage": "Maaf, produk yang Anda cari belum tersedia.",
     "categoryList": {
       "arabica": "Arabika",
       "robusta": "Robusta",
