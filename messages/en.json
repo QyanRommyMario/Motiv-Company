@@ -87,6 +87,7 @@
     "clearCart": "Clear Cart",
     "taxIncluded": "Price includes 11% VAT",
     "b2bMessage": "✨ You get special B2B pricing!",
+    "empty": "Shopping Cart is Empty",
     "emptyMessage": "Your shopping cart is empty"
   },
   "products": {

@@ -87,6 +87,7 @@
     "clearCart": "Kosongkan Keranjang",
     "taxIncluded": "Harga sudah termasuk PPN 11%",
     "b2bMessage": "✨ Anda mendapatkan harga khusus B2B!",
+    "empty": "Keranjang Belanja Kosong",
     "emptyMessage": "Keranjang belanja Anda kosong"
   },
   "products": {

@@ -69,15 +69,7 @@ export default function CartPage() {
         </div>
 
         {cartItems.length === 0 ? (
-          <div className="text-center py-20">
-            <CartEmpty />
-            <button
-              onClick={() => router.push("/products")}
-              className="mt-8 px-10 py-4 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-all"
-            >
-              {t("continueShopping")}
-            </button>
-          </div>
+          <CartEmpty />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2 space-y-6">
@@ -89,14 +81,6 @@ export default function CartPage() {
                   onRemove={fetchCart}
                 />
               ))}
-              <div className="pt-6">
-                <button
-                  onClick={() => router.push("/products")}
-                  className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
-                >
-                  ← {t("continueShopping")}
-                </button>
-              </div>
             </div>
             <div className="lg:col-span-1">
               <CartSummary

@@ -2,41 +2,39 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 
 export default function ProductCard({ product }) {
   const t = useTranslations("products");
 
-  // Ambil harga terendah dari varian produk di database
-  const variants = product.variants || [];
+  // Ambil harga terendah dari varian produk
+  const variants = product?.variants || [];
   const displayPrice =
     variants.length > 0 ? Math.min(...variants.map((v) => v.price)) : 0;
 
+  // Logika pengambilan gambar (Konsisten dengan ProductDetail.jsx)
   const imageSrc =
-    product.images && product.images.length > 0 ? product.images[0] : null;
+    product?.images && product.images.length > 0 ? product.images[0] : null;
 
   return (
-    <Link href={`/products/${product.id}`}>
+    <Link href={`/products/${product?.id}`}>
       <div className="group bg-white border border-[#E5E7EB] rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl h-full flex flex-col">
         <div className="relative aspect-square bg-[#F9FAFB] overflow-hidden">
           {imageSrc ? (
-            <Image
+            <img
               src={imageSrc}
-              alt={product.name}
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              alt={product?.name || "Product"}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
-              <span className="text-4xl font-display">M</span>
+              <span className="text-4xl font-display">☕</span>
             </div>
           )}
         </div>
 
         <div className="p-4 md:p-6 flex flex-col flex-grow">
           <h3 className="text-sm font-medium text-[#1A1A1A] line-clamp-2 mb-2 min-h-[40px]">
-            {product.name}
+            {product?.name}
           </h3>
           <div className="mt-auto">
             {displayPrice > 0 ? (
