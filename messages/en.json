@@ -11,7 +11,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
-    "edit": "Edit"
+    "edit": "Edit",
+    "error": "System error occurred"
   },
   "auth": {
     "tagline": "Experience coffee at its finest",
@@ -23,7 +24,18 @@
     "loginHere": "Login here",
     "loginButton": "Login Now",
     "registerButton": "Register Now",
-    "forgotPassword": "Forgot Password?"
+    "forgotPassword": "Forgot Password?",
+    "name": "Full Name",
+    "email": "Email Address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPasswordPlaceholder": "Repeat your password",
+    "registering": "Registering...",
+    "registerSuccess": "Registration successful! Redirecting to login...",
+    "loginError": "Invalid email or password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters"
   },
   "nav": {
     "home": "Home",
