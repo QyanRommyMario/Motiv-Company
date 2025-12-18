@@ -4,11 +4,9 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function Navbar() {
-  const t = useTranslations("nav");
   const { data: session, status } = useSession();
   const [cartCount, setCartCount] = useState(0);
   const [scrolled, setScrolled] = useState(false);
@@ -18,14 +16,8 @@ export default function Navbar() {
   const isGuestLanding = pathname === "/" && !session;
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-
-    if (session) {
-      fetchCartCount();
-    }
-
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    if (session) fetchCartCount();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [session]);
@@ -42,17 +34,13 @@ export default function Navbar() {
         setCartCount(total);
       }
     } catch (error) {
-      console.error("Error fetching cart count:", error);
+      console.error(error);
     }
   };
 
   const handleSignOut = async () => {
-    try {
-      setIsSigningOut(true);
-      await signOut({ callbackUrl: "/", redirect: true });
-    } catch (error) {
-      console.error("Sign out error:", error);
-    }
+    setIsSigningOut(true);
+    await signOut({ callbackUrl: "/", redirect: true });
   };
 
   const isActive = (path) => pathname === path || pathname?.startsWith(path);
@@ -72,7 +60,7 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          <Link href="/" className="flex items-center group">
+          <Link href="/" className="flex items-center">
             <span
               className={`text-3xl font-display font-bold tracking-tight transition-colors duration-300 ${textColor}`}
             >
@@ -89,7 +77,7 @@ export default function Navbar() {
                   : "opacity-70 hover:opacity-100"
               } ${textColor}`}
             >
-              {t("products")}
+              Produk
             </Link>
             <Link
               href="/stories"
@@ -99,7 +87,7 @@ export default function Navbar() {
                   : "opacity-70 hover:opacity-100"
               } ${textColor}`}
             >
-              {t("stories")}
+              Cerita
             </Link>
             <Link
               href="/vouchers"
@@ -109,11 +97,11 @@ export default function Navbar() {
                   : "opacity-70 hover:opacity-100"
               } ${textColor}`}
             >
-              Vouchers
+              Voucher
             </Link>
           </div>
 
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="flex items-center space-x-6">
             <LanguageSwitcher
               variant={isGuestLanding && !scrolled ? "dark" : "light"}
             />
@@ -121,11 +109,23 @@ export default function Navbar() {
             {session && session.user.role !== "ADMIN" && (
               <Link
                 href="/cart"
-                className={`relative p-2 text-sm uppercase tracking-widest font-medium transition-colors ${textColor} hover:opacity-70`}
+                className={`relative p-2 transition-colors ${textColor} hover:opacity-70`}
               >
-                {t("cart")}
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
+                </svg>
                 {cartCount > 0 && (
-                  <span className="ml-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full min-w-[18px] text-center inline-block">
+                  <span className="absolute top-0 right-0 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full min-w-[18px] text-center inline-block">
                     {cartCount}
                   </span>
                 )}
@@ -139,7 +139,7 @@ export default function Navbar() {
                 <button
                   className={`flex items-center space-x-2 text-sm uppercase tracking-widest font-medium transition-colors ${textColor}`}
                 >
-                  <span>{session.user.name?.split(" ")[0] || "Account"}</span>
+                  <span>{session.user.name?.split(" ")[0]}</span>
                   <svg
                     className="w-4 h-4 transition-transform group-hover:rotate-180"
                     fill="none"
@@ -165,52 +165,33 @@ export default function Navbar() {
                     </Link>
                   ) : (
                     <>
-                      <div className="px-4 py-2 mb-1 border-b border-gray-50">
-                        <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">
-                          Customer Menu
-                        </p>
-                      </div>
                       <Link
                         href="/profile"
-                        className={`block px-4 py-2 text-sm hover:bg-gray-50 ${
-                          isActive("/profile") && pathname === "/profile"
-                            ? "text-black font-bold"
-                            : "text-gray-600"
-                        }`}
+                        className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
                       >
-                        {t("profile")}
+                        Profil
                       </Link>
                       <Link
                         href="/profile/orders"
-                        className={`block px-4 py-2 text-sm hover:bg-gray-50 ${
-                          isActive("/profile/orders")
-                            ? "text-black font-bold"
-                            : "text-gray-600"
-                        }`}
+                        className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
                       >
-                        {t("myOrders")}
+                        Pesanan Saya
                       </Link>
                       <Link
                         href="/profile/addresses"
-                        className={`block px-4 py-2 text-sm hover:bg-gray-50 ${
-                          isActive("/profile/addresses")
-                            ? "text-black font-bold"
-                            : "text-gray-600"
-                        }`}
+                        className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
                       >
-                        Saved Addresses
+                        Alamat
                       </Link>
                     </>
                   )}
-
                   <div className="h-px bg-gray-100 my-2"></div>
-
                   <button
                     onClick={handleSignOut}
                     disabled={isSigningOut}
                     className="block w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 font-medium"
                   >
-                    {isSigningOut ? "Signing out..." : t("logout")}
+                    {isSigningOut ? "Keluar..." : "Keluar"}
                   </button>
                 </div>
               </div>
@@ -218,9 +199,9 @@ export default function Navbar() {
               <div className="flex items-center space-x-4">
                 <Link
                   href="/login"
-                  className={`text-sm uppercase tracking-widest font-medium transition-opacity hover:opacity-70 ${textColor}`}
+                  className={`text-sm uppercase tracking-widest font-medium ${textColor}`}
                 >
-                  {t("login")}
+                  Masuk
                 </Link>
                 <Link
                   href="/register"
@@ -230,7 +211,7 @@ export default function Navbar() {
                       : "bg-black text-white hover:bg-gray-800"
                   }`}
                 >
-                  {t("register")}
+                  Daftar
                 </Link>
               </div>
             )}

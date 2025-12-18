@@ -8,22 +8,15 @@ import Loading from "@/components/ui/Loading";
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [stats, setStats] = useState({
-    totalOrders: 0,
-    totalAddresses: 0,
-  });
+  const [stats, setStats] = useState({ totalOrders: 0, totalAddresses: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
+    if (status === "unauthenticated") router.push("/login");
   }, [status, router]);
 
   useEffect(() => {
-    if (session) {
-      fetchStats();
-    }
+    if (session) fetchStats();
   }, [session]);
 
   const fetchStats = async () => {
@@ -32,28 +25,21 @@ export default function ProfilePage() {
         fetch("/api/orders"),
         fetch("/api/shipping/addresses"),
       ]);
-
       const ordersData = await ordersRes.json();
       const addressesData = await addressesRes.json();
-
       setStats({
         totalOrders: ordersData.success ? ordersData.data.length : 0,
         totalAddresses: addressesData.success ? addressesData.data.length : 0,
       });
     } catch (error) {
-      console.error("Error fetching stats:", error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (status === "loading" || loading) {
-    return <Loading />;
-  }
-
-  if (!session) {
-    return null;
-  }
+  if (status === "loading" || loading) return <Loading />;
+  if (!session) return null;
 
   const menuItems = [
     {
@@ -104,202 +90,89 @@ export default function ProfilePage() {
         </svg>
       ),
     },
-    {
-      title: "Wishlist",
-      description: "Simpan produk favorit Anda",
-      href: "/profile/wishlist",
-      badge: null,
-      comingSoon: true,
-      icon: (
-        <svg
-          className="w-6 h-6 text-[#1A1A1A]"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-          />
-        </svg>
-      ),
-    },
-    {
-      title: "Pengaturan Akun",
-      description: "Ubah profil dan keamanan",
-      href: "/profile/settings",
-      badge: null,
-      comingSoon: true,
-      icon: (
-        <svg
-          className="w-6 h-6 text-[#1A1A1A]"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-        </svg>
-      ),
-    },
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDFCFA] pt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
-        {/* Header Section - Elegant & Minimal */}
-        <div className="mb-16">
-          <div className="flex items-start justify-between mb-8">
-            <div>
-              <p className="text-[#999999] text-xs tracking-[0.2em] uppercase mb-3">
-                Profil Pengguna
-              </p>
-              <h1 className="text-5xl font-['Playfair_Display'] text-[#1A1A1A] mb-3">
-                {session.user.name}
-              </h1>
-              <p className="text-[#666666] mb-2">{session.user.email}</p>
-              {session.user.role === "B2B" && (
-                <span className="inline-block px-3 py-1 border border-[#1A1A1A] text-[#1A1A1A] text-xs tracking-[0.15em] uppercase">
-                  B2B Partner
-                </span>
-              )}
-              {session.user.role === "ADMIN" && (
-                <span className="inline-block px-3 py-1 bg-[#1A1A1A] text-white text-xs tracking-[0.15em] uppercase">
-                  Administrator
-                </span>
-              )}
-            </div>
-            <div className="text-right">
-              <p className="text-[#999999] text-xs uppercase tracking-[0.15em] mb-2">
-                Status
-              </p>
-              <p className="text-[#1A1A1A] font-medium">Aktif</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-[#FDFCFA] pt-32 pb-20">
+      <div className="max-w-4xl mx-auto px-6">
+        <div className="mb-12 border-b border-gray-100 pb-12">
+          <p className="text-xs tracking-[0.2em] uppercase text-gray-400 mb-4">
+            Profil Akun
+          </p>
+          <h1 className="text-4xl font-bold text-[#1A1A1A] mb-2">
+            {session.user.name}
+          </h1>
+          <p className="text-gray-500 mb-6">{session.user.email}</p>
+          <span className="inline-block px-3 py-1 border border-black text-black text-[10px] tracking-widest uppercase font-bold">
+            {session.user.role}
+          </span>
+        </div>
 
-          {/* Stats Bar */}
-          <div className="grid grid-cols-3 gap-8 border-t border-b border-[#E5E5E5] py-6">
-            <div>
-              <p className="text-[#666666] text-xs uppercase tracking-[0.15em] mb-2">
-                Pesanan
-              </p>
-              <p className="text-3xl font-['Playfair_Display'] text-[#1A1A1A]">
-                {stats.totalOrders}
-              </p>
-            </div>
-            <div>
-              <p className="text-[#666666] text-xs uppercase tracking-[0.15em] mb-2">
-                Alamat
-              </p>
-              <p className="text-3xl font-['Playfair_Display'] text-[#1A1A1A]">
-                {stats.totalAddresses}
-              </p>
-            </div>
-            <div>
-              <p className="text-[#666666] text-xs uppercase tracking-[0.15em] mb-2">
-                Wishlist
-              </p>
-              <p className="text-3xl font-['Playfair_Display'] text-[#1A1A1A]">
-                0
-              </p>
-            </div>
+        <div className="grid grid-cols-2 gap-6 mb-12">
+          <div className="bg-white p-6 border border-gray-100 rounded-lg">
+            <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">
+              Total Pesanan
+            </p>
+            <p className="text-2xl font-bold">{stats.totalOrders}</p>
+          </div>
+          <div className="bg-white p-6 border border-gray-100 rounded-lg">
+            <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">
+              Alamat Tersimpan
+            </p>
+            <p className="text-2xl font-bold">{stats.totalAddresses}</p>
           </div>
         </div>
 
-        {/* Menu Grid - Clean & Structured */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-['Playfair_Display'] text-[#1A1A1A] mb-8">
-            Menu Profil
-          </h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            {menuItems.map((item, index) => (
-              <button
-                key={index}
-                onClick={() => !item.comingSoon && router.push(item.href)}
-                disabled={item.comingSoon}
-                className={`
-                  group bg-white border border-[#E5E5E5] p-8 text-left transition-all
-                  ${
-                    item.comingSoon
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:border-[#1A1A1A]"
-                  }
-                `}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 border border-[#E5E5E5] flex items-center justify-center">
-                    {item.icon}
-                  </div>
-                  {item.badge && (
-                    <span className="px-3 py-1 bg-[#1A1A1A] text-white text-xs tracking-[0.15em] uppercase">
-                      {item.badge}
-                    </span>
-                  )}
-                  {item.comingSoon && (
-                    <span className="px-3 py-1 border border-[#E5E5E5] text-[#999999] text-xs tracking-[0.15em] uppercase">
-                      Segera
-                    </span>
-                  )}
+        <div className="space-y-4">
+          {menuItems.map((item, index) => (
+            <button
+              key={index}
+              onClick={() => router.push(item.href)}
+              className="w-full flex items-center justify-between p-6 bg-white border border-gray-100 rounded-lg hover:border-black transition-all group"
+            >
+              <div className="flex items-center gap-6">
+                <div className="p-3 bg-gray-50 group-hover:bg-black group-hover:text-white transition-colors">
+                  {item.icon}
                 </div>
-                <h3 className="text-xl font-['Playfair_Display'] text-[#1A1A1A] mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-[#666666] text-sm mb-4">
-                  {item.description}
-                </p>
-                {!item.comingSoon && (
-                  <div className="flex items-center text-sm text-[#1A1A1A] tracking-[0.15em] uppercase group-hover:gap-2 transition-all">
-                    <span>Buka</span>
-                    <svg
-                      className="w-4 h-4 transition-transform group-hover:translate-x-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </div>
+                <div className="text-left">
+                  <h3 className="font-bold text-[#1A1A1A]">{item.title}</h3>
+                  <p className="text-sm text-gray-500">{item.description}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                {item.badge && (
+                  <span className="bg-black text-white text-[10px] px-2 py-1 rounded-full">
+                    {item.badge}
+                  </span>
                 )}
-              </button>
-            ))}
-          </div>
+                <svg
+                  className="w-5 h-5 text-gray-300 group-hover:text-black transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
+            </button>
+          ))}
         </div>
 
-        {/* Help Section - Professional */}
-        <div className="bg-[#1A1A1A] text-white p-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white/50 text-xs tracking-[0.2em] uppercase mb-3">
-                Butuh Bantuan?
-              </p>
-              <h3 className="text-2xl font-['Playfair_Display'] mb-3">
-                Hubungi Customer Service
-              </h3>
-              <p className="text-white/70 text-sm">
-                Tim kami siap membantu Anda
-              </p>
-            </div>
-            <button className="border border-white px-8 py-3 text-sm tracking-[0.15em] uppercase hover:bg-white hover:text-[#1A1A1A] transition-all">
-              Hubungi Kami
-            </button>
+        <div className="mt-12 bg-[#1A1A1A] text-white p-8 rounded-lg flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <h3 className="text-xl font-bold mb-1">Butuh Bantuan?</h3>
+            <p className="text-white/60 text-sm">
+              Hubungi kami jika memiliki kendala terkait pesanan.
+            </p>
           </div>
+          <button className="px-8 py-3 border border-white text-sm uppercase tracking-widest hover:bg-white hover:text-black transition-all">
+            Hubungi Kami
+          </button>
         </div>
       </div>
     </div>
