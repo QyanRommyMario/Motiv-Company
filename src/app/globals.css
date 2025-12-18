@@ -5,7 +5,7 @@
   --foreground: #1a1a1a;
   --accent: #d4af37;
   --gray-light: #f5f4f0;
-  --gray-medium: #9ca3af;
+  --gray-medium: #4b5563;
   --border: #e5e7eb;
 }
 
@@ -18,10 +18,10 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0f0f0f;
-    --foreground: #f5f4f0;
-    --gray-light: #1a1a1a;
-    --border: #2a2a2a;
+    --background: #fdfcfa;
+    --foreground: #1a1a1a;
+    --gray-light: #f5f4f0;
+    --border: #e5e7eb;
   }
 }
 
@@ -39,7 +39,6 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* Modern Typography */
 h1,
 h2,
 h3,
@@ -50,9 +49,9 @@ h6 {
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.2;
+  color: #1a1a1a;
 }
 
-/* Smooth Transitions */
 a,
 button,
 input,
@@ -61,17 +60,15 @@ select {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Focus States */
 input:focus,
 textarea:focus,
 select:focus {
   outline: none;
   ring: 2px;
-  ring-color: var(--foreground);
+  ring-color: #1a1a1a;
   ring-offset: 2px;
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -82,34 +79,23 @@ select:focus {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--gray-medium);
+  background: #9ca3af;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground);
+  background: #1a1a1a;
 }
 
-/* Image Loading */
 img {
   transition: opacity 0.3s ease-in-out;
 }
 
-img[loading] {
-  opacity: 0;
-}
-
-img.loaded {
-  opacity: 1;
-}
-
-/* Selection */
 ::selection {
-  background: var(--foreground);
-  color: var(--background);
+  background: #1a1a1a;
+  color: #fdfcfa;
 }
 
-/* Modern Button Base */
 .btn-modern {
   font-family: var(--font-inter), sans-serif;
   font-weight: 500;
@@ -117,13 +103,13 @@ img.loaded {
   letter-spacing: 0.08em;
   font-size: 0.875rem;
   padding: 1rem 2rem;
-  border: 1px solid var(--foreground);
+  border: 1px solid #1a1a1a;
   background: transparent;
-  color: var(--foreground);
+  color: #1a1a1a;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
+  z-index: 1;
 }
 
 .btn-modern::before {
@@ -133,7 +119,7 @@ img.loaded {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: var(--foreground);
+  background: #1a1a1a;
   transition: left 0.3s ease;
   z-index: -1;
 }
@@ -143,41 +129,9 @@ img.loaded {
 }
 
 .btn-modern:hover {
-  color: var(--background);
+  color: #fdfcfa;
 }
 
-/* Card Hover Effects */
-.card-modern {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card-modern:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-}
-
-/* Loading Shimmer */
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
-}
-
-.shimmer {
-  animation: shimmer 2s infinite linear;
-  background: linear-gradient(
-    to right,
-    var(--gray-light) 0%,
-    var(--border) 50%,
-    var(--gray-light) 100%
-  );
-  background-size: 1000px 100%;
-}
-
-/* Fade In Animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -191,33 +145,4 @@ img.loaded {
 
 .fade-in {
   animation: fadeIn 0.6s ease-out;
-}
-
-/* Toast Slide In Animation */
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.animate-slide-in-right {
-  animation: slideInRight 0.3s ease-out;
-}
-
-/* Utility Classes */
-.text-display {
-  font-family: var(--font-playfair), serif;
-}
-
-.letter-spacing-wider {
-  letter-spacing: 0.1em;
-}
-
-.letter-spacing-widest {
-  letter-spacing: 0.15em;
 }

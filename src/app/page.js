@@ -40,7 +40,7 @@ export default function Home() {
       <div className="min-h-screen bg-[#FDFCFA] flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#1A1A1A] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#6B7280] uppercase tracking-[0.15em] text-sm">
+          <p className="text-[#1A1A1A] uppercase tracking-[0.15em] text-sm font-bold">
             Loading...
           </p>
         </div>

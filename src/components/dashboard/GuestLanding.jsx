@@ -27,7 +27,10 @@ export default function GuestLanding() {
   return (
     <LazyMotion features={domAnimation}>
       <div className="min-h-screen bg-white">
-        <Navbar />
+        {/* Navbar Fixed dengan latar belakang solid agar warna tidak berubah saat scroll */}
+        <div className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A] border-b border-white/5">
+          <Navbar />
+        </div>
 
         <section className="relative h-screen flex items-center justify-center overflow-hidden bg-[#0A0A0A]">
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-transparent to-black/70 z-0" />
@@ -37,7 +40,8 @@ export default function GuestLanding() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1 }}
-              className="text-7xl md:text-9xl font-display text-white tracking-tighter font-bold"
+              /* Menggunakan !text-white untuk memastikan putih murni */
+              className="text-7xl md:text-9xl font-display !text-white tracking-tighter font-bold"
             >
               MOTIV
             </m.h1>
@@ -45,7 +49,7 @@ export default function GuestLanding() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 1 }}
-              className="text-white/60 uppercase tracking-[0.4em] text-xs md:text-sm mt-6 font-light"
+              className="!text-white uppercase tracking-[0.4em] text-xs md:text-sm mt-6 font-light opacity-60"
             >
               {t("hero.subtitle")}
             </m.p>
@@ -54,10 +58,10 @@ export default function GuestLanding() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.8 }}
-              className="mt-10"
+              className="mt-10 mb-32"
             >
               <Link href="/products">
-                <button className="group relative px-12 py-4 border border-white/30 text-white uppercase tracking-[0.2em] text-xs font-light overflow-hidden hover:bg-white hover:text-black transition-all duration-300">
+                <button className="group relative px-12 py-4 border border-white/30 !text-white uppercase tracking-[0.2em] text-xs font-light overflow-hidden hover:bg-white hover:!text-black transition-all duration-300">
                   <span className="relative z-10">Shop Now</span>
                 </button>
               </Link>
@@ -66,7 +70,7 @@ export default function GuestLanding() {
             <m.div
               animate={{ y: [0, 10, 0] }}
               transition={{ repeat: Infinity, duration: 2 }}
-              className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/20 text-[10px] uppercase tracking-[0.3em]"
+              className="absolute bottom-10 left-1/2 -translate-x-1/2 !text-white/40 text-[10px] uppercase tracking-[0.3em]"
             >
               Scroll to discover
             </m.div>
@@ -116,21 +120,9 @@ export default function GuestLanding() {
           </section>
         )}
 
-        <section className="py-24 bg-[#F9FAFB]">
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <h2 className="text-4xl font-display mb-6">{t("cta.title")}</h2>
-            <p className="text-gray-600 mb-10">{t("cta.subtitle")}</p>
-            <Link href="/products">
-              <button className="bg-black text-white px-10 py-4 uppercase tracking-widest text-sm hover:bg-gray-800 transition-colors">
-                {t("cta.button") || "Shop Collection"} →
-              </button>
-            </Link>
-          </div>
-        </section>
-
         <footer className="bg-[#0A0A0A] py-16 text-center border-t border-white/5">
           <div className="space-y-4">
-            <h4 className="text-white font-display text-xl tracking-[0.2em]">
+            <h4 className="!text-white font-display text-xl tracking-[0.2em]">
               MOTIV
             </h4>
             <p className="text-white/30 text-[10px] tracking-[0.3em] uppercase">

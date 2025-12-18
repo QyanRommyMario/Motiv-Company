@@ -52,42 +52,47 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-[#FDFCFA]">
       <Navbar />
       <div className="max-w-4xl mx-auto px-6 pt-32 pb-20">
-        <div className="mb-12 border-b border-gray-100 pb-12">
-          <p className="text-xs tracking-[0.2em] uppercase text-gray-400 mb-4">
+        <div className="mb-12 border-b border-gray-200 pb-12">
+          <p className="text-xs tracking-[0.2em] uppercase text-[#6B7280] font-bold mb-4">
             Profil Akun
           </p>
           <h1 className="text-4xl font-bold text-[#1A1A1A] mb-2">
             {session.user.name}
           </h1>
-          <p className="text-gray-500 mb-6">{session.user.email}</p>
-          <span className="inline-block px-3 py-1 border border-black text-black text-[10px] tracking-widest uppercase font-bold">
+          <p className="text-[#374151] text-lg font-medium mb-6">
+            {session.user.email}
+          </p>
+          <span className="inline-block px-4 py-1.5 bg-[#1A1A1A] text-white text-[11px] tracking-widest uppercase font-black rounded-sm">
             {session.user.role}
           </span>
         </div>
 
         <div className="grid grid-cols-2 gap-6 mb-12">
-          <div className="bg-white p-6 border border-gray-100 rounded-lg shadow-sm">
-            <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">
+          <div className="bg-white p-8 border border-gray-200 rounded-sm shadow-sm">
+            <p className="text-[11px] uppercase tracking-widest text-[#6B7280] font-black mb-2">
               Total Pesanan
             </p>
-            <p className="text-2xl font-bold">{stats.totalOrders}</p>
+            <p className="text-3xl font-bold text-[#1A1A1A]">
+              {stats.totalOrders}
+            </p>
           </div>
-          <div className="bg-white p-6 border border-gray-100 rounded-lg shadow-sm">
-            <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">
+          <div className="bg-white p-8 border border-gray-200 rounded-sm shadow-sm">
+            <p className="text-[11px] uppercase tracking-widest text-[#6B7280] font-black mb-2">
               Alamat Tersimpan
             </p>
-            <p className="text-2xl font-bold">{stats.totalAddresses}</p>
+            <p className="text-3xl font-bold text-[#1A1A1A]">
+              {stats.totalAddresses}
+            </p>
           </div>
         </div>
 
-        {/* Menu Items */}
-        <div className="space-y-4">
+        <div className="space-y-5">
           <button
             onClick={() => router.push("/profile/orders")}
-            className="w-full flex items-center justify-between p-6 bg-white border border-gray-100 rounded-lg hover:border-black transition-all group shadow-sm"
+            className="w-full flex items-center justify-between p-6 bg-white border border-gray-200 rounded-sm hover:border-[#1A1A1A] hover:shadow-md transition-all group"
           >
             <div className="flex items-center gap-6 text-left">
-              <div className="p-3 bg-gray-50 group-hover:bg-black group-hover:text-white transition-colors">
+              <div className="p-4 bg-gray-50 group-hover:bg-[#1A1A1A] group-hover:text-white transition-colors rounded-sm text-[#1A1A1A]">
                 <svg
                   className="w-6 h-6"
                   fill="none"
@@ -97,20 +102,22 @@ export default function ProfilePage() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={1.5}
+                    strokeWidth={2}
                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                   />
                 </svg>
               </div>
               <div>
-                <h3 className="font-bold text-[#1A1A1A]">Pesanan Saya</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="font-bold text-lg text-[#1A1A1A]">
+                  Pesanan Saya
+                </h3>
+                <p className="text-sm text-[#4B5563] font-medium">
                   Lacak dan kelola pesanan Anda
                 </p>
               </div>
             </div>
             <svg
-              className="w-5 h-5 text-gray-300 group-hover:text-black"
+              className="w-6 h-6 text-gray-300 group-hover:text-[#1A1A1A]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -126,10 +133,10 @@ export default function ProfilePage() {
 
           <button
             onClick={() => router.push("/profile/addresses")}
-            className="w-full flex items-center justify-between p-6 bg-white border border-gray-100 rounded-lg hover:border-black transition-all group shadow-sm"
+            className="w-full flex items-center justify-between p-6 bg-white border border-gray-200 rounded-sm hover:border-[#1A1A1A] hover:shadow-md transition-all group"
           >
             <div className="flex items-center gap-6 text-left">
-              <div className="p-3 bg-gray-50 group-hover:bg-black group-hover:text-white transition-colors">
+              <div className="p-4 bg-gray-50 group-hover:bg-[#1A1A1A] group-hover:text-white transition-colors rounded-sm text-[#1A1A1A]">
                 <svg
                   className="w-6 h-6"
                   fill="none"
@@ -139,26 +146,28 @@ export default function ProfilePage() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={1.5}
+                    strokeWidth={2}
                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                   />
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={1.5}
+                    strokeWidth={2}
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
               </div>
               <div>
-                <h3 className="font-bold text-[#1A1A1A]">Alamat Pengiriman</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="font-bold text-lg text-[#1A1A1A]">
+                  Alamat Pengiriman
+                </h3>
+                <p className="text-sm text-[#4B5563] font-medium">
                   Kelola alamat pengiriman
                 </p>
               </div>
             </div>
             <svg
-              className="w-5 h-5 text-gray-300 group-hover:text-black"
+              className="w-6 h-6 text-gray-300 group-hover:text-[#1A1A1A]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
