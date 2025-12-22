@@ -1,47 +1,34 @@
-/**
- * Midtrans Payment Gateway Integration
- * Handles Snap API and Core API operations
- */
-
 const midtransClient = require("midtrans-client");
 
-// Konfigurasi Environment
-const isProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
+// Konfigurasi Environment - Paksa ke Sandbox (isProduction: false)
+const isProduction = false;
 const serverKey = process.env.MIDTRANS_SERVER_KEY;
-const clientKey = process.env.MIDTRANS_CLIENT_KEY;
+const clientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
 
-console.log("🔌 Initializing Midtrans Service:", {
-  mode: isProduction ? "PRODUCTION" : "SANDBOX",
-  serverKeyStatus: serverKey ? "Loaded" : "MISSING",
-});
-
-const snap = new midtransClient.Snap({
+// Inisialisasi Snap
+export const snap = new midtransClient.Snap({
   isProduction,
   serverKey,
   clientKey,
 });
 
-const core = new midtransClient.CoreApi({
+// Inisialisasi CoreApi
+export const core = new midtransClient.CoreApi({
   isProduction,
   serverKey,
   clientKey,
 });
 
 export class MidtransService {
-  /**
-   * Create Snap transaction token
-   */
   static async createTransaction(order) {
     try {
-      // 1. Susun Item Details (Harga sudah didiskon B2B & dibulatkan dari route.js)
       const itemDetails = order.items.map((item) => ({
         id: item.variant.sku || item.variant.id,
-        price: Math.round(item.price), // Double check rounding
+        price: Math.round(item.price),
         quantity: item.quantity,
         name: `${item.product.name} - ${item.variant.name}`.substring(0, 50),
       }));
 
-      // 2. Tambah Ongkir
       if (order.shippingCost > 0) {
         itemDetails.push({
           id: "SHIPPING",
@@ -51,7 +38,6 @@ export class MidtransService {
         });
       }
 
-      // 3. Tambah Diskon Voucher (Harga Negatif)
       if (order.discount > 0) {
         itemDetails.push({
           id: "DISCOUNT",
@@ -61,17 +47,13 @@ export class MidtransService {
         });
       }
 
-      // 4. Hitung Ulang Gross Amount (Wajib!)
-      // Menjumlahkan manual itemDetails agar 100% akurat dengan parameter Midtrans
-      const calculatedGrossAmount = itemDetails.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0
-      );
-
       const parameter = {
         transaction_details: {
           order_id: order.orderNumber,
-          gross_amount: calculatedGrossAmount, // Pakai hasil hitung ulang
+          gross_amount: itemDetails.reduce(
+            (acc, item) => acc + item.price * item.quantity,
+            0
+          ),
         },
         customer_details: {
           first_name: order.user.name,
@@ -88,31 +70,22 @@ export class MidtransService {
         item_details: itemDetails,
       };
 
-      console.log("🚀 Sending to Midtrans:", {
-        orderId: parameter.transaction_details.order_id,
-        amount: parameter.transaction_details.gross_amount,
-      });
-
       const transaction = await snap.createTransaction(parameter);
-
       return {
         token: transaction.token,
         redirect_url: transaction.redirect_url,
       };
     } catch (error) {
-      console.error("❌ Midtrans Token Error:", error.message);
+      console.error("❌ Midtrans API Error:", error.message);
       throw error;
     }
   }
 
-  // --- Method helper lain tetap sama ---
-
   static async getTransactionStatus(orderId) {
     try {
-      const statusResponse = await core.transaction.status(orderId);
-      return statusResponse;
+      return await core.transaction.status(orderId);
     } catch (error) {
-      console.error("Midtrans get status error:", error);
+      console.error("Midtrans Status Error:", error);
       throw error;
     }
   }
@@ -121,27 +94,14 @@ export class MidtransService {
     let orderStatus = "PENDING";
     let paymentStatus = "UNPAID";
 
-    if (transactionStatus === "capture") {
-      if (fraudStatus === "accept") {
+    if (transactionStatus === "capture" || transactionStatus === "settlement") {
+      if (fraudStatus === "accept" || transactionStatus === "settlement") {
         orderStatus = "PAID";
         paymentStatus = "PAID";
-      } else if (fraudStatus === "challenge") {
-        orderStatus = "PENDING";
-        paymentStatus = "UNPAID";
       }
-    } else if (transactionStatus === "settlement") {
-      orderStatus = "PAID";
-      paymentStatus = "PAID";
-    } else if (
-      transactionStatus === "deny" ||
-      transactionStatus === "cancel" ||
-      transactionStatus === "expire"
-    ) {
+    } else if (["deny", "cancel", "expire"].includes(transactionStatus)) {
       orderStatus = "CANCELLED";
       paymentStatus = "FAILED";
-    } else if (transactionStatus === "pending") {
-      orderStatus = "PENDING";
-      paymentStatus = "UNPAID";
     }
 
     return { orderStatus, paymentStatus };

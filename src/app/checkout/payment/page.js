@@ -6,7 +6,6 @@ import { useSession } from "next-auth/react";
 import CheckoutSteps from "@/components/checkout/CheckoutSteps";
 import Loading from "@/components/ui/Loading";
 import Script from "next/script";
-import Image from "next/image"; // Penting untuk menampilkan gambar QRIS
 
 export default function PaymentPage() {
   const router = useRouter();
@@ -20,9 +19,6 @@ export default function PaymentPage() {
   // Midtrans State
   const [snapReady, setSnapReady] = useState(false);
   const [existingSnapToken, setExistingSnapToken] = useState(null);
-
-  // Payment Method State: Default ke 'MIDTRANS'
-  const [paymentMethod, setPaymentMethod] = useState("MIDTRANS");
 
   // Voucher State
   const [voucherCode, setVoucherCode] = useState("");
@@ -56,7 +52,6 @@ export default function PaymentPage() {
       }
       const parsedData = JSON.parse(data);
 
-      // Self-healing address logic: Cek jika detail alamat hilang
       if (parsedData.shippingAddressId && !parsedData.shippingAddress) {
         try {
           const res = await fetch(
@@ -126,11 +121,6 @@ export default function PaymentPage() {
       });
       setExistingSnapToken(order.snapToken);
 
-      // Jika sudah ada token snap (order lama), paksa ke mode Midtrans
-      if (order.snapToken) {
-        setPaymentMethod("MIDTRANS");
-      }
-
       if (order.voucherCode) {
         setVoucherCode(order.voucherCode);
         setVoucherApplied(true);
@@ -142,7 +132,6 @@ export default function PaymentPage() {
     }
   };
 
-  // Logic Voucher
   const handleApplyVoucher = async () => {
     if (!voucherCode.trim()) {
       setVoucherError("Mohon masukkan kode voucher");
@@ -200,75 +189,49 @@ export default function PaymentPage() {
     setVoucherError("");
   };
 
-  // Logic Proses Pembayaran
   const handleProcessPayment = async () => {
     setProcessing(true);
 
     try {
-      if (paymentMethod === "MANUAL") {
-        // --- FLOW MANUAL (QRIS) + AUTO VERIFY ---
+      let token = existingSnapToken;
+
+      if (!token) {
         const response = await fetch("/api/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...checkoutData,
-            paymentMethod: "MANUAL", // Kirim flag manual
+            paymentMethod: "MIDTRANS",
           }),
         });
 
         const data = await response.json();
+        if (!data.success)
+          throw new Error(data.message || "Gagal membuat order");
+        token = data.data.payment.token;
+      }
 
-        if (!data.success) throw new Error(data.message);
-
-        // Hapus session dan redirect ke halaman sukses
-        sessionStorage.removeItem("checkoutData");
-
-        // Redirect ke Success Page (Backend sudah meng-approve otomatis)
-        router.push(data.data.redirectUrl);
+      if (token && window.snap) {
+        window.snap.pay(token, {
+          onSuccess: (result) => {
+            sessionStorage.removeItem("checkoutData");
+            const target = checkoutData.orderNumber || result.order_id;
+            router.push(`/checkout/success?orderId=${target}`);
+          },
+          onPending: (result) => {
+            sessionStorage.removeItem("checkoutData");
+            const target = checkoutData.orderNumber || result.order_id;
+            router.push(`/checkout/success?orderId=${target}&status=pending`);
+          },
+          onError: () => {
+            alert("Pembayaran gagal/dibatalkan");
+            setProcessing(false);
+          },
+          onClose: () => setProcessing(false),
+        });
       } else {
-        // --- FLOW OTOMATIS (MIDTRANS) ---
-        let token = existingSnapToken;
-
-        if (!token) {
-          const response = await fetch("/api/orders", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              ...checkoutData,
-              paymentMethod: "MIDTRANS",
-            }),
-          });
-
-          const data = await response.json();
-          if (!data.success)
-            throw new Error(data.message || "Gagal membuat order");
-          token = data.data.payment.token;
-        }
-
-        if (token && window.snap) {
-          window.snap.pay(token, {
-            onSuccess: (result) => {
-              sessionStorage.removeItem("checkoutData");
-              const target = checkoutData.orderNumber || result.order_id;
-              router.push(`/checkout/success?orderId=${target}`);
-            },
-            onPending: (result) => {
-              sessionStorage.removeItem("checkoutData");
-              const target = checkoutData.orderNumber || result.order_id;
-              router.push(`/checkout/success?orderId=${target}&status=pending`);
-            },
-            onError: () => {
-              alert("Pembayaran gagal/dibatalkan");
-              setProcessing(false);
-            },
-            onClose: () => setProcessing(false),
-          });
-        } else {
-          alert(
-            "Sistem pembayaran otomatis belum siap (Token tidak ada). Coba refresh."
-          );
-          setProcessing(false);
-        }
+        alert("Sistem pembayaran belum siap. Coba refresh halaman.");
+        setProcessing(false);
       }
     } catch (err) {
       console.error(err);
@@ -288,10 +251,7 @@ export default function PaymentPage() {
   return (
     <>
       <Script
-        src={
-          process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL ||
-          "https://app.midtrans.com/snap/snap.js"
-        }
+        src="https://app.sandbox.midtrans.com/snap/snap.js"
         data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
         strategy="lazyOnload"
         onLoad={() => setSnapReady(true)}
@@ -304,72 +264,13 @@ export default function PaymentPage() {
               Pembayaran
             </h1>
             <p className="text-gray-600">
-              Pilih metode pembayaran yang Anda inginkan
+              Selesaikan pesanan Anda melalui Midtrans Payment Gateway
             </p>
           </div>
 
           {!existingSnapToken && <CheckoutSteps currentStep={3} />}
 
           <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
-            {/* SELEKTOR METODE PEMBAYARAN */}
-            {/* Hanya tampil jika ini order baru (belum ada token snap) */}
-            {!existingSnapToken && (
-              <div className="mb-8">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">
-                  Pilih Metode Pembayaran
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Opsi 1: Otomatis */}
-                  <div
-                    onClick={() => setPaymentMethod("MIDTRANS")}
-                    className={`cursor-pointer p-4 border-2 rounded-xl transition-all ${
-                      paymentMethod === "MIDTRANS"
-                        ? "border-gray-900 bg-gray-50 ring-1 ring-gray-900"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-bold text-gray-900">
-                        Otomatis (Midtrans)
-                      </span>
-                      {paymentMethod === "MIDTRANS" && (
-                        <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-500">
-                      Virtual Account, GoPay, Kartu Kredit. (Memerlukan Pop-up).
-                    </p>
-                  </div>
-
-                  {/* Opsi 2: Manual QRIS */}
-                  <div
-                    onClick={() => setPaymentMethod("MANUAL")}
-                    className={`cursor-pointer p-4 border-2 rounded-xl transition-all ${
-                      paymentMethod === "MANUAL"
-                        ? "border-gray-900 bg-gray-50 ring-1 ring-gray-900"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-bold text-gray-900">
-                        QRIS Manual
-                      </span>
-                      {paymentMethod === "MANUAL" && (
-                        <div className="w-5 h-5 bg-gray-900 rounded-full flex items-center justify-center">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-500">
-                      Scan QRIS Statis. Verifikasi Langsung (Demo Mode).
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Ringkasan Pesanan
             </h2>
@@ -389,7 +290,6 @@ export default function PaymentPage() {
                 </span>
               </div>
 
-              {/* AREA VOUCHER */}
               {!voucherApplied ? (
                 <div className="border border-gray-200 rounded p-4 bg-gray-50 my-4">
                   <div className="flex gap-2">
@@ -440,63 +340,10 @@ export default function PaymentPage() {
               </div>
             </div>
 
-            {/* AREA TAMPILAN KHUSUS MANUAL (QRIS) */}
-            {paymentMethod === "MANUAL" && !existingSnapToken && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8 text-center animate-fadeIn">
-                <h3 className="font-bold text-lg text-blue-900 mb-2">
-                  Scan QRIS untuk Membayar
-                </h3>
-                <p className="text-sm text-blue-700 mb-4">
-                  Silakan scan kode di bawah menggunakan GoPay, OVO, Dana, atau
-                  Mobile Banking.
-                </p>
-
-                <div className="w-64 h-64 bg-white mx-auto border-4 border-white shadow-md rounded-lg relative mb-6 overflow-hidden">
-                  {/* !!! PENTING: 
-                            Simpan gambar QRIS anda di folder: /public/qris-manual.jpg 
-                        */}
-                  <Image
-                    src="/qris-manual.jpg"
-                    alt="QRIS Motiv Company"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-
-                <div className="text-left bg-white p-4 rounded-lg border border-blue-100 max-w-md mx-auto">
-                  <p className="text-sm font-bold text-gray-800 mb-2">
-                    Instruksi Pembayaran:
-                  </p>
-                  <ol className="list-decimal list-inside text-sm text-gray-600 space-y-2">
-                    <li>Buka aplikasi pembayaran Anda.</li>
-                    <li>Scan QRIS di atas.</li>
-                    <li>
-                      Masukkan nominal:{" "}
-                      <span className="font-bold text-gray-900">
-                        Rp {checkoutData?.total?.toLocaleString("id-ID")}
-                      </span>{" "}
-                      (Harus Tepat).
-                    </li>
-                    <li>
-                      Pastikan penerima adalah <strong>MOTIV COMPANY</strong>.
-                    </li>
-                    <li>
-                      Klik tombol konfirmasi di bawah, sistem akan{" "}
-                      <strong>memverifikasi otomatis</strong>.
-                    </li>
-                  </ol>
-                </div>
-              </div>
-            )}
-
-            {/* TOMBOL AKSI */}
             <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button
                 onClick={handleProcessPayment}
-                disabled={
-                  processing || (paymentMethod === "MIDTRANS" && !snapReady)
-                }
+                disabled={processing || !snapReady}
                 className={`flex-1 py-4 px-6 rounded-lg font-bold text-white transition-all uppercase tracking-wide
                     ${
                       processing
@@ -505,11 +352,7 @@ export default function PaymentPage() {
                     }
                 `}
               >
-                {processing
-                  ? "Memproses..."
-                  : paymentMethod === "MANUAL"
-                  ? "Saya Sudah Transfer (Konfirmasi Otomatis)"
-                  : "Bayar Sekarang (Midtrans)"}
+                {processing ? "Memproses..." : "Bayar Sekarang"}
               </button>
 
               <button
@@ -526,9 +369,8 @@ export default function PaymentPage() {
             </div>
 
             <p className="mt-4 text-center text-xs text-gray-400">
-              {paymentMethod === "MANUAL"
-                ? "Mode Demo: Pembayaran akan diverifikasi secara otomatis oleh sistem."
-                : "Pembayaran aman & terenkripsi oleh Midtrans Payment Gateway."}
+              Pembayaran aman & terenkripsi oleh Midtrans Payment Gateway
+              (Sandbox Mode).
             </p>
           </div>
         </div>
