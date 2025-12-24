@@ -3,13 +3,15 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useParams, usePathname } from "next/navigation";
-import Navbar from "@/components/layout/Navbar"; // ✅ Tambah Navbar
+import { useTranslations } from "next-intl";
+import Navbar from "@/components/layout/Navbar";
 import OrderStatus from "@/components/orders/OrderStatus";
 import OrderTimeline from "@/components/orders/OrderTimeline";
 import Loading from "@/components/ui/Loading";
 import { formatCurrency } from "@/lib/utils";
 
 export default function OrderDetailPage() {
+  const t = useTranslations("orders");
   const { data: session, status } = useSession();
   const router = useRouter();
   const params = useParams();
@@ -41,7 +43,7 @@ export default function OrderDetailPage() {
       setLoading(true);
       setError(null);
       const response = await fetch(`/api/orders/${orderId}`);
-      if (!response.ok) throw new Error("Gagal memuat detail pesanan");
+      if (!response.ok) throw new Error(t("loadError"));
       const result = await response.json();
       if (result.success && result.data) setOrder(result.data);
     } catch (error) {
@@ -56,7 +58,7 @@ export default function OrderDetailPage() {
   };
 
   const handleContactSupport = () => {
-    const message = `Halo Admin Motiv, saya butuh bantuan untuk Order #${order?.orderNumber}`;
+    const message = `Hello Motiv Admin, I need help with Order #${order?.orderNumber}`;
     window.open(
       `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`,
       "_blank"
@@ -89,7 +91,7 @@ export default function OrderDetailPage() {
                 onClick={() => router.push("/profile/orders")}
                 className="mt-6 px-8 py-3 bg-[#1A1A1A] text-white hover:bg-black transition-colors"
               >
-                Kembali ke Daftar
+                {t("backToOrders")}
               </button>
             </div>
           </div>
@@ -102,10 +104,10 @@ export default function OrderDetailPage() {
 
   return (
     <>
-      <Navbar /> {/* ✅ Konsistensi: Navbar */}
+      <Navbar />
       <div className="min-h-screen bg-[#FDFCFA] py-8 pt-28 print:bg-white print:pt-0">
         <div className="max-w-4xl mx-auto px-4 print:px-0 print:max-w-full">
-          {/* Tombol Kembali (Hidden saat print) */}
+          {/* Back Button (Hidden on print) */}
           <button
             onClick={() => router.push("/profile/orders")}
             className="mb-6 flex items-center text-[#6B7280] hover:text-[#1A1A1A] transition-colors font-medium group print:hidden"
@@ -123,7 +125,7 @@ export default function OrderDetailPage() {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            Kembali ke Daftar Pesanan
+            {t("backToList")}
           </button>
 
           {/* Header Card */}
@@ -131,10 +133,11 @@ export default function OrderDetailPage() {
             <div className="flex justify-between items-start flex-wrap gap-4">
               <div>
                 <h1 className="text-3xl font-bold text-[#1A1A1A] mb-2">
-                  Detail Pesanan
+                  {t("orderDetail")}
                 </h1>
                 <p className="text-[#1A1A1A] font-medium">
-                  Order #{order.orderNumber}
+                  {t("orderNumber")}
+                  {order.orderNumber}
                 </p>
                 <p className="text-sm text-[#6B7280] mt-2">
                   {new Date(order.createdAt).toLocaleDateString("id-ID", {
@@ -166,7 +169,7 @@ export default function OrderDetailPage() {
                       d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
                     />
                   </svg>
-                  Invoice
+                  {t("printInvoice")}
                 </button>
 
                 {order.status === "PENDING" &&
@@ -175,7 +178,7 @@ export default function OrderDetailPage() {
                       onClick={handlePayment}
                       className="px-8 py-3 bg-[#1A1A1A] text-white hover:bg-black transition-colors font-semibold uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                     >
-                      Bayar Sekarang
+                      {t("payNow")}
                     </button>
                   )}
               </div>
@@ -183,11 +186,11 @@ export default function OrderDetailPage() {
           </div>
 
           <div className="space-y-6">
-            {/* Status & Timeline (Hidden saat Print) */}
+            {/* Status & Timeline (Hidden on Print) */}
             <div className="bg-white shadow-md border border-[#E5E7EB] overflow-hidden print:hidden">
               <div className="bg-[#1A1A1A] px-6 py-4">
                 <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
-                  Status Pesanan
+                  {t("orderStatus")}
                 </h2>
               </div>
               <div className="p-6">
@@ -201,7 +204,7 @@ export default function OrderDetailPage() {
             <div className="bg-white shadow-md border border-[#E5E7EB] overflow-hidden print:hidden">
               <div className="bg-[#1A1A1A] px-6 py-4">
                 <h2 className="text-lg font-semibold text-white uppercase tracking-wider">
-                  Riwayat Pesanan
+                  {t("orderHistory")}
                 </h2>
               </div>
               <div className="p-6">
@@ -209,17 +212,16 @@ export default function OrderDetailPage() {
               </div>
             </div>
 
-            {/* Produk */}
+            {/* Products */}
             <div className="bg-white shadow-md border border-[#E5E7EB] overflow-hidden print:shadow-none print:border print:border-[#1A1A1A]">
               <div className="bg-[#1A1A1A] px-6 py-4 print:bg-white print:border-b print:border-[#1A1A1A]">
                 <h2 className="text-lg font-semibold text-white uppercase tracking-wider print:text-[#1A1A1A] print:pl-0">
-                  Produk Dipesan
+                  {t("orderedProducts")}
                 </h2>
               </div>
               <div className="p-6">
                 <div className="space-y-4">
                   {order.items?.map((item, index) => {
-                    // Konsistensi pengambilan data produk
                     const product = item.product || item.variant?.product;
                     const variant = item.variant;
                     return (
@@ -245,13 +247,13 @@ export default function OrderDetailPage() {
                             {product?.name || "Product"}
                           </h4>
                           <p className="text-sm text-[#6B7280]">
-                            Ukuran:{" "}
+                            {t("size")}:{" "}
                             <span className="font-medium text-[#1A1A1A]">
                               {variant?.size || "-"}
                             </span>
                           </p>
                           <p className="text-sm text-[#6B7280]">
-                            Jumlah:{" "}
+                            {t("quantity")}:{" "}
                             <span className="font-medium text-[#1A1A1A]">
                               {item.quantity}x
                             </span>
@@ -262,7 +264,7 @@ export default function OrderDetailPage() {
                             {formatCurrency(item.price)}
                           </p>
                           <p className="text-sm text-[#6B7280]">
-                            Total:{" "}
+                            {t("itemTotal")}:{" "}
                             <span className="font-bold text-[#1A1A1A]">
                               {formatCurrency(item.price * item.quantity)}
                             </span>
@@ -276,17 +278,18 @@ export default function OrderDetailPage() {
             </div>
 
             {/* Pengiriman */}
+            {/* Shipping Information */}
             <div className="bg-white shadow-md border border-[#E5E7EB] overflow-hidden print:shadow-none print:border print:border-[#1A1A1A] print:mt-4">
               <div className="bg-[#1A1A1A] px-6 py-4 print:bg-white print:border-b print:border-[#1A1A1A]">
                 <h2 className="text-lg font-semibold text-white uppercase tracking-wider print:text-[#1A1A1A] print:pl-0">
-                  Informasi Pengiriman
+                  {t("shippingInfo")}
                 </h2>
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <p className="text-sm font-medium text-[#6B7280] mb-1">
-                      Penerima
+                      {t("recipient")}
                     </p>
                     <p className="font-semibold text-[#1A1A1A] text-lg">
                       {order.recipientName || order.shippingName}
@@ -294,7 +297,7 @@ export default function OrderDetailPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-[#6B7280] mb-1">
-                      Telepon
+                      {t("phone")}
                     </p>
                     <p className="font-medium text-[#1A1A1A]">
                       {order.recipientPhone || order.shippingPhone}
@@ -302,7 +305,7 @@ export default function OrderDetailPage() {
                   </div>
                   <div className="md:col-span-2">
                     <p className="text-sm font-medium text-[#6B7280] mb-1">
-                      Alamat
+                      {t("address")}
                     </p>
                     <p className="text-[#1A1A1A]">
                       {order.shippingAddress}, {order.shippingCity}{" "}
@@ -312,7 +315,7 @@ export default function OrderDetailPage() {
                   {(order.courierName || order.courierService) && (
                     <div className="md:col-span-2 pt-4 border-t border-[#E5E7EB] mt-2">
                       <p className="text-sm font-medium text-[#6B7280] mb-1">
-                        Kurir
+                        {t("courier")}
                       </p>
                       <p className="font-semibold text-[#1A1A1A] uppercase">
                         {order.courierName} - {order.courierService}
@@ -329,7 +332,7 @@ export default function OrderDetailPage() {
                               {order.trackingNumber}
                             </span>
                             <span className="text-xs text-blue-600">
-                              Lacak ↗
+                              {t("track")} ↗
                             </span>
                           </a>
                         </div>
@@ -345,31 +348,31 @@ export default function OrderDetailPage() {
               </div>
             </div>
 
-            {/* Ringkasan Biaya */}
+            {/* Cost Summary */}
             <div className="bg-white shadow-md border border-[#E5E7EB] overflow-hidden print:shadow-none print:border print:border-[#1A1A1A] print:mt-4 print:break-inside-avoid">
               <div className="bg-[#1A1A1A] px-6 py-4 print:bg-white print:border-b print:border-[#1A1A1A]">
                 <h2 className="text-lg font-semibold text-white uppercase tracking-wider print:text-[#1A1A1A] print:pl-0">
-                  Ringkasan Biaya
+                  {t("costSummary")}
                 </h2>
               </div>
               <div className="p-6">
                 <div className="space-y-2 text-[#1A1A1A]">
                   <div className="flex justify-between">
-                    <span className="text-[#6B7280]">Subtotal</span>
+                    <span className="text-[#6B7280]">{t("subtotal")}</span>
                     <span>{formatCurrency(order.subtotal)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#6B7280]">Ongkir</span>
+                    <span className="text-[#6B7280]">{t("shippingCost")}</span>
                     <span>{formatCurrency(order.shippingCost)}</span>
                   </div>
                   {order.discount > 0 && (
                     <div className="flex justify-between text-red-600">
-                      <span>Diskon</span>
+                      <span>{t("discount")}</span>
                       <span>-{formatCurrency(order.discount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between font-bold text-xl pt-4 border-t border-[#E5E7EB] mt-2">
-                    <span>Total</span>
+                    <span>{t("total")}</span>
                     <span>{formatCurrency(order.total)}</span>
                   </div>
                 </div>
@@ -378,19 +381,19 @@ export default function OrderDetailPage() {
 
             {/* Footer Invoice (Print Only) */}
             <div className="hidden print:block text-center mt-12 text-sm text-[#6B7280]">
-              <p>Terima kasih telah berbelanja di Motiv Company</p>
+              <p>{t("thankYou")}</p>
               <p>www.motivcompany.com</p>
             </div>
 
             {/* Help (Screen Only) */}
             <div className="bg-[#1A1A1A] shadow-lg overflow-hidden text-white print:hidden">
               <div className="p-8 text-center">
-                <h2 className="text-xl font-bold mb-2">Butuh Bantuan?</h2>
+                <h2 className="text-xl font-bold mb-2">{t("needHelp")}</h2>
                 <button
                   onClick={handleContactSupport}
                   className="px-8 py-3 bg-white text-[#1A1A1A] hover:bg-[#F9FAFB] transition-colors font-bold uppercase tracking-wider inline-flex items-center"
                 >
-                  <span className="mr-2">💬</span> Hubungi Customer Service
+                  <span className="mr-2">💬</span> {t("contactSupport")}
                 </button>
               </div>
             </div>

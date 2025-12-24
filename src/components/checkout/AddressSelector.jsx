@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 /**
  * AddressSelector Component
@@ -9,6 +10,8 @@ import { useRouter } from "next/navigation";
  */
 
 export default function AddressSelector({ onSelectAddress }) {
+  const t = useTranslations("address");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const [addresses, setAddresses] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
@@ -38,7 +41,7 @@ export default function AddressSelector({ onSelectAddress }) {
         }
       }
     } catch (err) {
-      setError("Gagal memuat alamat");
+      setError(t("loadError"));
       console.error(err);
     } finally {
       setLoading(false);
@@ -70,7 +73,7 @@ export default function AddressSelector({ onSelectAddress }) {
   if (loading) {
     return (
       <div className="border border-[#E5E7EB] p-8 text-center">
-        <p className="text-[#6B7280]">Memuat alamat...</p>
+        <p className="text-[#6B7280]">{tCommon("loading")}</p>
       </div>
     );
   }
@@ -97,16 +100,13 @@ export default function AddressSelector({ onSelectAddress }) {
             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
           />
         </svg>
-        <h3 className="text-lg font-semibold mb-2">Belum Ada Alamat</h3>
-        <p className="text-[#6B7280] mb-4">
-          Anda belum memiliki alamat pengiriman. Tambahkan alamat untuk
-          melanjutkan checkout.
-        </p>
+        <h3 className="text-lg font-semibold mb-2">{t("noAddresses")}</h3>
+        <p className="text-[#6B7280] mb-4">{t("noAddressesCheckoutDesc")}</p>
         <button
           onClick={() => router.push("/profile/addresses?action=add")}
           className="px-6 py-2 bg-[#1A1A1A] text-white hover:bg-black transition"
         >
-          Tambah Alamat
+          {t("addNew")}
         </button>
       </div>
     );
@@ -144,7 +144,7 @@ export default function AddressSelector({ onSelectAddress }) {
                 </span>
                 {address.isDefault && (
                   <span className="text-xs bg-[#1A1A1A] text-white px-2 py-0.5">
-                    Default
+                    {t("default")}
                   </span>
                 )}
               </div>
@@ -168,7 +168,7 @@ export default function AddressSelector({ onSelectAddress }) {
                   }}
                   className="text-xs text-[#1A1A1A] hover:text-[#6B7280] underline"
                 >
-                  Jadikan Default
+                  {t("setDefault")}
                 </button>
               )}
               <button
@@ -178,7 +178,7 @@ export default function AddressSelector({ onSelectAddress }) {
                 }}
                 className="text-xs text-[#6B7280] hover:text-[#1A1A1A] underline"
               >
-                Edit
+                {tCommon("edit")}
               </button>
             </div>
           </div>
@@ -204,7 +204,7 @@ export default function AddressSelector({ onSelectAddress }) {
             d="M12 4v16m8-8H4"
           />
         </svg>
-        Tambah Alamat Baru
+        {t("addNew")}
       </button>
     </div>
   );

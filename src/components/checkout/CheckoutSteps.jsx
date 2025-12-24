@@ -1,16 +1,20 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 /**
  * CheckoutSteps Component
  * Visual stepper for checkout process
  */
 
 export default function CheckoutSteps({ currentStep }) {
+  const t = useTranslations("checkout");
+
   const steps = [
-    { number: 1, title: "Keranjang", path: "/cart" },
-    { number: 2, title: "Alamat Pengiriman", path: "/checkout" },
-    { number: 3, title: "Pembayaran", path: "/checkout/payment" },
-    { number: 4, title: "Selesai", path: "/checkout/success" },
+    { number: 1, title: t("steps.cart"), path: "/cart" },
+    { number: 2, title: t("steps.shipping"), path: "/checkout" },
+    { number: 3, title: t("steps.payment"), path: "/checkout/payment" },
+    { number: 4, title: t("steps.complete"), path: "/checkout/success" },
   ];
 
   return (

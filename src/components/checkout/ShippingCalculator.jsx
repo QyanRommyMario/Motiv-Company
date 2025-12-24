@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 // 1. Tambahkan opsi "custom" ke daftar kurir
 const COURIERS = [
@@ -9,7 +10,7 @@ const COURIERS = [
   { code: "tiki", name: "TIKI" },
   { code: "sicepat", name: "SiCepat" },
   { code: "jnt", name: "J&T" },
-  { code: "custom", name: "Custom / Kurir Toko" }, // <-- Opsi Baru
+  { code: "custom", name: "Custom", isCustom: true }, // <-- Opsi Baru
 ];
 
 export default function ShippingCalculator({
@@ -17,6 +18,7 @@ export default function ShippingCalculator({
   weight = 1000,
   onSelectShipping,
 }) {
+  const t = useTranslations("checkout");
   const [selectedCourier, setSelectedCourier] = useState(null);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -43,11 +45,11 @@ export default function ShippingCalculator({
       setServices([
         {
           service: "CUSTOM",
-          description: "Pengiriman Diatur Sendiri / Hubungi Admin",
+          description: t("customCourierDesc"),
           cost: [
             {
               value: 0, // Set Rp 0 atau harga default
-              etd: "Konfirmasi Admin", // Estimasi waktu
+              etd: t("confirmAdmin"), // Estimasi waktu
             },
           ],
         },
@@ -61,7 +63,7 @@ export default function ShippingCalculator({
     const destId = destination?.cityId;
 
     if (!destId) {
-      setError("Alamat tidak valid (ID Kota hilang).");
+      setError(t("addressNotValid"));
       setLoading(false);
       return;
     }
@@ -82,11 +84,11 @@ export default function ShippingCalculator({
       if (data.success) {
         setServices(data.data.costs);
       } else {
-        setError(data.message || "Gagal cek ongkir");
+        setError(data.message || t("checkShippingError"));
       }
     } catch (err) {
       console.error(err);
-      setError("Terjadi kesalahan jaringan");
+      setError(t("networkError"));
     } finally {
       setLoading(false);
     }
@@ -109,7 +111,7 @@ export default function ShippingCalculator({
   if (!destination) {
     return (
       <div className="p-4 bg-[#F9FAFB] border border-[#E5E7EB] text-center text-[#6B7280] text-sm">
-        Pilih alamat pengiriman terlebih dahulu.
+        {t("selectAddress")}
       </div>
     );
   }
@@ -121,14 +123,16 @@ export default function ShippingCalculator({
         <div className="flex items-start gap-3">
           {/* ... (kode ikon svg sama seperti sebelumnya) ... */}
           <div>
-            <p className="text-blue-900 font-bold mb-1">Tujuan Pengiriman:</p>
+            <p className="text-blue-900 font-bold mb-1">
+              {t("shippingDestination")}
+            </p>
             <p className="text-blue-800">
               {destination.city}{" "}
               {destination.postalCode ? `(${destination.postalCode})` : ""},{" "}
               {destination.province}
             </p>
             <p className="text-xs text-blue-600 mt-1">
-              Berat Paket: {weight} gram
+              {t("packageWeight")} {weight} {t("gram")}
             </p>
           </div>
         </div>
@@ -137,7 +141,7 @@ export default function ShippingCalculator({
       {/* Pilihan Tombol Kurir */}
       <div>
         <label className="block text-sm font-semibold mb-2 text-[#1A1A1A]">
-          Pilih Kurir
+          {t("selectCourier")}
         </label>
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
           {COURIERS.map((c) => (
@@ -152,7 +156,7 @@ export default function ShippingCalculator({
               }`}
             >
               <span className="uppercase tracking-wider text-xs text-center">
-                {c.name}
+                {c.isCustom ? t("customCourier") : c.name}
               </span>
             </button>
           ))}
@@ -163,7 +167,9 @@ export default function ShippingCalculator({
       {loading && (
         <div className="text-center py-6">
           <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#1A1A1A]"></div>
-          <p className="text-xs text-[#9CA3AF] mt-2">Menghitung ongkir...</p>
+          <p className="text-xs text-[#9CA3AF] mt-2">
+            {t("calculatingShipping")}
+          </p>
         </div>
       )}
 
@@ -178,7 +184,7 @@ export default function ShippingCalculator({
       {!loading && services.length > 0 && (
         <div className="space-y-2 mt-2 animate-fade-in">
           <p className="text-sm font-semibold text-[#1A1A1A]">
-            Layanan Tersedia:
+            {t("availableServices")}
           </p>
           {services.map((svc, idx) => {
             const cost = svc.cost[0];
@@ -203,12 +209,12 @@ export default function ShippingCalculator({
                     </span>
                   </div>
                   <div className="text-xs text-[#6B7280] mt-1 flex items-center gap-1">
-                    Estimasi: {cost.etd || "-"}
+                    {t("estimatedDelivery")} {cost.etd || "-"}
                   </div>
                 </div>
                 <div className="font-bold text-[#1A1A1A] text-lg">
                   {cost.value === 0
-                    ? "Gratis / Sesuai Kesepakatan"
+                    ? t("freeOrAgreed")
                     : `Rp ${cost.value.toLocaleString("id-ID")}`}
                 </div>
               </div>

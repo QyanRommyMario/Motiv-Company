@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 
 export default function AddressForm({ address = null, onSubmit, onCancel }) {
+  const t = useTranslations("address");
+  const tCommon = useTranslations("common");
   const [formData, setFormData] = useState({
     label: address?.label || "",
     name: address?.name || "",
@@ -113,7 +116,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.cityId) {
-      setErrorMsg("Wajib memilih Provinsi dan Kota dari dropdown!");
+      setErrorMsg(t("requiredProvinceCity"));
       return;
     }
     setLoading(true);
@@ -132,7 +135,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
       {/* 1. Negara */}
       <div>
         <label className="block text-sm font-medium text-[#6B7280] mb-2">
-          Negara
+          {t("country")}
         </label>
         <select
           disabled
@@ -145,12 +148,12 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
       {/* 2. Label */}
       <div>
         <label className="block text-sm font-medium text-[#6B7280] mb-2">
-          Label Alamat
+          {t("label")}
         </label>
         <Input
           value={formData.label || ""}
           onChange={(e) => handleChange("label", e.target.value)}
-          placeholder="Contoh: Rumah, Kantor"
+          placeholder={t("labelPlaceholder")}
           required
         />
       </div>
@@ -159,7 +162,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-[#6B7280] mb-2">
-            Nama Penerima
+            {t("recipientName")}
           </label>
           <Input
             value={formData.name || ""}
@@ -169,7 +172,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
         </div>
         <div>
           <label className="block text-sm font-medium text-[#6B7280] mb-2">
-            Telepon
+            {t("phone")}
           </label>
           <Input
             value={formData.phone || ""}
@@ -182,7 +185,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
       {/* 4. Alamat Lengkap (NAIK KE ATAS) */}
       <div>
         <label className="block text-sm font-medium text-[#6B7280] mb-2">
-          Alamat Lengkap
+          {t("fullAddress")}
         </label>
         <textarea
           className="w-full px-4 py-3 border border-[#E5E7EB] focus:ring-2 focus:ring-black resize-none"
@@ -190,7 +193,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
           value={formData.address || ""}
           onChange={(e) => handleChange("address", e.target.value)}
           required
-          placeholder="Nama Jalan, Nomor Rumah, RT/RW, Kelurahan, Kecamatan"
+          placeholder={t("addressPlaceholder")}
         />
       </div>
 
@@ -198,7 +201,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-[#F9FAFB] border border-[#E5E7EB]">
         <div>
           <label className="block text-sm font-bold text-[#1A1A1A] mb-2">
-            Provinsi *
+            {t("province")} *
           </label>
           <select
             className="w-full px-4 py-2 border border-[#E5E7EB] bg-white focus:ring-2 focus:ring-black"
@@ -206,7 +209,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
             onChange={handleProvinceChange}
             required
           >
-            <option value="">-- Pilih Provinsi --</option>
+            <option value="">-- {t("selectProvince")} --</option>
             {provinces.map((p) => (
               <option key={p.province_id} value={p.province_id}>
                 {p.province}
@@ -216,7 +219,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
         </div>
         <div>
           <label className="block text-sm font-bold text-[#1A1A1A] mb-2">
-            Kota/Kabupaten *
+            {t("city")} *
           </label>
           <select
             className="w-full px-4 py-2 border border-[#E5E7EB] bg-white disabled:bg-[#F9FAFB]"
@@ -226,7 +229,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
             required
           >
             <option value="">
-              {loadingLoc ? "Loading..." : "-- Pilih Kota --"}
+              {loadingLoc ? tCommon("loading") : `-- ${t("selectCity")} --`}
             </option>
             {cities.map((c) => (
               <option key={c.city_id} value={c.city_id}>
@@ -240,13 +243,13 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
       {/* 6. Kode Pos (Paling Bawah) */}
       <div>
         <label className="block text-sm font-medium text-[#6B7280] mb-2">
-          Kode Pos
+          {t("postalCode")}
         </label>
         <Input
           value={formData.postalCode || ""}
           onChange={(e) => handleChange("postalCode", e.target.value)}
           required
-          placeholder="Otomatis terisi jika kota dipilih"
+          placeholder={t("postalCodePlaceholder")}
         />
       </div>
 
@@ -257,19 +260,19 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
           onChange={(e) => handleChange("isDefault", e.target.checked)}
           className="w-4 h-4"
         />
-        <label className="text-sm text-[#6B7280]">Jadikan Alamat Utama</label>
+        <label className="text-sm text-[#6B7280]">{t("makeDefault")}</label>
       </div>
 
       <div className="flex gap-3 pt-6 border-t border-[#E5E7EB] mt-4">
         <Button type="submit" loading={loading} fullWidth>
-          Simpan
+          {tCommon("save")}
         </Button>
         <button
           type="button"
           onClick={onCancel}
           className="px-4 border border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium"
         >
-          Batal
+          {tCommon("cancel")}
         </button>
       </div>
     </form>

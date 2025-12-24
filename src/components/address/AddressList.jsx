@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import AddressCard from "./AddressCard";
 import Loading from "@/components/ui/Loading";
 
@@ -10,6 +11,7 @@ import Loading from "@/components/ui/Loading";
  */
 
 export default function AddressList({ onEdit, refresh }) {
+  const t = useTranslations("address");
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -26,11 +28,11 @@ export default function AddressList({ onEdit, refresh }) {
       if (data.success) {
         setAddresses(data.data);
       } else {
-        setError(data.message || "Gagal memuat alamat");
+        setError(data.message || t("loadError"));
       }
     } catch (err) {
       console.error("Error fetching addresses:", err);
-      setError("Gagal memuat alamat");
+      setError(t("loadError"));
     } finally {
       setLoading(false);
     }
@@ -48,11 +50,11 @@ export default function AddressList({ onEdit, refresh }) {
       if (data.success) {
         fetchAddresses(); // Refresh list
       } else {
-        alert(data.message || "Gagal mengatur alamat default");
+        alert(data.message || t("setDefaultError"));
       }
     } catch (err) {
       console.error("Error setting default:", err);
-      alert("Gagal mengatur alamat default");
+      alert(t("setDefaultError"));
     }
   };
 
@@ -66,11 +68,11 @@ export default function AddressList({ onEdit, refresh }) {
       if (data.success) {
         fetchAddresses(); // Refresh list
       } else {
-        alert(data.message || "Gagal menghapus alamat");
+        alert(data.message || t("deleteError"));
       }
     } catch (err) {
       console.error("Error deleting address:", err);
-      alert("Gagal menghapus alamat");
+      alert(t("deleteError"));
     }
   };
 
@@ -113,11 +115,9 @@ export default function AddressList({ onEdit, refresh }) {
           />
         </svg>
         <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">
-          Belum Ada Alamat
+          {t("noAddresses")}
         </h3>
-        <p className="text-[#6B7280]">
-          Tambahkan alamat pengiriman untuk memudahkan checkout
-        </p>
+        <p className="text-[#6B7280]">{t("noAddressesDesc")}</p>
       </div>
     );
   }

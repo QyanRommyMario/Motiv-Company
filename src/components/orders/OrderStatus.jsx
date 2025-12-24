@@ -1,27 +1,31 @@
 "use client";
 
-const statusSteps = [
-  { key: "PENDING", label: "Menunggu Pembayaran", icon: "1" },
-  { key: "PAID", label: "Dibayar", icon: "2" },
-  { key: "PROCESSING", label: "Diproses", icon: "3" },
-  { key: "SHIPPED", label: "Dikirim", icon: "4" },
-  { key: "DELIVERED", label: "Selesai", icon: "✓" },
-];
-
-const statusOrder = ["PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED"];
+import { useTranslations } from "next-intl";
 
 export default function OrderStatus({ currentStatus, paymentStatus }) {
+  const t = useTranslations("orders");
+
+  const statusSteps = [
+    { key: "PENDING", label: t("status.PENDING"), icon: "1" },
+    { key: "PAID", label: t("status.PAID"), icon: "2" },
+    { key: "PROCESSING", label: t("status.PROCESSING"), icon: "3" },
+    { key: "SHIPPED", label: t("status.SHIPPED"), icon: "4" },
+    { key: "DELIVERED", label: t("status.DELIVERED"), icon: "✓" },
+  ];
+
+  const statusOrder = ["PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED"];
+
   // Jika dibatalkan, tampilkan status khusus
   if (currentStatus === "CANCELLED") {
     return (
       <div className="bg-red-50 border-2 border-red-600 rounded-lg p-6 text-center">
         <h3 className="text-xl font-bold text-red-900 mb-2 uppercase tracking-wider">
-          Pesanan Dibatalkan
+          {t("status.CANCELLED")}
         </h3>
         <p className="text-sm text-red-700 font-medium">
           {paymentStatus === "FAILED"
-            ? "Pembayaran gagal atau ditolak"
-            : "Pesanan telah dibatalkan"}
+            ? t("statusMessages.paymentFailed")
+            : t("statusMessages.CANCELLED")}
         </p>
       </div>
     );
@@ -92,19 +96,14 @@ export default function OrderStatus({ currentStatus, paymentStatus }) {
       {/* Status Info */}
       <div className="mt-6 p-5 bg-gray-50 border border-gray-200 rounded-lg">
         <p className="font-bold text-gray-900 text-lg mb-2 uppercase tracking-wider">
-          {statusSteps[currentIndex]?.label || "Status Tidak Diketahui"}
+          {statusSteps[currentIndex]?.label || t("status.unknown")}
         </p>
         <p className="text-sm text-gray-700 leading-relaxed">
-          {currentStatus === "PENDING" &&
-            "Silakan selesaikan pembayaran untuk melanjutkan pesanan"}
-          {currentStatus === "PAID" &&
-            "Pembayaran berhasil! Pesanan Anda sedang diproses"}
-          {currentStatus === "PROCESSING" &&
-            "Pesanan sedang disiapkan oleh penjual"}
-          {currentStatus === "SHIPPED" &&
-            "Pesanan dalam perjalanan menuju Anda"}
-          {currentStatus === "DELIVERED" &&
-            "Pesanan telah sampai. Terima kasih!"}
+          {currentStatus === "PENDING" && t("statusMessages.PENDING")}
+          {currentStatus === "PAID" && t("statusMessages.PAID")}
+          {currentStatus === "PROCESSING" && t("statusMessages.PROCESSING")}
+          {currentStatus === "SHIPPED" && t("statusMessages.SHIPPED")}
+          {currentStatus === "DELIVERED" && t("statusMessages.DELIVERED")}
         </p>
       </div>
     </div>

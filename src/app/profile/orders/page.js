@@ -3,12 +3,14 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Navbar from "@/components/layout/Navbar"; // ✅ Tambah Navbar
 import OrderCard from "@/components/orders/OrderCard";
 import OrderFilter from "@/components/orders/OrderFilter";
 import Loading from "@/components/ui/Loading";
 
 function OrderListContent() {
+  const t = useTranslations("orders");
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -79,17 +81,15 @@ function OrderListContent() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
               <h1 className="text-3xl font-bold text-[#1A1A1A]">
-                Riwayat Pesanan
+                {t("title")}
               </h1>
-              <p className="text-[#6B7280] mt-1">
-                Kelola dan pantau status pesanan Anda
-              </p>
+              <p className="text-[#6B7280] mt-1">{t("subtitle")}</p>
             </div>
             <button
               onClick={() => router.push("/products")}
               className="px-6 py-2.5 bg-[#1A1A1A] text-white hover:bg-black transition-colors font-semibold text-sm"
             >
-              Belanja Lagi
+              {t("shopAgain")}
             </button>
           </div>
 
@@ -124,16 +124,14 @@ function OrderListContent() {
                   </svg>
                 </div>
                 <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">
-                  Belum ada pesanan
+                  {t("noOrders")}
                 </h3>
-                <p className="text-[#6B7280] mb-6">
-                  Anda belum melakukan pemesanan apapun.
-                </p>
+                <p className="text-[#6B7280] mb-6">{t("noOrdersDesc")}</p>
                 <button
                   onClick={() => router.push("/products")}
                   className="px-8 py-3 bg-[#1A1A1A] text-white hover:bg-black transition-colors font-semibold uppercase tracking-wider"
                 >
-                  Lihat Produk
+                  {t("viewProducts")}
                 </button>
               </div>
             )}

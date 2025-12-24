@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import Navbar from "@/components/layout/Navbar";
 import AddressList from "@/components/address/AddressList";
 import AddressForm from "@/components/address/AddressForm";
@@ -14,6 +15,8 @@ import Loading from "@/components/ui/Loading";
  */
 
 function AddressesContent() {
+  const t = useTranslations("address");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
@@ -105,11 +108,11 @@ function AddressesContent() {
           router.push("/profile/addresses");
         }
       } else {
-        alert(data.message || "Gagal menyimpan alamat");
+        alert(data.message || t("saveError"));
       }
     } catch (err) {
       console.error("Error saving address:", err);
-      alert("Gagal menyimpan alamat");
+      alert(t("saveError"));
     }
   };
 
@@ -134,11 +137,9 @@ function AddressesContent() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-4xl font-bold text-[#1A1A1A] mb-3 tracking-tight">
-                  Alamat Pengiriman
+                  {t("title")}
                 </h1>
-                <p className="text-[#6B7280]">
-                  Kelola alamat pengiriman untuk memudahkan checkout
-                </p>
+                <p className="text-[#6B7280]">{t("noAddressesDesc")}</p>
               </div>
 
               {!showForm && (
@@ -159,7 +160,7 @@ function AddressesContent() {
                       d="M12 4v16m8-8H4"
                     />
                   </svg>
-                  Tambah Alamat
+                  {t("addNew")}
                 </button>
               )}
             </div>
@@ -170,7 +171,7 @@ function AddressesContent() {
             {showForm ? (
               <div className="p-8">
                 <h2 className="text-2xl font-bold text-[#1A1A1A] mb-8 tracking-tight">
-                  {editingAddress ? "Edit Alamat" : "Tambah Alamat Baru"}
+                  {editingAddress ? t("edit") : t("addNew")}
                 </h2>
                 <AddressForm
                   address={editingAddress}
@@ -205,7 +206,7 @@ function AddressesContent() {
                     d="M10 19l-7-7m0 0l7-7m-7 7h18"
                   />
                 </svg>
-                Kembali ke Beranda
+                {tCommon("backToHome")}
               </button>
             </div>
           )}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import useCartStore from "@/store/cartStore";
 import CheckoutSteps from "@/components/checkout/CheckoutSteps";
 import AddressSelector from "@/components/checkout/AddressSelector";
@@ -17,6 +18,8 @@ import Loading from "@/components/ui/Loading";
  */
 
 export default function CheckoutPage() {
+  const t = useTranslations("checkout");
+  const tCart = useTranslations("cart");
   const router = useRouter();
   const { data: session, status } = useSession();
   const { items, syncWithServer } = useCartStore();
@@ -43,14 +46,13 @@ export default function CheckoutPage() {
     try {
       console.log("🔄 Initializing checkout, current items:", items.length);
       await syncWithServer();
-      // Wait for state update
       setTimeout(() => {
         console.log("✅ Cart synced, items after sync:", items.length, items);
       }, 100);
       setLoading(false);
     } catch (err) {
       console.error("❌ Error loading checkout:", err);
-      setError("Gagal memuat data checkout");
+      setError(t("loadCheckoutError"));
       setLoading(false);
     }
   };
@@ -67,12 +69,12 @@ export default function CheckoutPage() {
   const handleProceedToPayment = async () => {
     // Validate
     if (!selectedAddress) {
-      setError("Pilih alamat pengiriman");
+      setError(t("selectAddressError"));
       return;
     }
 
     if (!selectedShipping) {
-      setError("Pilih metode pengiriman");
+      setError(t("selectShippingError"));
       return;
     }
 
@@ -116,7 +118,7 @@ export default function CheckoutPage() {
       router.push("/checkout/payment");
     } catch (err) {
       console.error("Error creating order:", err);
-      setError("Gagal membuat pesanan. Silakan coba lagi.");
+      setError(t("createOrderError"));
       setProcessing(false);
     }
   };
@@ -146,13 +148,10 @@ export default function CheckoutPage() {
               d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
             />
           </svg>
-          <h1 className="text-2xl font-bold mb-2">Keranjang Kosong</h1>
-          <p className="text-gray-600 mb-6">
-            Anda belum memiliki item di keranjang. Tambahkan produk untuk
-            melanjutkan checkout.
-          </p>
+          <h1 className="text-2xl font-bold mb-2">{tCart("empty")}</h1>
+          <p className="text-gray-600 mb-6">{tCart("emptyDescription")}</p>
           <Button onClick={() => router.push("/products")}>
-            Belanja Sekarang
+            {tCart("shopNow")}
           </Button>
         </div>
       </div>
@@ -165,11 +164,9 @@ export default function CheckoutPage() {
         {/* Page Header */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] mb-2">
-            Checkout
+            {t("title")}
           </h1>
-          <p className="text-sm sm:text-base text-[#6B7280]">
-            Lengkapi informasi pengiriman untuk menyelesaikan pesanan
-          </p>
+          <p className="text-sm sm:text-base text-[#6B7280]">{t("subtitle")}</p>
         </div>
 
         {/* Checkout Steps */}
@@ -203,7 +200,7 @@ export default function CheckoutPage() {
                   </svg>
                 </div>
                 <h2 className="text-lg sm:text-xl font-semibold text-[#1A1A1A]">
-                  Alamat Pengiriman
+                  {t("shippingAddress")}
                 </h2>
               </div>
 
@@ -229,7 +226,7 @@ export default function CheckoutPage() {
                   </svg>
                 </div>
                 <h2 className="text-xl font-semibold text-[#1A1A1A]">
-                  Metode Pengiriman
+                  {t("shippingMethod")}
                 </h2>
               </div>
 
@@ -243,17 +240,17 @@ export default function CheckoutPage() {
             {/* Order Notes */}
             <div className="bg-white border border-[#E5E7EB] shadow-sm p-6">
               <h3 className="font-semibold text-[#1A1A1A] mb-3">
-                Catatan Pesanan (Opsional)
+                {t("orderNotes")}
               </h3>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Contoh: Kirim sore hari, Tolong hubungi sebelum kirim, dll."
+                placeholder={t("orderNotesPlaceholder")}
                 rows={4}
                 className="w-full px-4 py-3 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none resize-none"
               />
               <p className="text-xs text-[#6B7280] mt-2">
-                Catatan akan diteruskan ke kurir untuk pengiriman
+                {t("orderNotesHelp")}
               </p>
             </div>
           </div>
@@ -274,25 +271,22 @@ export default function CheckoutPage() {
                   fullWidth
                   loading={processing}
                 >
-                  {processing ? "Memproses..." : "Lanjut ke Pembayaran"}
+                  {processing ? t("processing") : t("proceedPayment")}
                 </Button>
 
                 <button
                   onClick={() => router.push("/cart")}
                   className="w-full px-6 py-3 border-2 border-[#E5E7EB] text-[#1A1A1A] hover:bg-[#F9FAFB] transition font-medium"
                 >
-                  Kembali ke Keranjang
+                  {t("backToCart")}
                 </button>
               </div>
 
               <div className="bg-[#F9FAFB] border border-[#E5E7EB] p-4 text-sm text-[#6B7280]">
                 <p className="font-medium mb-2 text-[#1A1A1A]">
-                  🔒 Transaksi Aman
+                  🔒 {t("secureTransaction")}
                 </p>
-                <p>
-                  Data Anda dilindungi dengan enkripsi SSL. Pembayaran diproses
-                  secara aman.
-                </p>
+                <p>{t("secureTransactionDescription")}</p>
               </div>
             </div>
           </div>

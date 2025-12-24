@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 /**
  * AddressCard Component
@@ -13,6 +14,8 @@ export default function AddressCard({
   onDelete,
   onSetDefault,
 }) {
+  const t = useTranslations("address");
+  const tCommon = useTranslations("common");
   const [loading, setLoading] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
@@ -59,7 +62,7 @@ export default function AddressCard({
           </h3>
           {address.isDefault && (
             <span className="text-xs bg-[#1A1A1A] text-white px-2 py-1 uppercase tracking-wider font-semibold">
-              Default
+              {t("default")}
             </span>
           )}
         </div>
@@ -70,17 +73,15 @@ export default function AddressCard({
             disabled={loading}
             className="text-sm text-[#6B7280] hover:text-[#1A1A1A] font-medium disabled:opacity-50 transition-colors"
           >
-            Edit
+            {tCommon("edit")}
           </button>
           <button
             onClick={handleDelete}
             disabled={loading || address.isDefault}
             className="text-sm text-[#6B7280] hover:text-red-600 font-medium disabled:opacity-50 transition-colors"
-            title={
-              address.isDefault ? "Tidak dapat menghapus alamat default" : ""
-            }
+            title={address.isDefault ? t("cannotDeleteDefault") : ""}
           >
-            {deleteConfirm ? "Yakin?" : "Hapus"}
+            {deleteConfirm ? t("confirmDelete") : tCommon("delete")}
           </button>
         </div>
       </div>
@@ -102,13 +103,13 @@ export default function AddressCard({
           disabled={loading}
           className="text-sm text-[#1A1A1A] hover:text-black font-semibold disabled:opacity-50 transition-colors uppercase tracking-wide"
         >
-          {loading ? "Memproses..." : "Jadikan Alamat Utama"}
+          {loading ? tCommon("processing") : t("makeDefault")}
         </button>
       )}
 
       {deleteConfirm && (
         <div className="mt-4 bg-[#F9FAFB] border border-[#E5E7EB] text-[#1A1A1A] px-4 py-3 text-xs font-medium">
-          Klik "Hapus" sekali lagi untuk konfirmasi penghapusan
+          {t("deleteConfirmMessage")}
         </div>
       )}
     </div>

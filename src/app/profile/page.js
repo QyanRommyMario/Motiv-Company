@@ -3,10 +3,12 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Loading from "@/components/ui/Loading";
 import Navbar from "@/components/layout/Navbar";
 
 export default function ProfilePage() {
+  const t = useTranslations("profile");
   const { data: session, status } = useSession();
   const router = useRouter();
   const [stats, setStats] = useState({ totalOrders: 0, totalAddresses: 0 });
@@ -54,7 +56,7 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto px-6 pt-32 pb-20">
         <div className="mb-12 border-b border-[#E5E7EB] pb-12">
           <p className="text-xs tracking-[0.2em] uppercase text-[#6B7280] font-bold mb-4">
-            Profil Akun
+            {t("title")}
           </p>
           <h1 className="text-4xl font-bold text-[#1A1A1A] mb-2">
             {session.user.name}
@@ -70,7 +72,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-2 gap-6 mb-12">
           <div className="bg-white p-8 border border-[#E5E7EB] shadow-sm">
             <p className="text-[11px] uppercase tracking-widest text-[#6B7280] font-black mb-2">
-              Total Pesanan
+              {t("totalOrders")}
             </p>
             <p className="text-3xl font-bold text-[#1A1A1A]">
               {stats.totalOrders}
@@ -78,7 +80,7 @@ export default function ProfilePage() {
           </div>
           <div className="bg-white p-8 border border-[#E5E7EB] shadow-sm">
             <p className="text-[11px] uppercase tracking-widest text-[#6B7280] font-black mb-2">
-              Alamat Tersimpan
+              {t("savedAddresses")}
             </p>
             <p className="text-3xl font-bold text-[#1A1A1A]">
               {stats.totalAddresses}
@@ -109,10 +111,10 @@ export default function ProfilePage() {
               </div>
               <div>
                 <h3 className="font-bold text-lg text-[#1A1A1A]">
-                  Pesanan Saya
+                  {t("myOrders")}
                 </h3>
                 <p className="text-sm text-[#4B5563] font-medium">
-                  Lacak dan kelola pesanan Anda
+                  {t("myOrdersDesc")}
                 </p>
               </div>
             </div>
@@ -159,10 +161,10 @@ export default function ProfilePage() {
               </div>
               <div>
                 <h3 className="font-bold text-lg text-[#1A1A1A]">
-                  Alamat Pengiriman
+                  {t("addressBook")}
                 </h3>
                 <p className="text-sm text-[#4B5563] font-medium">
-                  Kelola alamat pengiriman
+                  {t("addressBookDesc")}
                 </p>
               </div>
             </div>

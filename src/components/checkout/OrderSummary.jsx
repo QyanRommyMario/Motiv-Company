@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 /**
  * OrderSummary Component
  * Displays cart items, shipping cost, voucher discount, and total
@@ -11,6 +13,9 @@ export default function OrderSummary({
   discount = 0,
   voucher = null,
 }) {
+  const t = useTranslations("checkout");
+  const tCart = useTranslations("cart");
+
   console.log("📊 OrderSummary received items:", items);
 
   const subtotal = items.reduce((sum, item) => {
@@ -23,7 +28,7 @@ export default function OrderSummary({
   return (
     <div className="bg-white border border-[#E5E7EB] p-4 sm:p-6 max-h-[calc(100vh-20rem)] flex flex-col">
       <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-[#1A1A1A] shrink-0">
-        Ringkasan Pesanan
+        {t("orderSummary")}
       </h2>
 
       {/* Cart Items */}
@@ -45,7 +50,7 @@ export default function OrderSummary({
                 <img
                   src={product.images[0]}
                   alt={product.name}
-                  className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded border border-gray-200 flex-shrink-0"
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded border border-gray-200 shrink-0"
                 />
               )}
               <div className="flex-1 min-w-0">
@@ -72,13 +77,15 @@ export default function OrderSummary({
       <div className="border-t border-[#E5E7EB] pt-3 sm:pt-4 space-y-1.5 sm:space-y-2 text-xs sm:text-sm shrink-0">
         {/* Subtotal */}
         <div className="flex justify-between text-[#6B7280]">
-          <span>Subtotal ({items.length} item)</span>
+          <span>
+            {tCart("subtotal")} ({items.length} {tCart("item")})
+          </span>
           <span>Rp {subtotal.toLocaleString("id-ID")}</span>
         </div>
 
         {/* Shipping */}
         <div className="flex justify-between text-[#6B7280]">
-          <span>Biaya Pengiriman</span>
+          <span>{tCart("shippingCost")}</span>
           <span>
             {shippingCost > 0
               ? `Rp ${shippingCost.toLocaleString("id-ID")}`
@@ -89,7 +96,9 @@ export default function OrderSummary({
         {/* Discount/Voucher */}
         {discount > 0 && (
           <div className="flex justify-between text-green-600">
-            <span>Diskon {voucher ? `(${voucher.code})` : ""}</span>
+            <span>
+              {tCart("discount")} {voucher ? `(${voucher.code})` : ""}
+            </span>
             <span>- Rp {discount.toLocaleString("id-ID")}</span>
           </div>
         )}
@@ -99,7 +108,7 @@ export default function OrderSummary({
       <div className="border-t border-[#E5E7EB] mt-3 sm:mt-4 pt-3 sm:pt-4 shrink-0">
         <div className="flex justify-between items-center">
           <span className="text-base sm:text-lg font-semibold text-[#1A1A1A]">
-            Total
+            {tCart("total")}
           </span>
           <span className="text-lg sm:text-xl font-bold text-[#1A1A1A]">
             Rp {total.toLocaleString("id-ID")}
@@ -110,7 +119,7 @@ export default function OrderSummary({
       {/* Payment Info */}
       {shippingCost > 0 && (
         <div className="mt-4 bg-green-50 border border-green-200 p-3 text-xs text-green-800 shrink-0">
-          ✓ Ongkir sudah termasuk dalam total pembayaran
+          ✓ {tCart("taxIncluded")}
         </div>
       )}
     </div>
