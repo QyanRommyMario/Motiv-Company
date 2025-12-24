@@ -61,7 +61,10 @@ export default function LoginPage() {
 
         {/* Back to Home */}
         <div className="text-center">
-          <Link href="/" className="text-sm text-gray-600 hover:text-gray-900">
+          <Link
+            href="/"
+            className="text-sm text-[#6B7280] hover:text-[#1A1A1A]"
+          >
             ← {tCommon("backToHome")}
           </Link>
         </div>

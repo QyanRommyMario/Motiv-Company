@@ -116,8 +116,13 @@ export default function AdminCustomersPage() {
 
         {/* Customers Table */}
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Loading />
+          <div className="flex items-center justify-center min-h-[40vh]">
+            <div className="text-center">
+              <div className="w-10 h-10 border-4 border-[#E5E7EB] border-t-[#1A1A1A] rounded-full animate-spin mx-auto" />
+              <p className="mt-3 text-sm text-[#6B7280] uppercase tracking-wider">
+                Memuat pelanggan...
+              </p>
+            </div>
           </div>
         ) : filteredCustomers.length === 0 ? (
           <div className="bg-white border border-[#E5E7EB] shadow-sm p-12 text-center">

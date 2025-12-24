@@ -109,7 +109,7 @@ export default function AdminVouchersPage() {
 
   const getVoucherStatus = (voucher) => {
     if (!voucher.isActive)
-      return { text: "Nonaktif", color: "bg-gray-100 text-gray-800" };
+      return { text: "Nonaktif", color: "bg-[#F9FAFB] text-[#6B7280]" };
     if (isExpired(voucher.validUntil))
       return { text: "Expired", color: "bg-red-100 text-red-800" };
     if (isUpcoming(voucher.validFrom))

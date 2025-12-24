@@ -22,10 +22,10 @@ export default function Input({
       <input
         type={type}
         className={`
-          w-full px-4 py-2 border rounded-lg
-          text-gray-900 placeholder:text-gray-400
-          focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent
-          ${error ? "border-red-500" : "border-gray-300"}
+          w-full px-4 py-3 border
+          text-[#1A1A1A] placeholder:text-[#9CA3AF]
+          focus:outline-none focus:border-[#1A1A1A] transition-colors
+          ${error ? "border-red-500" : "border-[#E5E7EB]"}
           ${className}
         `}
         {...props}

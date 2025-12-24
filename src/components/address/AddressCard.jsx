@@ -45,20 +45,20 @@ export default function AddressCard({
 
   return (
     <div
-      className={`border rounded p-6 transition-all ${
+      className={`border p-6 transition-all ${
         address.isDefault
-          ? "border-gray-900 bg-gray-50"
-          : "border-gray-200 bg-white hover:border-gray-400"
+          ? "border-[#1A1A1A] bg-[#F9FAFB]"
+          : "border-[#E5E7EB] bg-white hover:border-[#6B7280]"
       }`}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-2">
-          <h3 className="font-bold text-gray-900 tracking-wide">
+          <h3 className="font-bold text-[#1A1A1A] tracking-wide">
             {address.label}
           </h3>
           {address.isDefault && (
-            <span className="text-xs bg-gray-900 text-white px-2 py-1 rounded uppercase tracking-wider font-semibold">
+            <span className="text-xs bg-[#1A1A1A] text-white px-2 py-1 uppercase tracking-wider font-semibold">
               Default
             </span>
           )}
@@ -68,14 +68,14 @@ export default function AddressCard({
           <button
             onClick={() => onEdit(address)}
             disabled={loading}
-            className="text-sm text-gray-700 hover:text-gray-900 font-medium disabled:opacity-50 transition-colors"
+            className="text-sm text-[#6B7280] hover:text-[#1A1A1A] font-medium disabled:opacity-50 transition-colors"
           >
             Edit
           </button>
           <button
             onClick={handleDelete}
             disabled={loading || address.isDefault}
-            className="text-sm text-gray-700 hover:text-red-600 font-medium disabled:opacity-50 transition-colors"
+            className="text-sm text-[#6B7280] hover:text-red-600 font-medium disabled:opacity-50 transition-colors"
             title={
               address.isDefault ? "Tidak dapat menghapus alamat default" : ""
             }
@@ -86,11 +86,11 @@ export default function AddressCard({
       </div>
 
       {/* Address Details */}
-      <div className="space-y-1.5 text-sm text-gray-700 mb-5">
-        <p className="font-semibold text-gray-900">{address.name}</p>
-        <p className="text-gray-600">{address.phone}</p>
-        <p className="text-gray-600">{address.address}</p>
-        <p className="text-gray-600">
+      <div className="space-y-1.5 text-sm text-[#6B7280] mb-5">
+        <p className="font-semibold text-[#1A1A1A]">{address.name}</p>
+        <p>{address.phone}</p>
+        <p>{address.address}</p>
+        <p>
           {address.city}, {address.province} {address.postalCode}
         </p>
       </div>
@@ -100,14 +100,14 @@ export default function AddressCard({
         <button
           onClick={handleSetDefault}
           disabled={loading}
-          className="text-sm text-gray-900 hover:text-black font-semibold disabled:opacity-50 transition-colors uppercase tracking-wide"
+          className="text-sm text-[#1A1A1A] hover:text-black font-semibold disabled:opacity-50 transition-colors uppercase tracking-wide"
         >
           {loading ? "Memproses..." : "Jadikan Alamat Utama"}
         </button>
       )}
 
       {deleteConfirm && (
-        <div className="mt-4 bg-gray-100 border border-gray-300 text-gray-900 px-4 py-3 rounded text-xs font-medium">
+        <div className="mt-4 bg-[#F9FAFB] border border-[#E5E7EB] text-[#1A1A1A] px-4 py-3 text-xs font-medium">
           Klik "Hapus" sekali lagi untuk konfirmasi penghapusan
         </div>
       )}

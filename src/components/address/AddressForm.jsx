@@ -122,21 +122,21 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 text-gray-800">
+    <form onSubmit={handleSubmit} className="space-y-5 text-[#1A1A1A]">
       {errorMsg && (
-        <div className="bg-red-50 text-red-600 p-3 rounded text-sm font-medium">
+        <div className="bg-red-50 text-red-600 p-3 text-sm font-medium">
           ⚠️ {errorMsg}
         </div>
       )}
 
       {/* 1. Negara */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-[#6B7280] mb-2">
           Negara
         </label>
         <select
           disabled
-          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded text-gray-500"
+          className="w-full px-4 py-2 bg-[#F9FAFB] border border-[#E5E7EB] text-[#9CA3AF]"
         >
           <option>Indonesia</option>
         </select>
@@ -144,7 +144,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
 
       {/* 2. Label */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-[#6B7280] mb-2">
           Label Alamat
         </label>
         <Input
@@ -158,7 +158,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
       {/* 3. Nama & Telepon */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-[#6B7280] mb-2">
             Nama Penerima
           </label>
           <Input
@@ -168,7 +168,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-[#6B7280] mb-2">
             Telepon
           </label>
           <Input
@@ -181,11 +181,11 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
 
       {/* 4. Alamat Lengkap (NAIK KE ATAS) */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-[#6B7280] mb-2">
           Alamat Lengkap
         </label>
         <textarea
-          className="w-full px-4 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-black resize-none"
+          className="w-full px-4 py-3 border border-[#E5E7EB] focus:ring-2 focus:ring-black resize-none"
           rows={3}
           value={formData.address || ""}
           onChange={(e) => handleChange("address", e.target.value)}
@@ -195,13 +195,13 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
       </div>
 
       {/* 5. Dropdown Lokasi (DI BAWAH ALAMAT) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 border rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-[#F9FAFB] border border-[#E5E7EB]">
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">
+          <label className="block text-sm font-bold text-[#1A1A1A] mb-2">
             Provinsi *
           </label>
           <select
-            className="w-full px-4 py-2 border rounded bg-white focus:ring-2 focus:ring-black"
+            className="w-full px-4 py-2 border border-[#E5E7EB] bg-white focus:ring-2 focus:ring-black"
             value={formData.provinceId || ""}
             onChange={handleProvinceChange}
             required
@@ -215,11 +215,11 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">
+          <label className="block text-sm font-bold text-[#1A1A1A] mb-2">
             Kota/Kabupaten *
           </label>
           <select
-            className="w-full px-4 py-2 border rounded bg-white disabled:bg-gray-100"
+            className="w-full px-4 py-2 border border-[#E5E7EB] bg-white disabled:bg-[#F9FAFB]"
             value={formData.cityId || ""}
             onChange={handleCityChange}
             disabled={!formData.provinceId || loadingLoc}
@@ -239,7 +239,7 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
 
       {/* 6. Kode Pos (Paling Bawah) */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-[#6B7280] mb-2">
           Kode Pos
         </label>
         <Input
@@ -257,17 +257,17 @@ export default function AddressForm({ address = null, onSubmit, onCancel }) {
           onChange={(e) => handleChange("isDefault", e.target.checked)}
           className="w-4 h-4"
         />
-        <label className="text-sm text-gray-700">Jadikan Alamat Utama</label>
+        <label className="text-sm text-[#6B7280]">Jadikan Alamat Utama</label>
       </div>
 
-      <div className="flex gap-3 pt-6 border-t mt-4">
+      <div className="flex gap-3 pt-6 border-t border-[#E5E7EB] mt-4">
         <Button type="submit" loading={loading} fullWidth>
           Simpan
         </Button>
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 border rounded hover:bg-gray-100 font-medium"
+          className="px-4 border border-[#E5E7EB] hover:bg-[#F9FAFB] font-medium"
         >
           Batal
         </button>

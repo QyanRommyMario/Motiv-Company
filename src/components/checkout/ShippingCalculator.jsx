@@ -108,7 +108,7 @@ export default function ShippingCalculator({
 
   if (!destination) {
     return (
-      <div className="p-4 bg-gray-50 border rounded text-center text-gray-500 text-sm">
+      <div className="p-4 bg-[#F9FAFB] border border-[#E5E7EB] text-center text-[#6B7280] text-sm">
         Pilih alamat pengiriman terlebih dahulu.
       </div>
     );
@@ -117,7 +117,7 @@ export default function ShippingCalculator({
   return (
     <div className="space-y-4">
       {/* Info Route Pengiriman */}
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 text-sm">
+      <div className="bg-blue-50 p-4 border border-blue-100 text-sm">
         <div className="flex items-start gap-3">
           {/* ... (kode ikon svg sama seperti sebelumnya) ... */}
           <div>
@@ -136,7 +136,7 @@ export default function ShippingCalculator({
 
       {/* Pilihan Tombol Kurir */}
       <div>
-        <label className="block text-sm font-semibold mb-2 text-gray-800">
+        <label className="block text-sm font-semibold mb-2 text-[#1A1A1A]">
           Pilih Kurir
         </label>
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -145,10 +145,10 @@ export default function ShippingCalculator({
               key={c.code}
               onClick={() => checkOngkir(c)}
               disabled={loading}
-              className={`py-2 px-1 border rounded-lg text-sm font-medium transition flex flex-col items-center justify-center ${
+              className={`py-2 px-1 border text-sm font-medium transition flex flex-col items-center justify-center ${
                 selectedCourier?.code === c.code
-                  ? "bg-gray-900 text-white border-gray-900 shadow-md"
-                  : "bg-white text-gray-700 hover:bg-gray-50 border-gray-300"
+                  ? "bg-[#1A1A1A] text-white border-[#1A1A1A] shadow-md"
+                  : "bg-white text-[#6B7280] hover:bg-[#F9FAFB] border-[#E5E7EB]"
               }`}
             >
               <span className="uppercase tracking-wider text-xs text-center">
@@ -162,14 +162,14 @@ export default function ShippingCalculator({
       {/* Loading State */}
       {loading && (
         <div className="text-center py-6">
-          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
-          <p className="text-xs text-gray-500 mt-2">Menghitung ongkir...</p>
+          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-[#1A1A1A]"></div>
+          <p className="text-xs text-[#9CA3AF] mt-2">Menghitung ongkir...</p>
         </div>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="p-3 bg-red-50 text-red-700 text-sm rounded border border-red-200">
+        <div className="p-3 bg-red-50 text-red-700 text-sm border border-red-200">
           {error}
         </div>
       )}
@@ -177,7 +177,7 @@ export default function ShippingCalculator({
       {/* Daftar Layanan (Service List) */}
       {!loading && services.length > 0 && (
         <div className="space-y-2 mt-2 animate-fade-in">
-          <p className="text-sm font-semibold text-gray-800">
+          <p className="text-sm font-semibold text-[#1A1A1A]">
             Layanan Tersedia:
           </p>
           {services.map((svc, idx) => {
@@ -187,26 +187,26 @@ export default function ShippingCalculator({
               <div
                 key={`${svc.service}-${idx}`}
                 onClick={() => handleSelectService(svc)}
-                className={`flex justify-between items-center p-4 border rounded-lg cursor-pointer transition hover:shadow-sm ${
+                className={`flex justify-between items-center p-4 border cursor-pointer transition hover:shadow-sm ${
                   isSelected
                     ? "border-green-600 bg-green-50 ring-1 ring-green-600"
-                    : "border-gray-200 bg-white hover:border-gray-400"
+                    : "border-[#E5E7EB] bg-white hover:border-[#6B7280]"
                 }`}
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-gray-900">
+                    <span className="font-bold text-[#1A1A1A]">
                       {svc.service}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-[#9CA3AF]">
                       ({svc.description})
                     </span>
                   </div>
-                  <div className="text-xs text-gray-600 mt-1 flex items-center gap-1">
+                  <div className="text-xs text-[#6B7280] mt-1 flex items-center gap-1">
                     Estimasi: {cost.etd || "-"}
                   </div>
                 </div>
-                <div className="font-bold text-gray-900 text-lg">
+                <div className="font-bold text-[#1A1A1A] text-lg">
                   {cost.value === 0
                     ? "Gratis / Sesuai Kesepakatan"
                     : `Rp ${cost.value.toLocaleString("id-ID")}`}

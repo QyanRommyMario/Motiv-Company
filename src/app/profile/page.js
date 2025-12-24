@@ -52,7 +52,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-[#FDFCFA]">
       <Navbar />
       <div className="max-w-4xl mx-auto px-6 pt-32 pb-20">
-        <div className="mb-12 border-b border-gray-200 pb-12">
+        <div className="mb-12 border-b border-[#E5E7EB] pb-12">
           <p className="text-xs tracking-[0.2em] uppercase text-[#6B7280] font-bold mb-4">
             Profil Akun
           </p>
@@ -62,13 +62,13 @@ export default function ProfilePage() {
           <p className="text-[#374151] text-lg font-medium mb-6">
             {session.user.email}
           </p>
-          <span className="inline-block px-4 py-1.5 bg-[#1A1A1A] text-white text-[11px] tracking-widest uppercase font-black rounded-sm">
+          <span className="inline-block px-4 py-1.5 bg-[#1A1A1A] text-white text-[11px] tracking-widest uppercase font-black">
             {session.user.role}
           </span>
         </div>
 
         <div className="grid grid-cols-2 gap-6 mb-12">
-          <div className="bg-white p-8 border border-gray-200 rounded-sm shadow-sm">
+          <div className="bg-white p-8 border border-[#E5E7EB] shadow-sm">
             <p className="text-[11px] uppercase tracking-widest text-[#6B7280] font-black mb-2">
               Total Pesanan
             </p>
@@ -76,7 +76,7 @@ export default function ProfilePage() {
               {stats.totalOrders}
             </p>
           </div>
-          <div className="bg-white p-8 border border-gray-200 rounded-sm shadow-sm">
+          <div className="bg-white p-8 border border-[#E5E7EB] shadow-sm">
             <p className="text-[11px] uppercase tracking-widest text-[#6B7280] font-black mb-2">
               Alamat Tersimpan
             </p>
@@ -89,10 +89,10 @@ export default function ProfilePage() {
         <div className="space-y-5">
           <button
             onClick={() => router.push("/profile/orders")}
-            className="w-full flex items-center justify-between p-6 bg-white border border-gray-200 rounded-sm hover:border-[#1A1A1A] hover:shadow-md transition-all group"
+            className="w-full flex items-center justify-between p-6 bg-white border border-[#E5E7EB] hover:border-[#1A1A1A] hover:shadow-md transition-all group"
           >
             <div className="flex items-center gap-6 text-left">
-              <div className="p-4 bg-gray-50 group-hover:bg-[#1A1A1A] group-hover:text-white transition-colors rounded-sm text-[#1A1A1A]">
+              <div className="p-4 bg-[#F9FAFB] group-hover:bg-[#1A1A1A] group-hover:text-white transition-colors text-[#1A1A1A]">
                 <svg
                   className="w-6 h-6"
                   fill="none"
@@ -117,7 +117,7 @@ export default function ProfilePage() {
               </div>
             </div>
             <svg
-              className="w-6 h-6 text-gray-300 group-hover:text-[#1A1A1A]"
+              className="w-6 h-6 text-[#E5E7EB] group-hover:text-[#1A1A1A]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -133,10 +133,10 @@ export default function ProfilePage() {
 
           <button
             onClick={() => router.push("/profile/addresses")}
-            className="w-full flex items-center justify-between p-6 bg-white border border-gray-200 rounded-sm hover:border-[#1A1A1A] hover:shadow-md transition-all group"
+            className="w-full flex items-center justify-between p-6 bg-white border border-[#E5E7EB] hover:border-[#1A1A1A] hover:shadow-md transition-all group"
           >
             <div className="flex items-center gap-6 text-left">
-              <div className="p-4 bg-gray-50 group-hover:bg-[#1A1A1A] group-hover:text-white transition-colors rounded-sm text-[#1A1A1A]">
+              <div className="p-4 bg-[#F9FAFB] group-hover:bg-[#1A1A1A] group-hover:text-white transition-colors text-[#1A1A1A]">
                 <svg
                   className="w-6 h-6"
                   fill="none"
@@ -167,7 +167,7 @@ export default function ProfilePage() {
               </div>
             </div>
             <svg
-              className="w-6 h-6 text-gray-300 group-hover:text-[#1A1A1A]"
+              className="w-6 h-6 text-[#E5E7EB] group-hover:text-[#1A1A1A]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

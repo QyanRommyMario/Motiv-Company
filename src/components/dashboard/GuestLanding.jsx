@@ -62,7 +62,7 @@ export default function GuestLanding() {
             >
               <Link href="/products">
                 <button className="group relative px-12 py-4 border border-white/30 !text-white uppercase tracking-[0.2em] text-xs font-light overflow-hidden hover:bg-white hover:!text-black transition-all duration-300">
-                  <span className="relative z-10">Shop Now</span>
+                  <span className="relative z-10">{t("hero.cta")}</span>
                 </button>
               </Link>
             </m.div>
@@ -72,7 +72,7 @@ export default function GuestLanding() {
               transition={{ repeat: Infinity, duration: 2 }}
               className="absolute bottom-10 left-1/2 -translate-x-1/2 !text-white/40 text-[10px] uppercase tracking-[0.3em]"
             >
-              Scroll to discover
+              {t("scroll")}
             </m.div>
           </div>
         </section>

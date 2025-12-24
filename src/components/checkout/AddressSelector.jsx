@@ -69,8 +69,8 @@ export default function AddressSelector({ onSelectAddress }) {
 
   if (loading) {
     return (
-      <div className="border border-gray-300 rounded-lg p-8 text-center">
-        <p className="text-gray-500">Memuat alamat...</p>
+      <div className="border border-[#E5E7EB] p-8 text-center">
+        <p className="text-[#6B7280]">Memuat alamat...</p>
       </div>
     );
   }
@@ -98,13 +98,13 @@ export default function AddressSelector({ onSelectAddress }) {
           />
         </svg>
         <h3 className="text-lg font-semibold mb-2">Belum Ada Alamat</h3>
-        <p className="text-gray-600 mb-4">
+        <p className="text-[#6B7280] mb-4">
           Anda belum memiliki alamat pengiriman. Tambahkan alamat untuk
           melanjutkan checkout.
         </p>
         <button
           onClick={() => router.push("/profile/addresses?action=add")}
-          className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition"
+          className="px-6 py-2 bg-[#1A1A1A] text-white hover:bg-black transition"
         >
           Tambah Alamat
         </button>
@@ -115,7 +115,7 @@ export default function AddressSelector({ onSelectAddress }) {
   return (
     <div className="space-y-3">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3">
           {error}
         </div>
       )}
@@ -123,10 +123,10 @@ export default function AddressSelector({ onSelectAddress }) {
       {addresses.map((address) => (
         <div
           key={address.id}
-          className={`border rounded-lg p-4 cursor-pointer transition ${
+          className={`border p-4 cursor-pointer transition ${
             selectedId === address.id
-              ? "border-gray-900 bg-gray-100"
-              : "border-gray-300 hover:border-gray-400"
+              ? "border-[#1A1A1A] bg-[#F9FAFB]"
+              : "border-[#E5E7EB] hover:border-[#9CA3AF]"
           }`}
           onClick={() => handleSelect(address)}
         >
@@ -137,20 +137,20 @@ export default function AddressSelector({ onSelectAddress }) {
                   type="radio"
                   checked={selectedId === address.id}
                   onChange={() => handleSelect(address)}
-                  className="w-4 h-4 text-gray-900"
+                  className="w-4 h-4 text-[#1A1A1A]"
                 />
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-[#1A1A1A]">
                   {address.label}
                 </span>
                 {address.isDefault && (
-                  <span className="text-xs bg-gray-900 text-white px-2 py-0.5 rounded">
+                  <span className="text-xs bg-[#1A1A1A] text-white px-2 py-0.5">
                     Default
                   </span>
                 )}
               </div>
 
-              <div className="ml-6 text-sm text-gray-700">
-                <p className="font-medium">{address.name}</p>
+              <div className="ml-6 text-sm text-[#6B7280]">
+                <p className="font-medium text-[#1A1A1A]">{address.name}</p>
                 <p>{address.phone}</p>
                 <p className="mt-1">{address.address}</p>
                 <p>
@@ -166,7 +166,7 @@ export default function AddressSelector({ onSelectAddress }) {
                     e.stopPropagation();
                     handleSetDefault(address.id);
                   }}
-                  className="text-xs text-gray-900 hover:text-gray-700 underline"
+                  className="text-xs text-[#1A1A1A] hover:text-[#6B7280] underline"
                 >
                   Jadikan Default
                 </button>
@@ -176,7 +176,7 @@ export default function AddressSelector({ onSelectAddress }) {
                   e.stopPropagation();
                   router.push(`/profile/addresses?edit=${address.id}`);
                 }}
-                className="text-xs text-gray-600 hover:text-gray-700 underline"
+                className="text-xs text-[#6B7280] hover:text-[#1A1A1A] underline"
               >
                 Edit
               </button>
@@ -189,7 +189,7 @@ export default function AddressSelector({ onSelectAddress }) {
         onClick={() =>
           router.push("/profile/addresses?action=add&returnTo=/checkout")
         }
-        className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-gray-600 hover:border-gray-900 hover:text-gray-900 transition flex items-center justify-center gap-2"
+        className="w-full border-2 border-dashed border-[#E5E7EB] p-4 text-[#6B7280] hover:border-[#1A1A1A] hover:text-[#1A1A1A] transition flex items-center justify-center gap-2"
       >
         <svg
           className="w-5 h-5"

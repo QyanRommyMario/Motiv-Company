@@ -16,15 +16,6 @@
   --font-display: var(--font-playfair);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #fdfcfa;
-    --foreground: #1a1a1a;
-    --gray-light: #f5f4f0;
-    --border: #e5e7eb;
-  }
-}
-
 * {
   scroll-behavior: smooth;
 }
@@ -64,9 +55,7 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  ring: 2px;
-  ring-color: #1a1a1a;
-  ring-offset: 2px;
+  box-shadow: 0 0 0 2px #1a1a1a;
 }
 
 ::-webkit-scrollbar {
@@ -145,4 +134,19 @@ img {
 
 .fade-in {
   animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
 }

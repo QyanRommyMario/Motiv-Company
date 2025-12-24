@@ -41,6 +41,7 @@
     "home": "Home",
     "products": "Products",
     "stories": "Our Stories",
+    "vouchers": "Vouchers",
     "cart": "Cart",
     "profile": "Profile",
     "login": "Login",
@@ -51,7 +52,8 @@
     "myOrders": "My Orders",
     "becomeB2B": "Join B2B",
     "b2bPartnerDiscount": "B2B Partner - {discount}% Off",
-    "roleAdministrator": "Administrator"
+    "b2bDashboard": "B2B Dashboard",
+    "roleAdministrator": "ADMIN DASHBOARD"
   },
   "landing": {
     "hero": {
@@ -102,6 +104,7 @@
     "addToCart": "Add to Cart",
     "noProducts": "No products found",
     "noProductsMessage": "Sorry, the products you are looking for are not available.",
+    "priceNotAvailable": "Price not available",
     "categoryList": {
       "arabica": "Arabica",
       "robusta": "Robusta",

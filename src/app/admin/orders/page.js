@@ -35,16 +35,13 @@ export default function AdminOrdersPage() {
       console.log("🔍 Fetching admin orders with params:", params.toString());
 
       const response = await fetch(`/api/admin/orders?${params.toString()}`);
-      if (response.ok) {
-        const result = await response.json();
-        console.log("📦 Received orders:", result);
-        if (result.success) {
-          setOrders(result.data.orders || []);
-        }
+      const result = await response.json();
+      console.log("📦 Received orders:", result);
+
+      if (response.ok && result.success) {
+        setOrders(result.orders || []);
       } else {
-        console.error("❌ Failed to fetch orders:", response.status);
-        const errorData = await response.json();
-        console.error("Error details:", errorData);
+        console.error("❌ Failed to fetch orders:", response.status, result);
       }
     } catch (error) {
       console.error("❌ Error fetching orders:", error);
@@ -118,7 +115,7 @@ export default function AdminOrdersPage() {
       DELIVERED: "bg-green-100 text-green-800",
       CANCELLED: "bg-red-100 text-red-800",
     };
-    return colors[status] || "bg-gray-100 text-gray-800";
+    return colors[status] || "bg-[#F9FAFB] text-[#6B7280]";
   };
 
   return (
@@ -126,18 +123,18 @@ export default function AdminOrdersPage() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-[#1A1A1A]">
             Manajemen Pesanan
           </h1>
-          <p className="text-gray-600 mt-2">Kelola semua pesanan pelanggan</p>
+          <p className="text-[#6B7280] mt-2">Kelola semua pesanan pelanggan</p>
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white border border-[#E5E7EB] shadow-sm p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
                 Cari Pesanan
               </label>
               <input
@@ -145,19 +142,19 @@ export default function AdminOrdersPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Nomor order, nama, email..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent"
+                className="w-full px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-[#1A1A1A] placeholder:text-[#9CA3AF]"
               />
             </div>
 
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
                 Filter Status
               </label>
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent"
+                className="w-full px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-[#1A1A1A] bg-white"
               >
                 {statusOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -170,78 +167,83 @@ export default function AdminOrdersPage() {
         </div>
 
         {/* Orders Table */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="bg-white border border-[#E5E7EB] shadow-sm overflow-hidden">
           {loading ? (
-            <div className="p-12 flex justify-center">
-              <Loading />
+            <div className="flex items-center justify-center min-h-[40vh]">
+              <div className="text-center">
+                <div className="w-10 h-10 border-4 border-[#E5E7EB] border-t-[#1A1A1A] rounded-full animate-spin mx-auto" />
+                <p className="mt-3 text-sm text-[#6B7280] uppercase tracking-wider">
+                  Memuat pesanan...
+                </p>
+              </div>
             </div>
           ) : filteredOrders.length === 0 ? (
-            <div className="p-12 text-center text-gray-500">
+            <div className="p-12 text-center text-[#6B7280]">
               <div className="text-6xl mb-4">📦</div>
               <p>Tidak ada pesanan</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-[#F9FAFB] border-b border-[#E5E7EB]">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
                       Order
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
                       Pelanggan
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
                       Total
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
                       Tanggal
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
                       Aksi
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-[#E5E7EB]">
                   {filteredOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gray-50">
+                    <tr key={order.id} className="hover:bg-[#F9FAFB]">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-[#1A1A1A]">
                           #{order.orderNumber}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-[#6B7280]">
                           {order.items?.length || 0} items
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm text-[#1A1A1A]">
                           {order.user?.name || "-"}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-[#6B7280]">
                           {order.user?.email || "-"}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-[#1A1A1A]">
                           {formatCurrency(order.total)}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-[#6B7280]">
                           {order.paymentStatus}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold ${getStatusColor(
                             order.status
                           )}`}
                         >
                           {order.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#6B7280]">
                         {new Date(order.createdAt).toLocaleDateString("id-ID", {
                           day: "2-digit",
                           month: "short",
@@ -252,7 +254,7 @@ export default function AdminOrdersPage() {
                         <div className="flex gap-2">
                           <Link
                             href={`/admin/orders/${order.id}`}
-                            className="text-gray-900 hover:text-gray-700 font-medium uppercase tracking-wider underline"
+                            className="text-[#1A1A1A] hover:text-[#6B7280] font-medium uppercase tracking-wider underline"
                           >
                             Detail
                           </Link>
@@ -261,7 +263,7 @@ export default function AdminOrdersPage() {
                               setSelectedOrder(order);
                               setShowModal(true);
                             }}
-                            className="text-gray-900 hover:text-gray-700 font-medium uppercase tracking-wider underline"
+                            className="text-[#1A1A1A] hover:text-[#6B7280] font-medium uppercase tracking-wider underline"
                           >
                             Update
                           </button>
@@ -277,20 +279,20 @@ export default function AdminOrdersPage() {
 
         {/* Update Status Modal */}
         {showModal && selectedOrder && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-md w-full p-6">
-              <h3 className="text-lg font-semibold mb-4">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white max-w-md w-full p-6">
+              <h3 className="text-lg font-semibold text-[#1A1A1A] mb-4">
                 Update Status Order #{selectedOrder.orderNumber}
               </h3>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
                     Status Baru
                   </label>
                   <select
                     id="newStatus"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coffee-500"
+                    className="w-full px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-[#1A1A1A] bg-white"
                     defaultValue={selectedOrder.status}
                   >
                     {statusOptions
@@ -304,27 +306,27 @@ export default function AdminOrdersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
                     Nomor Resi (Opsional)
                   </label>
                   <input
                     type="text"
                     id="trackingNumber"
                     placeholder="Masukkan nomor resi..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coffee-500"
+                    className="w-full px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-[#1A1A1A] placeholder:text-[#9CA3AF]"
                     defaultValue={selectedOrder.trackingNumber || ""}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
                     Kurir (Opsional)
                   </label>
                   <input
                     type="text"
                     id="courier"
                     placeholder="JNE, TIKI, POS..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coffee-500"
+                    className="w-full px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-[#1A1A1A] placeholder:text-[#9CA3AF]"
                     defaultValue={selectedOrder.shippingCourier || ""}
                   />
                 </div>
@@ -336,7 +338,7 @@ export default function AdminOrdersPage() {
                     setShowModal(false);
                     setSelectedOrder(null);
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-2 border-2 border-[#E5E7EB] text-[#1A1A1A] hover:bg-[#F9FAFB] transition-colors"
                   disabled={updatingStatus}
                 >
                   Batal
@@ -354,7 +356,7 @@ export default function AdminOrdersPage() {
                       shippingCourier: courier || undefined,
                     });
                   }}
-                  className="flex-1 px-4 py-2 bg-coffee-600 text-white rounded-lg hover:bg-coffee-700 transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-[#1A1A1A] text-white hover:bg-black transition-colors disabled:opacity-50"
                   disabled={updatingStatus}
                 >
                   {updatingStatus ? "Mengupdate..." : "Update"}

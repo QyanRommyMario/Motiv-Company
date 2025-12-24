@@ -170,7 +170,7 @@ const navigation = [
   { key: "b2bRequests", href: "/admin/b2b", icon: "b2bRequests" },
 ];
 
-export default function AdminSidebar({ user }) {
+export default function AdminSidebar({ user, onClose }) {
   const pathname = usePathname();
   const t = useTranslations("admin.sidebar");
 
@@ -181,24 +181,49 @@ export default function AdminSidebar({ user }) {
   return (
     <div className="w-64 bg-[#1A1A1A] text-white h-screen flex flex-col overflow-y-auto">
       {/* Logo */}
-      <div className="p-6 border-b border-white/10 shrink-0">
-        <Link href="/admin" className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white flex items-center justify-center">
-            <svg
-              className="w-6 h-6 text-[#1A1A1A]"
-              fill="currentColor"
-              viewBox="0 0 24 24"
+      <div className="p-4 sm:p-6 border-b border-white/10 shrink-0">
+        <div className="flex items-center justify-between">
+          <Link href="/admin" className="flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-white flex items-center justify-center">
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6 text-[#1A1A1A]"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M2 21h19v-3H2v3zM20 8H3v8h17V8zM4 14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2v-3c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v3z" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="font-bold text-base sm:text-lg tracking-tight">
+                MOTIV Coffee
+              </h1>
+              <p className="text-[10px] sm:text-xs text-white/50 uppercase tracking-wider">
+                Admin Panel
+              </p>
+            </div>
+          </Link>
+          {/* Mobile Close Button */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="lg:hidden p-2 hover:bg-white/10 rounded-lg transition-colors"
             >
-              <path d="M2 21h19v-3H2v3zM20 8H3v8h17V8zM4 14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2v-3c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v3z" />
-            </svg>
-          </div>
-          <div>
-            <h1 className="font-bold text-lg tracking-tight">MOTIV Coffee</h1>
-            <p className="text-xs text-white/50 uppercase tracking-wider">
-              Admin Panel
-            </p>
-          </div>
-        </Link>
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* User Info */}

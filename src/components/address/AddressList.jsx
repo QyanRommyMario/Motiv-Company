@@ -84,7 +84,7 @@ export default function AddressList({ onEdit, refresh }) {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+      <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3">
         {error}
       </div>
     );
@@ -94,7 +94,7 @@ export default function AddressList({ onEdit, refresh }) {
     return (
       <div className="text-center py-12">
         <svg
-          className="w-16 h-16 mx-auto text-gray-400 mb-4"
+          className="w-16 h-16 mx-auto text-[#9CA3AF] mb-4"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -112,10 +112,10 @@ export default function AddressList({ onEdit, refresh }) {
             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
           />
         </svg>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">
           Belum Ada Alamat
         </h3>
-        <p className="text-gray-600">
+        <p className="text-[#6B7280]">
           Tambahkan alamat pengiriman untuk memudahkan checkout
         </p>
       </div>

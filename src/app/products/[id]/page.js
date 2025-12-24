@@ -92,7 +92,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-16">
+      <div className="min-h-screen bg-[#FDFCFA] pt-16">
         <Navbar />
         <Loading fullScreen />
       </div>
@@ -101,15 +101,15 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-16">
+      <div className="min-h-screen bg-[#FDFCFA] pt-16">
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <div className="text-6xl mb-4">😞</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-[#1A1A1A] mb-2">
               {error || "Produk Tidak Ditemukan"}
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-[#6B7280] mb-6">
               Produk yang Anda cari tidak tersedia
             </p>
             <Link href="/products">
@@ -122,41 +122,41 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16">
+    <div className="min-h-screen bg-[#FDFCFA] pt-16">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Breadcrumb */}
         <nav className="mb-4 sm:mb-6 text-xs sm:text-sm overflow-x-auto">
-          <ol className="flex items-center space-x-2 text-gray-600 whitespace-nowrap">
+          <ol className="flex items-center space-x-2 text-[#6B7280] whitespace-nowrap">
             <li>
-              <Link href="/" className="hover:text-amber-600">
+              <Link href="/" className="hover:text-[#1A1A1A]">
                 Home
               </Link>
             </li>
             <li>/</li>
             <li>
-              <Link href="/products" className="hover:text-amber-600">
+              <Link href="/products" className="hover:text-[#1A1A1A]">
                 Products
               </Link>
             </li>
             <li>/</li>
-            <li className="text-gray-900 font-medium truncate max-w-[200px]">
+            <li className="text-[#1A1A1A] font-medium truncate max-w-[200px]">
               {product.name}
             </li>
           </ol>
         </nav>
 
         {/* Product Detail */}
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:p-8">
+        <div className="bg-white shadow-md p-4 sm:p-6 lg:p-8 border border-[#E5E7EB]">
           <ProductDetail product={product} />
         </div>
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div className="mt-8 sm:mt-12 pb-6 sm:pb-8">
-            <div className="border-t border-gray-200 pt-6 sm:pt-8">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">
+            <div className="border-t border-[#E5E7EB] pt-6 sm:pt-8">
+              <h2 className="text-lg sm:text-xl font-bold text-[#1A1A1A] mb-4 sm:mb-6">
                 Produk Lainnya
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -164,9 +164,9 @@ export default function ProductDetailPage() {
                   <Link
                     key={relatedProduct.id}
                     href={`/products/${relatedProduct.id}`}
-                    className="group bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-gray-900 hover:shadow-lg transition-all"
+                    className="group bg-white border border-[#E5E7EB] overflow-hidden hover:border-[#1A1A1A] hover:shadow-lg transition-all"
                   >
-                    <div className="aspect-[4/3] relative bg-gray-50 overflow-hidden">
+                    <div className="aspect-[4/3] relative bg-[#F9FAFB] overflow-hidden">
                       {relatedProduct.images &&
                       relatedProduct.images.length > 0 ? (
                         <img
@@ -175,7 +175,7 @@ export default function ProductDetailPage() {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                        <div className="w-full h-full flex items-center justify-center text-[#9CA3AF]">
                           <svg
                             className="w-16 h-16"
                             fill="none"
@@ -192,25 +192,25 @@ export default function ProductDetailPage() {
                         </div>
                       )}
                       <div className="absolute top-2 left-2">
-                        <span className="inline-block px-2 py-1 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium rounded shadow-sm">
+                        <span className="inline-block px-2 py-1 bg-white/90 backdrop-blur-sm text-[#6B7280] text-xs font-medium shadow-sm">
                           {relatedProduct.category}
                         </span>
                       </div>
                     </div>
                     <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-gray-700 transition-colors line-clamp-1">
+                      <h3 className="font-semibold text-[#1A1A1A] mb-1 group-hover:text-[#6B7280] transition-colors line-clamp-1">
                         {relatedProduct.name}
                       </h3>
                       {relatedProduct.variants &&
                         relatedProduct.variants.length > 0 && (
                           <div className="flex items-center justify-between mt-2">
-                            <span className="text-lg font-bold text-gray-900">
+                            <span className="text-lg font-bold text-[#1A1A1A]">
                               Rp{" "}
                               {relatedProduct.variants[0].price.toLocaleString(
                                 "id-ID"
                               )}
                             </span>
-                            <span className="text-xs text-gray-600 font-medium group-hover:text-gray-900 transition-colors">
+                            <span className="text-xs text-[#6B7280] font-medium group-hover:text-[#1A1A1A] transition-colors">
                               Lihat →
                             </span>
                           </div>

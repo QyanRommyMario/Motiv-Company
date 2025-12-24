@@ -209,7 +209,7 @@ export default function AdminB2BPage() {
       APPROVED: "bg-green-100 text-green-800",
       REJECTED: "bg-red-100 text-red-800",
     };
-    return badges[status] || "bg-gray-100 text-gray-800";
+    return badges[status] || "bg-[#F9FAFB] text-[#6B7280]";
   };
 
   const formatDate = (dateString) => {
@@ -225,8 +225,8 @@ export default function AdminB2BPage() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">B2B Management</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-[#1A1A1A]">B2B Management</h1>
+          <p className="text-[#6B7280] mt-1">
             Kelola pengajuan dan pengguna B2B
           </p>
         </div>
@@ -241,15 +241,15 @@ export default function AdminB2BPage() {
         )}
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="border-b border-gray-200">
+        <div className="bg-white border border-[#E5E7EB] shadow-sm">
+          <div className="border-b border-[#E5E7EB]">
             <nav className="flex -mb-px">
               <button
                 onClick={() => setActiveTab("requests")}
                 className={`px-6 py-4 text-sm font-medium border-b-2 ${
                   activeTab === "requests"
-                    ? "border-coffee-600 text-coffee-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-[#1A1A1A] text-[#1A1A1A]"
+                    : "border-transparent text-[#6B7280] hover:text-[#1A1A1A] hover:border-[#E5E7EB]"
                 }`}
               >
                 Pengajuan B2B
@@ -258,8 +258,8 @@ export default function AdminB2BPage() {
                 onClick={() => setActiveTab("users")}
                 className={`px-6 py-4 text-sm font-medium border-b-2 ${
                   activeTab === "users"
-                    ? "border-coffee-600 text-coffee-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-[#1A1A1A] text-[#1A1A1A]"
+                    : "border-transparent text-[#6B7280] hover:text-[#1A1A1A] hover:border-[#E5E7EB]"
                 }`}
               >
                 B2B Users
@@ -273,7 +273,7 @@ export default function AdminB2BPage() {
               {/* Filters */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
                     Cari
                   </label>
                   <input
@@ -281,17 +281,17 @@ export default function AdminB2BPage() {
                     value={requestSearch}
                     onChange={(e) => setRequestSearch(e.target.value)}
                     placeholder="Nama bisnis, nama, email..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-[#1A1A1A] placeholder:text-[#9CA3AF]"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
                     Status
                   </label>
                   <select
                     value={requestStatusFilter}
                     onChange={(e) => setRequestStatusFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-[#1A1A1A] bg-white"
                   >
                     <option value="">Semua Status</option>
                     <option value="PENDING">Pending</option>
@@ -303,62 +303,66 @@ export default function AdminB2BPage() {
 
               {/* Requests Table */}
               {loading ? (
-                <div className="text-center py-8">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-coffee-600"></div>
-                  <p className="mt-2 text-gray-600">Loading...</p>
+                <div className="flex items-center justify-center min-h-[30vh]">
+                  <div className="text-center">
+                    <div className="w-10 h-10 border-4 border-[#E5E7EB] border-t-[#1A1A1A] rounded-full animate-spin mx-auto" />
+                    <p className="mt-3 text-sm text-[#6B7280] uppercase tracking-wider">
+                      Memuat pengajuan...
+                    </p>
+                  </div>
                 </div>
               ) : requests.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-[#6B7280]">
                   <p>Tidak ada pengajuan B2B</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-[#E5E7EB]">
+                    <thead className="bg-[#F9FAFB]">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase">
                           Bisnis
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase">
                           Pengguna
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase">
                           Kontak
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase">
                           Tanggal
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase">
                           Status
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-[#E5E7EB]">
                       {requests.map((request) => (
-                        <tr key={request.id} className="hover:bg-gray-50">
+                        <tr key={request.id} className="hover:bg-[#F9FAFB]">
                           <td className="px-6 py-4">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-[#1A1A1A]">
                               {request.businessName}
                             </div>
-                            <div className="text-sm text-gray-500 truncate max-w-xs">
+                            <div className="text-sm text-[#6B7280] truncate max-w-xs">
                               {request.address}
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900">
+                            <div className="text-sm text-[#1A1A1A]">
                               {request.user.name}
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-[#6B7280]">
                               {request.user.email}
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-6 py-4 text-sm text-[#1A1A1A]">
                             {request.phone}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-6 py-4 text-sm text-[#1A1A1A]">
                             {formatDate(request.createdAt)}
                           </td>
                           <td className="px-6 py-4">
@@ -410,7 +414,7 @@ export default function AdminB2BPage() {
             <div className="p-6">
               {/* Search */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
                   Cari B2B User
                 </label>
                 <input
@@ -418,70 +422,74 @@ export default function AdminB2BPage() {
                   value={userSearch}
                   onChange={(e) => setUserSearch(e.target.value)}
                   placeholder="Nama, email, nama bisnis..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coffee-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-[#1A1A1A] placeholder:text-[#9CA3AF]"
                 />
               </div>
 
               {/* Users Table */}
               {loading ? (
-                <div className="text-center py-8">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-coffee-600"></div>
-                  <p className="mt-2 text-gray-600">Loading...</p>
+                <div className="flex items-center justify-center min-h-[30vh]">
+                  <div className="text-center">
+                    <div className="w-10 h-10 border-4 border-[#E5E7EB] border-t-[#1A1A1A] rounded-full animate-spin mx-auto" />
+                    <p className="mt-3 text-sm text-[#6B7280] uppercase tracking-wider">
+                      Memuat pengguna...
+                    </p>
+                  </div>
                 </div>
               ) : users.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-[#6B7280]">
                   <p>Tidak ada B2B user</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-[#E5E7EB]">
+                    <thead className="bg-[#F9FAFB]">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase">
                           Nama Bisnis
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase">
                           Pengguna
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase">
                           Kontak
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase">
                           Diskon
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase">
                           Bergabung
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-[#E5E7EB]">
                       {users.map((user) => (
-                        <tr key={user.id} className="hover:bg-gray-50">
+                        <tr key={user.id} className="hover:bg-[#F9FAFB]">
                           <td className="px-6 py-4">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-[#1A1A1A]">
                               {user.businessName || "-"}
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900">
+                            <div className="text-sm text-[#1A1A1A]">
                               {user.name}
                             </div>
-                            <div className="text-sm text-gray-500">
+                            <div className="text-sm text-[#6B7280]">
                               {user.email}
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-6 py-4 text-sm text-[#1A1A1A]">
                             {user.phone || "-"}
                           </td>
                           <td className="px-6 py-4">
-                            <span className="px-2 py-1 text-sm font-semibold text-coffee-700 bg-coffee-100 rounded">
+                            <span className="px-2 py-1 text-sm font-semibold text-[#1A1A1A] bg-[#F3F4F6]">
                               {user.discount}%
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-6 py-4 text-sm text-[#1A1A1A]">
                             {formatDate(user.createdAt)}
                           </td>
                           <td className="px-6 py-4 text-sm font-medium">
@@ -493,7 +501,7 @@ export default function AdminB2BPage() {
                                   discount: user.discount,
                                 })
                               }
-                              className="text-gray-900 hover:text-gray-700 font-semibold uppercase tracking-wider"
+                              className="text-[#1A1A1A] hover:text-[#6B7280] font-semibold uppercase tracking-wider"
                             >
                               Edit Diskon
                             </button>
@@ -511,14 +519,14 @@ export default function AdminB2BPage() {
 
       {/* Approve Modal */}
       {approveModal.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-gray-900 mb-4 uppercase tracking-wider">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold text-[#1A1A1A] mb-4 uppercase tracking-wider">
               Approve B2B Request
             </h3>
-            <p className="text-gray-700 mb-6">
+            <p className="text-[#6B7280] mb-6">
               Approve pengajuan B2B dari{" "}
-              <strong className="text-gray-900">
+              <strong className="text-[#1A1A1A]">
                 {approveModal.request?.user?.name}
               </strong>
               ?
@@ -528,7 +536,7 @@ export default function AdminB2BPage() {
 
             {/* Discount Input */}
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-900 mb-2 uppercase tracking-wider">
+              <label className="block text-sm font-semibold text-[#1A1A1A] mb-2 uppercase tracking-wider">
                 Diskon B2B (%)
               </label>
               <div className="relative">
@@ -544,14 +552,14 @@ export default function AdminB2BPage() {
                       discount: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-gray-900 focus:ring-2 focus:ring-gray-900 focus:outline-none text-lg font-semibold"
+                  className="w-full px-4 py-3 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-lg font-semibold text-[#1A1A1A]"
                   placeholder="Masukkan diskon (0-100)"
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-lg">
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6B7280] font-semibold text-lg">
                   %
                 </span>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-[#6B7280] mt-2">
                 Diskon akan berlaku untuk semua produk yang dibeli user ini
               </p>
             </div>
@@ -561,13 +569,13 @@ export default function AdminB2BPage() {
                 onClick={() =>
                   setApproveModal({ show: false, request: null, discount: 10 })
                 }
-                className="px-6 py-2.5 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold uppercase tracking-wider transition-colors"
+                className="px-6 py-2.5 border-2 border-[#E5E7EB] text-[#1A1A1A] hover:bg-[#F9FAFB] font-semibold uppercase tracking-wider transition-colors"
               >
                 Batal
               </button>
               <button
                 onClick={handleApprove}
-                className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold uppercase tracking-wider transition-colors"
+                className="px-6 py-2.5 bg-green-600 text-white hover:bg-green-700 font-semibold uppercase tracking-wider transition-colors"
               >
                 Approve
               </button>
@@ -578,14 +586,14 @@ export default function AdminB2BPage() {
 
       {/* Reject Modal */}
       {rejectModal.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-gray-900 mb-4 uppercase tracking-wider">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold text-[#1A1A1A] mb-4 uppercase tracking-wider">
               Reject B2B Request
             </h3>
-            <p className="text-gray-700 mb-6">
+            <p className="text-[#6B7280] mb-6">
               Tolak pengajuan B2B dari{" "}
-              <strong className="text-gray-900">
+              <strong className="text-[#1A1A1A]">
                 {rejectModal.request?.user?.name}
               </strong>
               ?
@@ -593,13 +601,13 @@ export default function AdminB2BPage() {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setRejectModal({ show: false, request: null })}
-                className="px-6 py-2.5 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold uppercase tracking-wider transition-colors"
+                className="px-6 py-2.5 border-2 border-[#E5E7EB] text-[#1A1A1A] hover:bg-[#F9FAFB] font-semibold uppercase tracking-wider transition-colors"
               >
                 Batal
               </button>
               <button
                 onClick={handleReject}
-                className="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold uppercase tracking-wider transition-colors"
+                className="px-6 py-2.5 bg-red-600 text-white hover:bg-red-700 font-semibold uppercase tracking-wider transition-colors"
               >
                 Reject
               </button>
@@ -610,21 +618,21 @@ export default function AdminB2BPage() {
 
       {/* Edit Discount Modal */}
       {discountModal.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-gray-900 mb-4 uppercase tracking-wider">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold text-[#1A1A1A] mb-4 uppercase tracking-wider">
               Edit Diskon B2B
             </h3>
-            <p className="text-gray-700 mb-6">
+            <p className="text-[#6B7280] mb-6">
               Update diskon untuk{" "}
-              <strong className="text-gray-900">
+              <strong className="text-[#1A1A1A]">
                 {discountModal.user?.name}
               </strong>
             </p>
 
             {/* Discount Input */}
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-900 mb-2 uppercase tracking-wider">
+              <label className="block text-sm font-semibold text-[#1A1A1A] mb-2 uppercase tracking-wider">
                 Diskon B2B (%)
               </label>
               <div className="relative">
@@ -640,14 +648,14 @@ export default function AdminB2BPage() {
                       discount: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-gray-900 focus:ring-2 focus:ring-gray-900 focus:outline-none text-lg font-semibold"
+                  className="w-full px-4 py-3 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-lg font-semibold text-[#1A1A1A]"
                   placeholder="Masukkan diskon (0-100)"
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-lg">
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6B7280] font-semibold text-lg">
                   %
                 </span>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-[#6B7280] mt-2">
                 Diskon akan berlaku untuk semua produk yang dibeli user ini
               </p>
             </div>
@@ -657,13 +665,13 @@ export default function AdminB2BPage() {
                 onClick={() =>
                   setDiscountModal({ show: false, user: null, discount: 0 })
                 }
-                className="px-6 py-2.5 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold uppercase tracking-wider transition-colors"
+                className="px-6 py-2.5 border-2 border-[#E5E7EB] text-[#1A1A1A] hover:bg-[#F9FAFB] font-semibold uppercase tracking-wider transition-colors"
               >
                 Batal
               </button>
               <button
                 onClick={handleUpdateDiscount}
-                className="px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-semibold uppercase tracking-wider transition-colors"
+                className="px-6 py-2.5 bg-[#1A1A1A] text-white hover:bg-black font-semibold uppercase tracking-wider transition-colors"
               >
                 Update
               </button>

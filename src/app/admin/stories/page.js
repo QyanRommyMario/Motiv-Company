@@ -147,8 +147,13 @@ export default function AdminStoriesPage() {
   if (loading && !stories.length) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1A1A1A]"></div>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-[#E5E7EB] border-t-[#1A1A1A] rounded-full animate-spin mx-auto" />
+            <p className="mt-4 text-sm text-[#6B7280] uppercase tracking-widest">
+              Memuat cerita...
+            </p>
+          </div>
         </div>
       </AdminLayout>
     );

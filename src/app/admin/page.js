@@ -49,8 +49,13 @@ export default function AdminDashboard() {
   if (status === "loading" || loading) {
     return (
       <AdminLayout>
-        <div className="flex justify-center items-center h-96">
-          <Loading />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-[#E5E7EB] border-t-[#1A1A1A] rounded-full animate-spin mx-auto" />
+            <p className="mt-4 text-sm text-[#6B7280] uppercase tracking-widest">
+              Memuat dashboard...
+            </p>
+          </div>
         </div>
       </AdminLayout>
     );
@@ -60,15 +65,15 @@ export default function AdminDashboard() {
     return (
       <AdminLayout>
         <div className="text-center py-12">
-          <p className="text-gray-900 font-semibold text-xl mb-2">
+          <p className="text-[#1A1A1A] font-semibold text-xl mb-2">
             Gagal memuat data
           </p>
-          <p className="text-gray-600 mb-4">
+          <p className="text-[#6B7280] mb-4">
             Silakan refresh halaman atau cek console untuk detail error
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold uppercase tracking-wider"
+            className="px-6 py-3 bg-[#1A1A1A] text-white hover:bg-black transition-colors font-semibold uppercase tracking-wider"
           >
             Refresh Halaman
           </button>
@@ -85,8 +90,8 @@ export default function AdminDashboard() {
       <div className="space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-[#1A1A1A]">Dashboard</h1>
+          <p className="text-[#6B7280] mt-2">
             Selamat datang di Admin Panel MOTIV Coffee
           </p>
         </div>
@@ -95,46 +100,48 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             title="Total Pesanan"
-            value={overview.totalOrders}
+            value={overview?.totalOrders || 0}
             icon="🛒"
-            change={`${growth.ordersThisMonth} bulan ini`}
+            change={`${growth?.ordersThisMonth || 0} bulan ini`}
             changeType="positive"
           />
           <StatCard
             title="Total Revenue"
-            value={formatCurrency(overview.totalRevenue)}
+            value={formatCurrency(overview?.totalRevenue || 0)}
             icon="💰"
-            change={`${formatCurrency(growth.revenueThisMonth)} bulan ini`}
+            change={`${formatCurrency(
+              growth?.revenueThisMonth || 0
+            )} bulan ini`}
             changeType="positive"
           />
           <StatCard
             title="Total Produk"
-            value={overview.totalProducts}
+            value={overview?.totalProducts || 0}
             icon="📦"
           />
           <StatCard
             title="Total Pelanggan"
-            value={overview.totalUsers}
+            value={overview?.totalUsers || 0}
             icon="👥"
           />
         </div>
 
         {/* Pending Orders Alert */}
-        {overview.pendingOrders > 0 && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        {overview?.pendingOrders > 0 && (
+          <div className="bg-[#FEF9C3] border border-[#FDE047] p-4">
             <div className="flex items-center gap-3">
               <span className="text-2xl">⚠️</span>
               <div className="flex-1">
-                <p className="font-medium text-yellow-900">
+                <p className="font-medium text-[#854D0E]">
                   {overview.pendingOrders} pesanan perlu diproses
                 </p>
-                <p className="text-sm text-yellow-700">
+                <p className="text-sm text-[#A16207]">
                   Ada pesanan yang menunggu konfirmasi atau pengiriman
                 </p>
               </div>
               <Link
                 href="/admin/orders"
-                className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium"
+                className="px-4 py-2 bg-[#854D0E] text-white hover:bg-[#713F12] transition-colors font-medium"
               >
                 Lihat Pesanan
               </Link>
@@ -145,52 +152,52 @@ export default function AdminDashboard() {
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Orders */}
-          <div className="bg-white rounded-lg shadow-md">
-            <div className="p-6 border-b border-gray-200">
+          <div className="bg-white border border-[#E5E7EB] shadow-sm">
+            <div className="p-6 border-b border-[#E5E7EB]">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-[#1A1A1A]">
                   Pesanan Terbaru
                 </h2>
                 <Link
                   href="/admin/orders"
-                  className="text-coffee-600 hover:text-coffee-700 font-medium text-sm"
+                  className="text-[#1A1A1A] hover:text-[#6B7280] font-medium text-sm"
                 >
                   Lihat Semua →
                 </Link>
               </div>
             </div>
-            <div className="divide-y divide-gray-200">
-              {recentOrders.length === 0 ? (
-                <div className="p-6 text-center text-gray-500">
+            <div className="divide-y divide-[#E5E7EB]">
+              {!recentOrders || recentOrders.length === 0 ? (
+                <div className="p-6 text-center text-[#6B7280]">
                   Belum ada pesanan
                 </div>
               ) : (
                 recentOrders.map((order) => (
                   <div
                     key={order.id}
-                    className="p-4 hover:bg-gray-50 transition-colors"
+                    className="p-4 hover:bg-[#F9FAFB] transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-[#1A1A1A]">
                           #{order.orderNumber}
                         </p>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-[#6B7280] mt-1">
                           {order.user?.name || "Unknown"}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-[#9CA3AF] mt-1">
                           {new Date(order.createdAt).toLocaleDateString(
                             "id-ID"
                           )}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-[#1A1A1A]">
                           {formatCurrency(order.total)}
                         </p>
                         <span
                           className={`
-                          inline-block px-2 py-1 rounded text-xs font-medium mt-1
+                          inline-block px-2 py-1 text-xs font-medium mt-1
                           ${
                             order.status === "DELIVERED"
                               ? "bg-green-100 text-green-800"
@@ -215,50 +222,50 @@ export default function AdminDashboard() {
           </div>
 
           {/* Top Products */}
-          <div className="bg-white rounded-lg shadow-md">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">
+          <div className="bg-white border border-[#E5E7EB] shadow-sm">
+            <div className="p-6 border-b border-[#E5E7EB]">
+              <h2 className="text-xl font-semibold text-[#1A1A1A]">
                 Produk Terlaris
               </h2>
             </div>
-            <div className="divide-y divide-gray-200">
-              {topProducts.length === 0 ? (
-                <div className="p-6 text-center text-gray-500">
+            <div className="divide-y divide-[#E5E7EB]">
+              {!topProducts || topProducts.length === 0 ? (
+                <div className="p-6 text-center text-[#6B7280]">
                   Belum ada data penjualan
                 </div>
               ) : (
                 topProducts.map((item, index) => (
                   <div
-                    key={item.variantId}
-                    className="p-4 hover:bg-gray-50 transition-colors"
+                    key={item.variant?.id || index}
+                    className="p-4 hover:bg-[#F9FAFB] transition-colors"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-8 h-8 rounded-full bg-coffee-600 text-white flex items-center justify-center font-bold">
+                      <div className="w-8 h-8 bg-[#1A1A1A] text-white flex items-center justify-center font-bold text-sm">
                         {index + 1}
                       </div>
-                      <div className="w-12 h-12 bg-gray-100 rounded shrink-0">
+                      <div className="w-12 h-12 bg-[#F3F4F6] shrink-0">
                         {item.variant?.product?.images?.[0] && (
                           <img
                             src={item.variant.product.images[0]}
-                            alt={item.variant.product.name}
-                            className="w-full h-full object-cover rounded"
+                            alt={item.variant?.product?.name || "Product"}
+                            className="w-full h-full object-cover"
                           />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">
+                        <p className="font-medium text-[#1A1A1A] truncate">
                           {item.variant?.product?.name || "Unknown"}
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-[#6B7280]">
                           {item.variant?.size || "-"}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-gray-900">
-                          {item._sum.quantity}x
+                        <p className="font-medium text-[#1A1A1A]">
+                          {item.totalQuantity || 0}x
                         </p>
-                        <p className="text-xs text-gray-500">
-                          {item._count.id} orders
+                        <p className="text-xs text-[#6B7280]">
+                          {item.orderCount || 0} orders
                         </p>
                       </div>
                     </div>
@@ -270,19 +277,19 @@ export default function AdminDashboard() {
         </div>
 
         {/* Low Stock Alert */}
-        {lowStockProducts.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md">
-            <div className="p-6 border-b border-gray-200">
+        {lowStockProducts && lowStockProducts.length > 0 && (
+          <div className="bg-white border border-[#E5E7EB] shadow-sm">
+            <div className="p-6 border-b border-[#E5E7EB]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">⚠️</span>
-                  <h2 className="text-xl font-semibold text-gray-900">
+                  <h2 className="text-xl font-semibold text-[#1A1A1A]">
                     Stok Menipis
                   </h2>
                 </div>
                 <Link
                   href="/admin/products"
-                  className="text-coffee-600 hover:text-coffee-700 font-medium text-sm"
+                  className="text-[#1A1A1A] hover:text-[#6B7280] font-medium text-sm"
                 >
                   Kelola Produk →
                 </Link>
@@ -292,23 +299,23 @@ export default function AdminDashboard() {
               {lowStockProducts.map((variant) => (
                 <div
                   key={variant.id}
-                  className="border border-red-200 bg-red-50 rounded-lg p-4"
+                  className="border border-red-200 bg-red-50 p-4"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 bg-white rounded shrink-0">
+                    <div className="w-12 h-12 bg-white shrink-0">
                       {variant.product?.images?.[0] && (
                         <img
                           src={variant.product.images[0]}
-                          alt={variant.product.name}
-                          className="w-full h-full object-cover rounded"
+                          alt={variant.product?.name || "Product"}
+                          className="w-full h-full object-cover"
                         />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 text-sm truncate">
+                      <p className="font-medium text-[#1A1A1A] text-sm truncate">
                         {variant.product?.name || "Unknown"}
                       </p>
-                      <p className="text-xs text-gray-600 mt-1">
+                      <p className="text-xs text-[#6B7280] mt-1">
                         {variant.size || "Default"}
                       </p>
                       <p className="text-sm font-bold text-red-600 mt-2">

@@ -117,7 +117,7 @@ function AddressesContent() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen flex items-center justify-center pt-28 bg-white">
+        <div className="min-h-screen flex items-center justify-center pt-28 bg-[#FDFCFA]">
           <Loading />
         </div>
       </>
@@ -127,16 +127,16 @@ function AddressesContent() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-white py-8 pt-28">
+      <div className="min-h-screen bg-[#FDFCFA] py-8 pt-28">
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Page Header */}
           <div className="mb-12">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-3 tracking-tight">
+                <h1 className="text-4xl font-bold text-[#1A1A1A] mb-3 tracking-tight">
                   Alamat Pengiriman
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-[#6B7280]">
                   Kelola alamat pengiriman untuk memudahkan checkout
                 </p>
               </div>
@@ -144,7 +144,7 @@ function AddressesContent() {
               {!showForm && (
                 <button
                   onClick={handleAddNew}
-                  className="bg-gray-900 text-white px-6 py-3 rounded hover:bg-black transition-colors font-semibold uppercase tracking-wider text-sm flex items-center gap-2"
+                  className="bg-[#1A1A1A] text-white px-6 py-3 hover:bg-black transition-colors font-semibold uppercase tracking-wider text-sm flex items-center gap-2"
                 >
                   <svg
                     className="w-5 h-5"
@@ -166,10 +166,10 @@ function AddressesContent() {
           </div>
 
           {/* Form or List */}
-          <div className="bg-white border border-gray-200 rounded">
+          <div className="bg-white border border-[#E5E7EB]">
             {showForm ? (
               <div className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-8 tracking-tight">
+                <h2 className="text-2xl font-bold text-[#1A1A1A] mb-8 tracking-tight">
                   {editingAddress ? "Edit Alamat" : "Tambah Alamat Baru"}
                 </h2>
                 <AddressForm
@@ -190,7 +190,7 @@ function AddressesContent() {
             <div className="mt-8">
               <button
                 onClick={() => router.push("/")}
-                className="text-gray-600 hover:text-gray-900 flex items-center gap-2 transition-colors font-medium"
+                className="text-[#6B7280] hover:text-[#1A1A1A] flex items-center gap-2 transition-colors font-medium"
               >
                 <svg
                   className="w-5 h-5"

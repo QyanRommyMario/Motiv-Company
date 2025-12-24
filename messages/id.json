@@ -41,17 +41,19 @@
     "home": "Beranda",
     "products": "Produk",
     "stories": "Cerita Kami",
+    "vouchers": "Voucher",
     "cart": "Keranjang",
     "profile": "Profil",
     "login": "Masuk",
     "register": "Daftar",
     "logout": "Keluar",
-    "signingOut": "Sedang Keluar...",
+    "signingOut": "Keluar...",
     "addresses": "Buku Alamat",
     "myOrders": "Pesanan Saya",
     "becomeB2B": "Daftar Mitra B2B",
     "b2bPartnerDiscount": "Mitra B2B - Diskon {discount}%",
-    "roleAdministrator": "Administrator"
+    "b2bDashboard": "Dashboard B2B",
+    "roleAdministrator": "DASHBOARD ADMIN"
   },
   "landing": {
     "hero": {
@@ -102,6 +104,7 @@
     "addToCart": "Tambah ke Keranjang",
     "noProducts": "Produk tidak ditemukan",
     "noProductsMessage": "Maaf, produk yang Anda cari belum tersedia.",
+    "priceNotAvailable": "Harga belum tersedia",
     "categoryList": {
       "arabica": "Arabika",
       "robusta": "Robusta",

@@ -160,14 +160,14 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16 pb-8">
+    <div className="min-h-screen bg-[#FDFCFA] pt-16 pb-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
         {/* Page Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] mb-2">
             Checkout
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-sm sm:text-base text-[#6B7280]">
             Lengkapi informasi pengiriman untuk menyelesaikan pesanan
           </p>
         </div>
@@ -176,7 +176,7 @@ export default function CheckoutPage() {
         <CheckoutSteps currentStep={2} />
 
         {error && (
-          <div className="mb-4 sm:mb-6 bg-red-50 border border-red-200 text-red-600 px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-sm sm:text-base">
+          <div className="mb-4 sm:mb-6 bg-red-50 border border-red-200 text-red-600 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base">
             {error}
           </div>
         )}
@@ -185,9 +185,9 @@ export default function CheckoutPage() {
           {/* Left Column: Address & Shipping */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Shipping Address Section */}
-            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <div className="bg-white border border-[#E5E7EB] shadow-sm p-4 sm:p-6">
               <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-100 flex items-center justify-center shrink-0">
                   <svg
                     className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600"
                     fill="none"
@@ -202,7 +202,7 @@ export default function CheckoutPage() {
                     />
                   </svg>
                 </div>
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+                <h2 className="text-lg sm:text-xl font-semibold text-[#1A1A1A]">
                   Alamat Pengiriman
                 </h2>
               </div>
@@ -211,9 +211,9 @@ export default function CheckoutPage() {
             </div>
 
             {/* Shipping Method Section */}
-            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <div className="bg-white border border-[#E5E7EB] shadow-sm p-4 sm:p-6">
               <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 flex items-center justify-center shrink-0">
                   <svg
                     className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600"
                     fill="none"
@@ -228,7 +228,7 @@ export default function CheckoutPage() {
                     />
                   </svg>
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-[#1A1A1A]">
                   Metode Pengiriman
                 </h2>
               </div>
@@ -241,8 +241,8 @@ export default function CheckoutPage() {
             </div>
 
             {/* Order Notes */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="font-semibold text-gray-900 mb-3">
+            <div className="bg-white border border-[#E5E7EB] shadow-sm p-6">
+              <h3 className="font-semibold text-[#1A1A1A] mb-3">
                 Catatan Pesanan (Opsional)
               </h3>
               <textarea
@@ -250,9 +250,9 @@ export default function CheckoutPage() {
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Contoh: Kirim sore hari, Tolong hubungi sebelum kirim, dll."
                 rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-600 resize-none"
+                className="w-full px-4 py-3 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none resize-none"
               />
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-[#6B7280] mt-2">
                 Catatan akan diteruskan ke kurir untuk pengiriman
               </p>
             </div>
@@ -279,14 +279,16 @@ export default function CheckoutPage() {
 
                 <button
                   onClick={() => router.push("/cart")}
-                  className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+                  className="w-full px-6 py-3 border-2 border-[#E5E7EB] text-[#1A1A1A] hover:bg-[#F9FAFB] transition font-medium"
                 >
                   Kembali ke Keranjang
                 </button>
               </div>
 
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600">
-                <p className="font-medium mb-2">🔒 Transaksi Aman</p>
+              <div className="bg-[#F9FAFB] border border-[#E5E7EB] p-4 text-sm text-[#6B7280]">
+                <p className="font-medium mb-2 text-[#1A1A1A]">
+                  🔒 Transaksi Aman
+                </p>
                 <p>
                   Data Anda dilindungi dengan enkripsi SSL. Pembayaran diproses
                   secara aman.

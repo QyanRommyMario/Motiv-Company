@@ -128,15 +128,15 @@ export default function OrderCard({ order }) {
 
   return (
     <Link href={`/profile/orders/${order.id}`}>
-      <div className="bg-white rounded border border-gray-900 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
+      <div className="bg-white border border-[#1A1A1A] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
         <div className="p-4 sm:p-6">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0 mb-5 pb-4 border-b border-gray-900">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0 mb-5 pb-4 border-b border-[#E5E7EB]">
             <div>
-              <p className="text-sm sm:text-base font-bold text-gray-900 tracking-wide">
+              <p className="text-sm sm:text-base font-bold text-[#1A1A1A] tracking-wide">
                 Order #{order.orderNumber}
               </p>
-              <p className="text-xs text-gray-900 mt-1.5 font-semibold">
+              <p className="text-xs text-[#6B7280] mt-1.5 font-semibold">
                 {orderDate}
               </p>
             </div>
@@ -198,41 +198,41 @@ export default function OrderCard({ order }) {
                   );
                 })}
                 {order.items.length > 2 && (
-                  <p className="text-xs text-gray-900 text-center font-bold py-2 bg-gray-50 rounded border border-gray-300">
+                  <p className="text-xs text-[#1A1A1A] text-center font-bold py-2 bg-[#F9FAFB] border border-[#E5E7EB]">
                     +{order.items.length - 2} produk lainnya
                   </p>
                 )}
               </div>
             ) : (
-              <p className="text-sm text-gray-900 text-center py-4 font-bold">
+              <p className="text-sm text-[#6B7280] text-center py-4 font-bold">
                 Tidak ada produk
               </p>
             )}
           </div>
 
           {/* Footer */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 pt-4 border-t border-gray-900">
-            <div className="text-sm text-gray-900">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 pt-4 border-t border-[#E5E7EB]">
+            <div className="text-sm text-[#1A1A1A]">
               <p className="font-semibold">
                 {totalItems} {totalItems === 1 ? "Produk" : "Produk"}
               </p>
             </div>
             <div className="text-left sm:text-right w-full sm:w-auto">
-              <p className="text-xs text-gray-900 font-medium mb-1">
+              <p className="text-xs text-[#6B7280] font-medium mb-1">
                 Total Belanja
               </p>
-              <p className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">
+              <p className="text-lg sm:text-xl font-bold text-[#1A1A1A] tracking-tight">
                 {formatCurrency(order.total)}
               </p>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="mt-5 flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-900">
+          <div className="mt-5 flex flex-col sm:flex-row gap-3 pt-4 border-t border-[#E5E7EB]">
             {order.status === "PENDING" && order.paymentStatus === "UNPAID" && (
               <button
                 onClick={handlePayment}
-                className="flex-1 sm:flex-none px-5 py-3 bg-gray-900 text-white rounded hover:bg-gray-800 transition-all duration-300 text-sm font-bold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                className="flex-1 sm:flex-none px-5 py-3 bg-[#1A1A1A] text-white hover:bg-black transition-all duration-300 text-sm font-bold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
               >
                 Bayar Sekarang
               </button>
@@ -241,7 +241,7 @@ export default function OrderCard({ order }) {
               <button
                 onClick={openConfirmModal}
                 disabled={isCompleting}
-                className={`flex-1 sm:flex-none px-5 py-3 bg-gray-900 text-white rounded hover:bg-gray-800 transition-all duration-300 text-sm font-bold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 ${
+                className={`flex-1 sm:flex-none px-5 py-3 bg-[#1A1A1A] text-white hover:bg-black transition-all duration-300 text-sm font-bold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 ${
                   isCompleting ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
@@ -250,7 +250,7 @@ export default function OrderCard({ order }) {
             )}
             <button
               onClick={handleViewDetail}
-              className="flex-1 sm:flex-none px-5 py-3 border border-gray-900 text-gray-900 rounded hover:bg-gray-900 hover:text-white transition-all duration-300 text-sm font-bold shadow-sm hover:shadow-md"
+              className="flex-1 sm:flex-none px-5 py-3 border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-all duration-300 text-sm font-bold shadow-sm hover:shadow-md"
             >
               Lihat Detail
             </button>
@@ -269,7 +269,7 @@ export default function OrderCard({ order }) {
           }}
         >
           <div
-            className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-slide-in-right"
+            className="bg-white shadow-2xl max-w-md w-full p-6 animate-slide-in-right"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -292,10 +292,10 @@ export default function OrderCard({ order }) {
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">
                   Konfirmasi Penerimaan Pesanan
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-[#6B7280]">
                   Apakah Anda yakin pesanan telah diterima dengan baik dan
                   sesuai?
                 </p>
@@ -309,7 +309,7 @@ export default function OrderCard({ order }) {
                   e.stopPropagation();
                   setShowConfirmModal(false);
                 }}
-                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                className="flex-1 px-4 py-2.5 border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB] transition-colors font-medium"
               >
                 Batal
               </button>
@@ -319,7 +319,7 @@ export default function OrderCard({ order }) {
                   e.stopPropagation();
                   handleCompleteOrder();
                 }}
-                className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                className="flex-1 px-4 py-2.5 bg-green-600 text-white hover:bg-green-700 transition-colors font-medium"
               >
                 Ya, Terima
               </button>

@@ -21,12 +21,12 @@ function SuccessContent() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-[#FDFCFA] py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Checkout Steps */}
         <CheckoutSteps currentStep={4} />
 
-        <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+        <div className="bg-white shadow-sm p-8 text-center border border-[#E5E7EB]">
           {/* Success Icon */}
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg
@@ -45,23 +45,23 @@ function SuccessContent() {
           </div>
 
           {/* Success Message */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">
+          <h1 className="text-3xl font-bold text-[#1A1A1A] mb-3">
             Pesanan Berhasil!
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-[#6B7280] mb-6">
             Terima kasih telah berbelanja. Pesanan Anda sedang diproses.
           </p>
 
           {/* Order ID */}
           {orderId && (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6 inline-block">
-              <p className="text-sm text-gray-600 mb-1">ID Pesanan</p>
-              <p className="text-xl font-bold text-gray-900">{orderId}</p>
+            <div className="bg-[#F9FAFB] border border-[#E5E7EB] p-4 mb-6 inline-block">
+              <p className="text-sm text-[#6B7280] mb-1">ID Pesanan</p>
+              <p className="text-xl font-bold text-[#1A1A1A]">{orderId}</p>
             </div>
           )}
 
           {/* Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 text-left max-w-md mx-auto">
+          <div className="bg-blue-50 border border-blue-200 p-4 mb-8 text-left max-w-md mx-auto">
             <div className="flex items-start gap-3">
               <svg
                 className="w-5 h-5 text-blue-600 mt-0.5"
@@ -95,7 +95,7 @@ function SuccessContent() {
             </Button>
             <button
               onClick={() => router.push("/")}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+              className="px-6 py-3 border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB] transition font-medium"
             >
               Kembali ke Beranda
             </button>
@@ -110,10 +110,10 @@ export default function CheckoutSuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-[#FDFCFA] flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1A1A1A] mx-auto mb-4"></div>
+            <p className="text-[#6B7280]">Loading...</p>
           </div>
         </div>
       }

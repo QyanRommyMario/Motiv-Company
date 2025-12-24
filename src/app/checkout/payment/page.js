@@ -257,32 +257,32 @@ export default function PaymentPage() {
         onLoad={() => setSnapReady(true)}
       />
 
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-[#FDFCFA] py-8">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold text-[#1A1A1A] mb-2">
               Pembayaran
             </h1>
-            <p className="text-gray-600">
+            <p className="text-[#6B7280]">
               Selesaikan pesanan Anda melalui Midtrans Payment Gateway
             </p>
           </div>
 
           {!existingSnapToken && <CheckoutSteps currentStep={3} />}
 
-          <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          <div className="bg-white border border-[#E5E7EB] shadow-sm p-6 mt-6">
+            <h2 className="text-xl font-semibold text-[#1A1A1A] mb-4">
               Ringkasan Pesanan
             </h2>
 
             <div className="space-y-3 mb-6">
-              <div className="flex justify-between text-gray-700">
+              <div className="flex justify-between text-[#6B7280]">
                 <span>Subtotal</span>
                 <span>
                   Rp {checkoutData?.subtotal?.toLocaleString("id-ID") || 0}
                 </span>
               </div>
-              <div className="flex justify-between text-gray-700">
+              <div className="flex justify-between text-[#6B7280]">
                 <span>Ongkos Kirim</span>
                 <span>
                   Rp{" "}
@@ -291,7 +291,7 @@ export default function PaymentPage() {
               </div>
 
               {!voucherApplied ? (
-                <div className="border border-gray-200 rounded p-4 bg-gray-50 my-4">
+                <div className="border border-[#E5E7EB] p-4 bg-[#F9FAFB] my-4">
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -300,13 +300,13 @@ export default function PaymentPage() {
                         setVoucherCode(e.target.value.toUpperCase())
                       }
                       placeholder="Kode Voucher"
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded uppercase font-mono text-sm"
+                      className="flex-1 px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none uppercase font-mono text-sm"
                       disabled={voucherLoading}
                     />
                     <button
                       onClick={handleApplyVoucher}
                       disabled={voucherLoading || !voucherCode.trim()}
-                      className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-black text-sm"
+                      className="px-4 py-2 bg-[#1A1A1A] text-white hover:bg-black text-sm"
                     >
                       {voucherLoading ? "..." : "Gunakan"}
                     </button>
@@ -330,7 +330,7 @@ export default function PaymentPage() {
                 </div>
               )}
 
-              <div className="border-t-2 border-gray-900 pt-4 flex justify-between text-xl font-bold text-gray-900">
+              <div className="border-t-2 border-[#1A1A1A] pt-4 flex justify-between text-xl font-bold text-[#1A1A1A]">
                 <span className="uppercase tracking-wide">
                   Total Pembayaran
                 </span>
@@ -344,11 +344,11 @@ export default function PaymentPage() {
               <button
                 onClick={handleProcessPayment}
                 disabled={processing || !snapReady}
-                className={`flex-1 py-4 px-6 rounded-lg font-bold text-white transition-all uppercase tracking-wide
+                className={`flex-1 py-4 px-6 font-bold text-white transition-all uppercase tracking-wide
                     ${
                       processing
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-gray-900 hover:bg-black shadow-lg hover:shadow-xl"
+                        ? "bg-[#9CA3AF] cursor-not-allowed"
+                        : "bg-[#1A1A1A] hover:bg-black shadow-lg hover:shadow-xl"
                     }
                 `}
               >
@@ -362,13 +362,13 @@ export default function PaymentPage() {
                   )
                 }
                 disabled={processing}
-                className="px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold uppercase transition"
+                className="px-6 py-4 border-2 border-[#E5E7EB] text-[#1A1A1A] hover:bg-[#F9FAFB] font-semibold uppercase transition"
               >
                 Kembali
               </button>
             </div>
 
-            <p className="mt-4 text-center text-xs text-gray-400">
+            <p className="mt-4 text-center text-xs text-[#9CA3AF]">
               Pembayaran aman & terenkripsi oleh Midtrans Payment Gateway
               (Sandbox Mode).
             </p>

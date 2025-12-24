@@ -93,10 +93,10 @@ export default function VouchersPage() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-white flex items-center justify-center pt-28">
+        <div className="min-h-screen bg-[#FDFCFA] flex items-center justify-center pt-28">
           <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-            <p className="mt-4 text-gray-600">Loading vouchers...</p>
+            <div className="w-12 h-12 border-4 border-[#E5E7EB] border-t-[#1A1A1A] rounded-full animate-spin mx-auto" />
+            <p className="mt-4 text-[#6B7280]">Loading vouchers...</p>
           </div>
         </div>
       </>
@@ -106,14 +106,14 @@ export default function VouchersPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-white pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-[#FDFCFA] pt-28 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-bold text-[#1A1A1A] mb-4 tracking-tight">
               Voucher Diskon
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-[#6B7280] max-w-2xl mx-auto">
               Dapatkan diskon spesial untuk pembelian Anda
             </p>
           </div>
@@ -131,11 +131,11 @@ export default function VouchersPage() {
 
           {/* Vouchers Grid */}
           {vouchers.length === 0 ? (
-            <div className="bg-white border border-gray-200 rounded p-16 text-center">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            <div className="bg-white border border-[#E5E7EB] p-16 text-center">
+              <h2 className="text-2xl font-semibold text-[#1A1A1A] mb-2">
                 Belum Ada Voucher Tersedia
               </h2>
-              <p className="text-gray-600">
+              <p className="text-[#6B7280]">
                 Voucher diskon akan muncul di sini. Cek kembali nanti!
               </p>
             </div>
@@ -153,10 +153,10 @@ export default function VouchersPage() {
                 return (
                   <div
                     key={voucher.id}
-                    className="bg-white border border-gray-200 rounded overflow-hidden hover:border-gray-900 transition-all duration-300 group flex flex-col"
+                    className="bg-white border border-[#E5E7EB] overflow-hidden hover:border-[#1A1A1A] transition-all duration-300 group flex flex-col"
                   >
                     {/* Voucher Header */}
-                    <div className="bg-gray-900 p-6 text-white h-[200px] flex flex-col">
+                    <div className="bg-[#1A1A1A] p-6 text-white h-[200px] flex flex-col">
                       <div className="mb-4 h-[90px] flex flex-col justify-center">
                         <div
                           className={`${textSize} font-bold tracking-tight wrap-break-word leading-tight`}
@@ -197,7 +197,7 @@ export default function VouchersPage() {
                           <div className="text-sm text-gray-500 uppercase tracking-wide mb-1">
                             Minimum Pembelian
                           </div>
-                          <div className="font-semibold text-gray-900">
+                          <div className="font-semibold text-[#1A1A1A]">
                             {voucher.minPurchase > 0
                               ? `Rp ${voucher.minPurchase.toLocaleString(
                                   "id-ID"
@@ -208,12 +208,12 @@ export default function VouchersPage() {
                       </div>
 
                       {/* Validity Period */}
-                      <div className="flex items-start gap-3 py-3 border-b border-gray-100">
+                      <div className="flex items-start gap-3 py-3 border-b border-[#E5E7EB]">
                         <div className="flex-1">
-                          <div className="text-sm text-gray-500 uppercase tracking-wide mb-1">
+                          <div className="text-sm text-[#6B7280] uppercase tracking-wide mb-1">
                             Berlaku Sampai
                           </div>
-                          <div className="font-semibold text-gray-900">
+                          <div className="font-semibold text-[#1A1A1A]">
                             {formatDate(voucher.validUntil)}
                           </div>
                         </div>
@@ -222,21 +222,21 @@ export default function VouchersPage() {
                       {/* Quota Progress */}
                       <div className="py-3 flex-1">
                         <div className="flex justify-between text-sm mb-2">
-                          <span className="text-gray-500 uppercase tracking-wide">
+                          <span className="text-[#6B7280] uppercase tracking-wide">
                             Sisa Kuota
                           </span>
                           <span
                             className={`font-semibold ${
-                              almostFull ? "text-red-600" : "text-gray-900"
+                              almostFull ? "text-red-600" : "text-[#1A1A1A]"
                             }`}
                           >
                             {voucher.quota - voucher.used} / {voucher.quota}
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-[#E5E7EB] h-2">
                           <div
-                            className={`h-2 rounded-full transition-all ${
-                              almostFull ? "bg-red-600" : "bg-gray-900"
+                            className={`h-2 transition-all ${
+                              almostFull ? "bg-red-600" : "bg-[#1A1A1A]"
                             }`}
                             style={{ width: `${progressPercentage}%` }}
                           ></div>
@@ -254,7 +254,7 @@ export default function VouchersPage() {
                           copyVoucherCode(voucher.code);
                           setTimeout(() => router.push("/cart"), 500);
                         }}
-                        className="w-full bg-gray-900 text-white py-3 rounded font-semibold hover:bg-black transition-colors uppercase tracking-wider text-sm mt-auto"
+                        className="w-full bg-[#1A1A1A] text-white py-3 font-semibold hover:bg-black transition-colors uppercase tracking-wider text-sm mt-auto"
                       >
                         Gunakan Sekarang
                       </button>
@@ -266,11 +266,11 @@ export default function VouchersPage() {
           )}
 
           {/* Info Section */}
-          <div className="mt-16 border border-gray-200 rounded p-8">
-            <h3 className="font-semibold text-gray-900 mb-4 text-lg tracking-wide uppercase">
+          <div className="mt-16 border border-[#E5E7EB] p-8">
+            <h3 className="font-semibold text-[#1A1A1A] mb-4 text-lg tracking-wide uppercase">
               Cara Menggunakan Voucher
             </h3>
-            <ol className="list-decimal list-inside space-y-3 text-gray-700">
+            <ol className="list-decimal list-inside space-y-3 text-[#6B7280]">
               <li>Pilih voucher yang ingin digunakan dan salin kode voucher</li>
               <li>Tambahkan produk ke keranjang belanja</li>
               <li>Di halaman checkout, masukkan kode voucher</li>

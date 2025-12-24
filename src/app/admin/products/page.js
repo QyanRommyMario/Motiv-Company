@@ -170,8 +170,13 @@ export default function AdminProductsPage() {
 
         {/* Products Grid */}
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Loading />
+          <div className="flex items-center justify-center min-h-[40vh]">
+            <div className="text-center">
+              <div className="w-10 h-10 border-4 border-[#E5E7EB] border-t-[#1A1A1A] rounded-full animate-spin mx-auto" />
+              <p className="mt-3 text-sm text-[#6B7280] uppercase tracking-wider">
+                Memuat produk...
+              </p>
+            </div>
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="bg-white border border-[#E5E7EB] shadow-sm p-12 text-center">
@@ -198,7 +203,7 @@ export default function AdminProductsPage() {
                 className="bg-white border border-[#E5E7EB] shadow-sm hover:shadow-lg hover:border-[#1A1A1A] transition-all duration-300 flex flex-col"
               >
                 {/* Image */}
-                <div className="aspect-square bg-[#F3F4F6] relative flex-shrink-0">
+                <div className="aspect-square bg-[#F3F4F6] relative shrink-0">
                   {product.images && product.images[0] ? (
                     <img
                       src={product.images[0]}
@@ -222,7 +227,7 @@ export default function AdminProductsPage() {
                 </div>
 
                 {/* Content */}
-                <div className="p-5 flex flex-col flex-grow">
+                <div className="p-5 flex flex-col grow">
                   <h3 className="font-bold text-lg text-[#1A1A1A] mb-2">
                     {product.name}
                   </h3>
@@ -231,7 +236,7 @@ export default function AdminProductsPage() {
                   </p>
 
                   {/* Variants */}
-                  <div className="mb-4 flex-grow">
+                  <div className="mb-4 grow">
                     <p className="text-xs font-bold text-[#1A1A1A] mb-2 uppercase tracking-wider">
                       {product.variants?.length || 0} {t("variantsAvailable")}
                     </p>
