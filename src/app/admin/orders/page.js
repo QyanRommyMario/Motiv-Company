@@ -1,22 +1,26 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import AdminLayout from "@/components/layout/AdminLayout";
 import Loading from "@/components/ui/Loading";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
 
-const statusOptions = [
-  { value: "", label: "Semua Status" },
-  { value: "PENDING", label: "Pending", color: "yellow" },
-  { value: "PAID", label: "Paid", color: "blue" },
-  { value: "PROCESSING", label: "Processing", color: "purple" },
-  { value: "SHIPPED", label: "Shipped", color: "indigo" },
-  { value: "DELIVERED", label: "Delivered", color: "green" },
-  { value: "CANCELLED", label: "Cancelled", color: "red" },
-];
-
 export default function AdminOrdersPage() {
+  const t = useTranslations("admin.ordersPage");
+  const tStatus = useTranslations("orders.status");
+  
+  const statusOptions = [
+    { value: "", label: t("allStatus") },
+    { value: "PENDING", label: tStatus("PENDING"), color: "yellow" },
+    { value: "PAID", label: tStatus("PAID"), color: "blue" },
+    { value: "PROCESSING", label: tStatus("PROCESSING"), color: "purple" },
+    { value: "SHIPPED", label: tStatus("SHIPPED"), color: "indigo" },
+    { value: "DELIVERED", label: tStatus("DELIVERED"), color: "green" },
+    { value: "CANCELLED", label: tStatus("CANCELLED"), color: "red" },
+  ];
+  
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
@@ -79,18 +83,18 @@ export default function AdminOrdersPage() {
       if (response.ok) {
         const result = await response.json();
         console.log("✅ Order updated:", result);
-        alert("Status berhasil diupdate!");
+        alert(t("statusUpdated"));
         fetchOrders();
         setShowModal(false);
         setSelectedOrder(null);
       } else {
         const data = await response.json();
         console.error("❌ Update failed:", data);
-        alert(data.message || "Gagal update status");
+        alert(data.message || t("updateFailed"));
       }
     } catch (error) {
       console.error("❌ Error updating status:", error);
-      alert("Terjadi kesalahan");
+      alert(t("errorOccurred"));
     } finally {
       setUpdatingStatus(false);
     }
@@ -124,9 +128,9 @@ export default function AdminOrdersPage() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-[#1A1A1A]">
-            Manajemen Pesanan
+            {t("title")}
           </h1>
-          <p className="text-[#6B7280] mt-2">Kelola semua pesanan pelanggan</p>
+          <p className="text-[#6B7280] mt-2">{t("subtitle")}</p>
         </div>
 
         {/* Filters */}
@@ -135,13 +139,13 @@ export default function AdminOrdersPage() {
             {/* Search */}
             <div>
               <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
-                Cari Pesanan
+                {t("searchLabel")}
               </label>
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Nomor order, nama, email..."
+                placeholder={t("searchPlaceholder")}
                 className="w-full px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-[#1A1A1A] placeholder:text-[#9CA3AF]"
               />
             </div>
@@ -149,7 +153,7 @@ export default function AdminOrdersPage() {
             {/* Status Filter */}
             <div>
               <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
-                Filter Status
+                {t("filterStatus")}
               </label>
               <select
                 value={filter}
@@ -173,14 +177,14 @@ export default function AdminOrdersPage() {
               <div className="text-center">
                 <div className="w-10 h-10 border-4 border-[#E5E7EB] border-t-[#1A1A1A] rounded-full animate-spin mx-auto" />
                 <p className="mt-3 text-sm text-[#6B7280] uppercase tracking-wider">
-                  Memuat pesanan...
+                  {t("loadingOrders")}
                 </p>
               </div>
             </div>
           ) : filteredOrders.length === 0 ? (
             <div className="p-12 text-center text-[#6B7280]">
               <div className="text-6xl mb-4">📦</div>
-              <p>Tidak ada pesanan</p>
+              <p>{t("noOrders")}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -191,19 +195,19 @@ export default function AdminOrdersPage() {
                       Order
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Pelanggan
+                      {t("customer")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Total
+                      {t("total")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Status
+                      {t("status")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Tanggal
+                      {t("date")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-[#6B7280] uppercase tracking-wider">
-                      Aksi
+                      {t("actions")}
                     </th>
                   </tr>
                 </thead>
@@ -215,7 +219,7 @@ export default function AdminOrdersPage() {
                           #{order.orderNumber}
                         </div>
                         <div className="text-xs text-[#6B7280]">
-                          {order.items?.length || 0} items
+                          {order.items?.length || 0} {t("items")}
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -256,7 +260,7 @@ export default function AdminOrdersPage() {
                             href={`/admin/orders/${order.id}`}
                             className="text-[#1A1A1A] hover:text-[#6B7280] font-medium uppercase tracking-wider underline"
                           >
-                            Detail
+                            {t("detail")}
                           </Link>
                           <button
                             onClick={() => {
@@ -265,7 +269,7 @@ export default function AdminOrdersPage() {
                             }}
                             className="text-[#1A1A1A] hover:text-[#6B7280] font-medium uppercase tracking-wider underline"
                           >
-                            Update
+                            {t("update")}
                           </button>
                         </div>
                       </td>
@@ -282,13 +286,13 @@ export default function AdminOrdersPage() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white max-w-md w-full p-6">
               <h3 className="text-lg font-semibold text-[#1A1A1A] mb-4">
-                Update Status Order #{selectedOrder.orderNumber}
+                {t("updateStatus")} #{selectedOrder.orderNumber}
               </h3>
 
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
-                    Status Baru
+                    {t("newStatus")}
                   </label>
                   <select
                     id="newStatus"
@@ -307,12 +311,12 @@ export default function AdminOrdersPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
-                    Nomor Resi (Opsional)
+                    {t("trackingNumber")}
                   </label>
                   <input
                     type="text"
                     id="trackingNumber"
-                    placeholder="Masukkan nomor resi..."
+                    placeholder={t("trackingPlaceholder")}
                     className="w-full px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-[#1A1A1A] placeholder:text-[#9CA3AF]"
                     defaultValue={selectedOrder.trackingNumber || ""}
                   />
@@ -320,12 +324,12 @@ export default function AdminOrdersPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[#1A1A1A] mb-2">
-                    Kurir (Opsional)
+                    {t("courier")}
                   </label>
                   <input
                     type="text"
                     id="courier"
-                    placeholder="JNE, TIKI, POS..."
+                    placeholder={t("courierPlaceholder")}
                     className="w-full px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none text-[#1A1A1A] placeholder:text-[#9CA3AF]"
                     defaultValue={selectedOrder.shippingCourier || ""}
                   />
@@ -341,7 +345,7 @@ export default function AdminOrdersPage() {
                   className="flex-1 px-4 py-2 border-2 border-[#E5E7EB] text-[#1A1A1A] hover:bg-[#F9FAFB] transition-colors"
                   disabled={updatingStatus}
                 >
-                  Batal
+                  {t("cancel")}
                 </button>
                 <button
                   onClick={() => {
@@ -359,7 +363,7 @@ export default function AdminOrdersPage() {
                   className="flex-1 px-4 py-2 bg-[#1A1A1A] text-white hover:bg-black transition-colors disabled:opacity-50"
                   disabled={updatingStatus}
                 >
-                  {updatingStatus ? "Mengupdate..." : "Update"}
+                  {updatingStatus ? t("updating") : t("update")}
                 </button>
               </div>
             </div>

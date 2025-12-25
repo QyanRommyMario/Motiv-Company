@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import CheckoutSteps from "@/components/checkout/CheckoutSteps";
 import Loading from "@/components/ui/Loading";
 import Script from "next/script";
@@ -11,6 +12,7 @@ export default function PaymentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
+  const t = useTranslations("payment");
 
   const [checkoutData, setCheckoutData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -134,7 +136,7 @@ export default function PaymentPage() {
 
   const handleApplyVoucher = async () => {
     if (!voucherCode.trim()) {
-      setVoucherError("Mohon masukkan kode voucher");
+      setVoucherError(t("enterVoucherCode"));
       return;
     }
     setVoucherLoading(true);
@@ -163,10 +165,10 @@ export default function PaymentPage() {
         setVoucherDiscount(discount);
         setVoucherError("");
       } else {
-        setVoucherError(data.message || "Voucher tidak valid");
+        setVoucherError(data.message || t("invalidVoucher"));
       }
     } catch (error) {
-      setVoucherError("Gagal menerapkan voucher");
+      setVoucherError(t("voucherApplyFailed"));
     } finally {
       setVoucherLoading(false);
     }
@@ -207,7 +209,7 @@ export default function PaymentPage() {
 
         const data = await response.json();
         if (!data.success)
-          throw new Error(data.message || "Gagal membuat order");
+          throw new Error(data.message || t("orderCreateFailed"));
         token = data.data.payment.token;
       }
 
@@ -224,18 +226,18 @@ export default function PaymentPage() {
             router.push(`/checkout/success?orderId=${target}&status=pending`);
           },
           onError: () => {
-            alert("Pembayaran gagal/dibatalkan");
+            alert(t("paymentFailed"));
             setProcessing(false);
           },
           onClose: () => setProcessing(false),
         });
       } else {
-        alert("Sistem pembayaran belum siap. Coba refresh halaman.");
+        alert(t("paymentNotReady"));
         setProcessing(false);
       }
     } catch (err) {
       console.error(err);
-      alert("Gagal memproses pembayaran: " + err.message);
+      alert(t("paymentProcessFailed") + ": " + err.message);
       setProcessing(false);
     }
   };
@@ -261,10 +263,10 @@ export default function PaymentPage() {
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-[#1A1A1A] mb-2">
-              Pembayaran
+              {t("title")}
             </h1>
             <p className="text-[#6B7280]">
-              Selesaikan pesanan Anda melalui Midtrans Payment Gateway
+              {t("subtitle")}
             </p>
           </div>
 
@@ -272,18 +274,18 @@ export default function PaymentPage() {
 
           <div className="bg-white border border-[#E5E7EB] shadow-sm p-6 mt-6">
             <h2 className="text-xl font-semibold text-[#1A1A1A] mb-4">
-              Ringkasan Pesanan
+              {t("orderSummary")}
             </h2>
 
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-[#6B7280]">
-                <span>Subtotal</span>
+                <span>{t("subtotal")}</span>
                 <span>
                   Rp {checkoutData?.subtotal?.toLocaleString("id-ID") || 0}
                 </span>
               </div>
               <div className="flex justify-between text-[#6B7280]">
-                <span>Ongkos Kirim</span>
+                <span>{t("shippingCost")}</span>
                 <span>
                   Rp{" "}
                   {checkoutData?.shipping?.cost?.toLocaleString("id-ID") || 0}
@@ -299,7 +301,7 @@ export default function PaymentPage() {
                       onChange={(e) =>
                         setVoucherCode(e.target.value.toUpperCase())
                       }
-                      placeholder="Kode Voucher"
+                      placeholder={t("voucherCode")}
                       className="flex-1 px-4 py-2 border-2 border-[#E5E7EB] focus:border-[#1A1A1A] focus:outline-none uppercase font-mono text-sm"
                       disabled={voucherLoading}
                     />
@@ -308,7 +310,7 @@ export default function PaymentPage() {
                       disabled={voucherLoading || !voucherCode.trim()}
                       className="px-4 py-2 bg-[#1A1A1A] text-white hover:bg-black text-sm"
                     >
-                      {voucherLoading ? "..." : "Gunakan"}
+                      {voucherLoading ? "..." : t("apply")}
                     </button>
                   </div>
                   {voucherError && (
@@ -317,14 +319,14 @@ export default function PaymentPage() {
                 </div>
               ) : (
                 <div className="flex justify-between text-green-700 font-medium my-2">
-                  <span>Diskon Voucher ({voucherCode})</span>
+                  <span>{t("voucherDiscount")} ({voucherCode})</span>
                   <div className="flex items-center gap-2">
                     <span>- Rp {voucherDiscount.toLocaleString("id-ID")}</span>
                     <button
                       onClick={handleRemoveVoucher}
                       className="text-xs text-red-500 underline"
                     >
-                      Hapus
+                      {t("remove")}
                     </button>
                   </div>
                 </div>
@@ -332,7 +334,7 @@ export default function PaymentPage() {
 
               <div className="border-t-2 border-[#1A1A1A] pt-4 flex justify-between text-xl font-bold text-[#1A1A1A]">
                 <span className="uppercase tracking-wide">
-                  Total Pembayaran
+                  {t("totalPayment")}
                 </span>
                 <span>
                   Rp {checkoutData?.total?.toLocaleString("id-ID") || 0}
@@ -352,7 +354,7 @@ export default function PaymentPage() {
                     }
                 `}
               >
-                {processing ? "Memproses..." : "Bayar Sekarang"}
+                {processing ? t("processing") : t("payNow")}
               </button>
 
               <button
@@ -364,13 +366,12 @@ export default function PaymentPage() {
                 disabled={processing}
                 className="px-6 py-4 border-2 border-[#E5E7EB] text-[#1A1A1A] hover:bg-[#F9FAFB] font-semibold uppercase transition"
               >
-                Kembali
+                {t("back")}
               </button>
             </div>
 
             <p className="mt-4 text-center text-xs text-[#9CA3AF]">
-              Pembayaran aman & terenkripsi oleh Midtrans Payment Gateway
-              (Sandbox Mode).
+              {t("securePayment")}
             </p>
           </div>
         </div>

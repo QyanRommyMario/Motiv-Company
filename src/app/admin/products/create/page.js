@@ -2,16 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import AdminLayout from "@/components/layout/AdminLayout";
 
-const categories = [
-  { value: "ARABICA", label: "Arabica" },
-  { value: "ROBUSTA", label: "Robusta" },
-  { value: "BLEND", label: "Blend" },
-  { value: "INSTANT", label: "Instant" },
-];
-
 export default function CreateProductPage() {
+  const t = useTranslations("admin.createProduct");
+  const tCats = useTranslations("products.categoryList");
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -26,6 +22,13 @@ export default function CreateProductPage() {
   const [variants, setVariants] = useState([
     { size: "100g", price: "", stock: "" },
   ]);
+
+  const categories = [
+    { value: "ARABICA", label: tCats("arabica") },
+    { value: "ROBUSTA", label: tCats("robusta") },
+    { value: "BLEND", label: tCats("blend") },
+    { value: "INSTANT", label: tCats("instant") },
+  ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -161,14 +164,14 @@ export default function CreateProductPage() {
 
     // Validation
     if (!formData.name || !formData.description || !formData.category) {
-      alert("Mohon lengkapi semua field yang wajib diisi");
+      alert(t("fillRequired"));
       return;
     }
 
     // Validate variants
     const validVariants = variants.filter((v) => v.size && v.price && v.stock);
     if (validVariants.length === 0) {
-      alert("Minimal 1 varian harus diisi lengkap");
+      alert(t("minOneVariant"));
       return;
     }
 
@@ -204,15 +207,15 @@ export default function CreateProductPage() {
       console.log("📥 Response:", data);
 
       if (response.ok) {
-        alert("Produk berhasil dibuat!");
+        alert(t("productCreated"));
         router.push("/admin/products");
       } else {
         console.error("❌ Error response:", data);
-        alert(data.message || "Gagal membuat produk");
+        alert(data.message || t("createFailed"));
       }
     } catch (error) {
       console.error("❌ Error creating product:", error);
-      alert("Terjadi kesalahan: " + error.message);
+      alert(t("errorOccurred") + ": " + error.message);
     } finally {
       setLoading(false);
     }
@@ -240,13 +243,13 @@ export default function CreateProductPage() {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            Kembali
+            {t("back")}
           </button>
           <h1 className="text-3xl font-bold text-gray-900">
-            Tambah Produk Baru
+            {t("title")}
           </h1>
           <p className="text-gray-600 mt-2">
-            Isi form di bawah untuk menambah produk
+            {t("subtitle")}
           </p>
         </div>
 
@@ -255,21 +258,21 @@ export default function CreateProductPage() {
           {/* Basic Info */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Informasi Dasar
+              {t("basicInfo")}
             </h2>
 
             <div className="space-y-4">
               {/* Name */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Nama Produk <span className="text-red-600">*</span>
+                  {t("productName")} <span className="text-red-600">*</span>
                 </label>
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  placeholder="Contoh: Kopi Arabica Gayo"
+                  placeholder={t("productNamePlaceholder")}
                   className="w-full px-4 py-3 border-2 border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-400"
                   required
                 />
@@ -278,13 +281,13 @@ export default function CreateProductPage() {
               {/* Description */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Deskripsi <span className="text-red-600">*</span>
+                  {t("description")} <span className="text-red-600">*</span>
                 </label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  placeholder="Deskripsi produk..."
+                  placeholder={t("descriptionPlaceholder")}
                   rows={4}
                   className="w-full px-4 py-3 border-2 border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-400"
                   required
@@ -294,7 +297,7 @@ export default function CreateProductPage() {
               {/* Category */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Kategori <span className="text-red-600">*</span>
+                  {t("category")} <span className="text-red-600">*</span>
                 </label>
                 <select
                   name="category"
@@ -316,13 +319,13 @@ export default function CreateProductPage() {
           {/* Images */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900">Gambar Produk</h2>
+              <h2 className="text-xl font-bold text-gray-900">{t("productImages")}</h2>
               <button
                 type="button"
                 onClick={addImageField}
                 className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                + Tambah Gambar
+                {t("addImage")}
               </button>
             </div>
 
@@ -334,9 +337,9 @@ export default function CreateProductPage() {
                 >
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="text-sm font-semibold text-gray-900">
-                      Gambar {index + 1}{" "}
+                      {t("image")} {index + 1}{" "}
                       {index === 0 && (
-                        <span className="text-blue-600">(Utama)</span>
+                        <span className="text-blue-600">{t("mainImage")}</span>
                       )}
                     </h3>
                     {formData.images.length > 1 && (
@@ -345,7 +348,7 @@ export default function CreateProductPage() {
                         onClick={() => removeImageField(index)}
                         className="text-red-600 hover:text-red-700 text-sm"
                       >
-                        Hapus
+                        {t("remove")}
                       </button>
                     )}
                   </div>
@@ -425,10 +428,10 @@ export default function CreateProductPage() {
                                 />
                               </svg>
                               <span className="text-base font-medium text-gray-700">
-                                Click to upload
+                                {t("clickToUpload")}
                               </span>
                               <span className="text-sm text-gray-500">
-                                PNG, JPG, GIF up to 5MB
+                                {t("uploadHint")}
                               </span>
                             </>
                           )}
@@ -438,7 +441,7 @@ export default function CreateProductPage() {
                       {/* Or URL Input */}
                       <div>
                         <p className="text-sm font-medium text-gray-600 mb-2 text-center">
-                          Or paste image URL
+                          {t("orPasteUrl")}
                         </p>
                         <input
                           type="url"
@@ -456,8 +459,7 @@ export default function CreateProductPage() {
               ))}
             </div>
             <p className="text-xs text-gray-500 mt-3">
-              Upload gambar atau masukkan URL. Gambar pertama akan menjadi
-              gambar utama.
+              {t("imageHint")}
             </p>
           </div>
 
@@ -465,14 +467,14 @@ export default function CreateProductPage() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider">
-                Informasi Produk (Features)
+                {t("productInfo")}
               </h2>
               <button
                 type="button"
                 onClick={addFeature}
                 className="px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold uppercase tracking-wider"
               >
-                + Tambah Info
+                {t("addInfo")}
               </button>
             </div>
 
@@ -483,7 +485,7 @@ export default function CreateProductPage() {
                     type="text"
                     value={feature}
                     onChange={(e) => handleFeatureChange(index, e.target.value)}
-                    placeholder={`Contoh: 100% Arabica Premium`}
+                    placeholder={t("featurePlaceholder")}
                     className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                   />
                   {formData.features.length > 1 && (
@@ -492,16 +494,14 @@ export default function CreateProductPage() {
                       onClick={() => removeFeature(index)}
                       className="px-4 py-2 text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-lg transition-colors font-semibold uppercase tracking-wider"
                     >
-                      Hapus
+                      {t("remove")}
                     </button>
                   )}
                 </div>
               ))}
             </div>
             <p className="text-xs text-gray-500 mt-3">
-              Tambahkan informasi penting tentang produk seperti jenis biji,
-              tingkat sangrai, atau karakteristik rasa. Akan ditampilkan dengan
-              ikon checklist.
+              {t("featureHint")}
             </p>
           </div>
 
@@ -509,14 +509,14 @@ export default function CreateProductPage() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-900 uppercase tracking-wider">
-                Varian Produk <span className="text-red-600">*</span>
+                {t("productVariants")} <span className="text-red-600">*</span>
               </h2>
               <button
                 type="button"
                 onClick={addVariant}
                 className="px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold uppercase tracking-wider"
               >
-                + Tambah Varian
+                {t("addVariant")}
               </button>
             </div>
 
@@ -528,7 +528,7 @@ export default function CreateProductPage() {
                 >
                   <div className="flex justify-between items-center mb-3">
                     <h3 className="font-bold text-gray-900 uppercase tracking-wider">
-                      Varian {index + 1}
+                      {t("variant")} {index + 1}
                     </h3>
                     {variants.length > 1 && (
                       <button
@@ -536,7 +536,7 @@ export default function CreateProductPage() {
                         onClick={() => removeVariant(index)}
                         className="px-4 py-2 text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-lg transition-colors font-semibold text-sm uppercase tracking-wider"
                       >
-                        Hapus Varian
+                        {t("removeVariant")}
                       </button>
                     )}
                   </div>
@@ -545,7 +545,7 @@ export default function CreateProductPage() {
                     {/* Size */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-900 mb-2">
-                        Ukuran/Tipe
+                        {t("sizeType")}
                       </label>
                       <input
                         type="text"
@@ -553,7 +553,7 @@ export default function CreateProductPage() {
                         onChange={(e) =>
                           handleVariantChange(index, "size", e.target.value)
                         }
-                        placeholder="100g, 250g, 1kg"
+                        placeholder={t("sizePlaceholder")}
                         className="w-full px-4 py-3 border-2 border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-400"
                       />
                     </div>
@@ -561,7 +561,7 @@ export default function CreateProductPage() {
                     {/* Price */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-900 mb-2">
-                        Harga (Rp)
+                        {t("price")}
                       </label>
                       <input
                         type="number"
@@ -578,7 +578,7 @@ export default function CreateProductPage() {
                     {/* Stock */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-900 mb-2">
-                        Stok
+                        {t("stock")}
                       </label>
                       <input
                         type="number"
@@ -605,14 +605,14 @@ export default function CreateProductPage() {
               className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
               disabled={loading}
             >
-              Batal
+              {t("cancel")}
             </button>
             <button
               type="submit"
               className="flex-1 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading || uploading}
             >
-              {loading ? "Menyimpan..." : "Tambah Produk"}
+              {loading ? t("saving") : t("addProduct")}
             </button>
           </div>
         </form>

@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Navbar from "@/components/layout/Navbar";
 import Alert from "@/components/ui/Alert";
 
 export default function VouchersPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const t = useTranslations("vouchers");
   const [vouchers, setVouchers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState(null);
@@ -52,7 +54,7 @@ export default function VouchersPage() {
     setCopiedCode(code);
     setAlert({
       type: "success",
-      message: `Kode voucher ${code} berhasil disalin!`,
+      message: t("codeCopied", { code }),
     });
     setTimeout(() => {
       setCopiedCode(null);
@@ -96,7 +98,7 @@ export default function VouchersPage() {
         <div className="min-h-screen bg-[#FDFCFA] flex items-center justify-center pt-28">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-[#E5E7EB] border-t-[#1A1A1A] rounded-full animate-spin mx-auto" />
-            <p className="mt-4 text-[#6B7280]">Loading vouchers...</p>
+            <p className="mt-4 text-[#6B7280]">{t("loading")}</p>
           </div>
         </div>
       </>
@@ -111,10 +113,10 @@ export default function VouchersPage() {
           {/* Header */}
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-[#1A1A1A] mb-4 tracking-tight">
-              Voucher Diskon
+              {t("title")}
             </h1>
             <p className="text-lg text-[#6B7280] max-w-2xl mx-auto">
-              Dapatkan diskon spesial untuk pembelian Anda
+              {t("subtitle")}
             </p>
           </div>
 
@@ -133,10 +135,10 @@ export default function VouchersPage() {
           {vouchers.length === 0 ? (
             <div className="bg-white border border-[#E5E7EB] p-16 text-center">
               <h2 className="text-2xl font-semibold text-[#1A1A1A] mb-2">
-                Belum Ada Voucher Tersedia
+                {t("noVouchers")}
               </h2>
               <p className="text-[#6B7280]">
-                Voucher diskon akan muncul di sini. Cek kembali nanti!
+                {t("noVouchersDesc")}
               </p>
             </div>
           ) : (
@@ -165,15 +167,15 @@ export default function VouchersPage() {
                         </div>
                         <div className="text-sm text-gray-300 uppercase tracking-wider mt-2">
                           {voucher.type === "PERCENTAGE"
-                            ? "Diskon Persentase"
-                            : "Diskon Tetap"}
+                            ? t("percentageDiscount")
+                            : t("fixedDiscount")}
                         </div>
                       </div>
 
                       {/* Voucher Code */}
                       <div className="bg-white/10 rounded p-3 backdrop-blur-sm border border-white/20">
                         <div className="text-xs text-gray-300 mb-1 uppercase tracking-wider">
-                          Kode Voucher
+                          {t("voucherCode")}
                         </div>
                         <div className="flex justify-between items-center">
                           <div className="font-mono font-bold text-lg tracking-wider">
@@ -183,7 +185,7 @@ export default function VouchersPage() {
                             onClick={() => copyVoucherCode(voucher.code)}
                             className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-sm transition-colors"
                           >
-                            {copiedCode === voucher.code ? "✓ Copied" : "Copy"}
+                            {copiedCode === voucher.code ? t("copied") : t("copy")}
                           </button>
                         </div>
                       </div>
@@ -195,14 +197,14 @@ export default function VouchersPage() {
                       <div className="flex items-start gap-3 py-3 border-b border-gray-100 min-h-20">
                         <div className="flex-1">
                           <div className="text-sm text-gray-500 uppercase tracking-wide mb-1">
-                            Minimum Pembelian
+                            {t("minPurchase")}
                           </div>
                           <div className="font-semibold text-[#1A1A1A]">
                             {voucher.minPurchase > 0
                               ? `Rp ${voucher.minPurchase.toLocaleString(
                                   "id-ID"
                                 )}`
-                              : "Tidak ada minimum"}
+                              : t("noMinimum")}
                           </div>
                         </div>
                       </div>
@@ -211,7 +213,7 @@ export default function VouchersPage() {
                       <div className="flex items-start gap-3 py-3 border-b border-[#E5E7EB]">
                         <div className="flex-1">
                           <div className="text-sm text-[#6B7280] uppercase tracking-wide mb-1">
-                            Berlaku Sampai
+                            {t("validUntil")}
                           </div>
                           <div className="font-semibold text-[#1A1A1A]">
                             {formatDate(voucher.validUntil)}
@@ -223,7 +225,7 @@ export default function VouchersPage() {
                       <div className="py-3 flex-1">
                         <div className="flex justify-between text-sm mb-2">
                           <span className="text-[#6B7280] uppercase tracking-wide">
-                            Sisa Kuota
+                            {t("remainingQuota")}
                           </span>
                           <span
                             className={`font-semibold ${
@@ -243,7 +245,7 @@ export default function VouchersPage() {
                         </div>
                         {almostFull && (
                           <div className="text-xs text-red-600 mt-2 font-medium">
-                            Segera digunakan, kuota hampir habis!
+                            {t("almostOut")}
                           </div>
                         )}
                       </div>
@@ -256,7 +258,7 @@ export default function VouchersPage() {
                         }}
                         className="w-full bg-[#1A1A1A] text-white py-3 font-semibold hover:bg-black transition-colors uppercase tracking-wider text-sm mt-auto"
                       >
-                        Gunakan Sekarang
+                        {t("useNow")}
                       </button>
                     </div>
                   </div>
@@ -268,14 +270,14 @@ export default function VouchersPage() {
           {/* Info Section */}
           <div className="mt-16 border border-[#E5E7EB] p-8">
             <h3 className="font-semibold text-[#1A1A1A] mb-4 text-lg tracking-wide uppercase">
-              Cara Menggunakan Voucher
+              {t("howToUse")}
             </h3>
             <ol className="list-decimal list-inside space-y-3 text-[#6B7280]">
-              <li>Pilih voucher yang ingin digunakan dan salin kode voucher</li>
-              <li>Tambahkan produk ke keranjang belanja</li>
-              <li>Di halaman checkout, masukkan kode voucher</li>
-              <li>Klik "Gunakan" untuk mendapatkan diskon</li>
-              <li>Selesaikan pembayaran dengan harga yang sudah didiskon</li>
+              <li>{t("step1")}</li>
+              <li>{t("step2")}</li>
+              <li>{t("step3")}</li>
+              <li>{t("step4")}</li>
+              <li>{t("step5")}</li>
             </ol>
           </div>
         </div>

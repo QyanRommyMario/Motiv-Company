@@ -8,6 +8,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import Navbar from "@/components/layout/Navbar";
 import ProductDetail from "@/components/products/ProductDetail";
 import Loading from "@/components/ui/Loading";
@@ -16,6 +17,7 @@ import Button from "@/components/ui/Button";
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations("products");
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,11 +39,11 @@ export default function ProductDetailPage() {
         // Fetch related products after getting the product
         fetchRelatedProducts(data.data.category, data.data.id);
       } else {
-        setError(data.message || "Produk tidak ditemukan");
+        setError(data.message || t("productNotFound"));
       }
     } catch (error) {
       console.error("Error fetching product:", error);
-      setError("Terjadi kesalahan saat memuat produk");
+      setError(t("errorLoadingProduct"));
     } finally {
       setLoading(false);
     }
@@ -107,13 +109,13 @@ export default function ProductDetailPage() {
           <div className="text-center">
             <div className="text-6xl mb-4">😞</div>
             <h2 className="text-2xl font-bold text-[#1A1A1A] mb-2">
-              {error || "Produk Tidak Ditemukan"}
+              {error || t("productNotFound")}
             </h2>
             <p className="text-[#6B7280] mb-6">
-              Produk yang Anda cari tidak tersedia
+              {t("productNotFoundDesc")}
             </p>
             <Link href="/products">
-              <Button variant="primary">Kembali ke Katalog</Button>
+              <Button variant="primary">{t("backToCatalog")}</Button>
             </Link>
           </div>
         </div>
@@ -157,7 +159,7 @@ export default function ProductDetailPage() {
           <div className="mt-8 sm:mt-12 pb-6 sm:pb-8">
             <div className="border-t border-[#E5E7EB] pt-6 sm:pt-8">
               <h2 className="text-lg sm:text-xl font-bold text-[#1A1A1A] mb-4 sm:mb-6">
-                Produk Lainnya
+                {t("relatedProducts")}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {relatedProducts.map((relatedProduct) => (
@@ -211,7 +213,7 @@ export default function ProductDetailPage() {
                               )}
                             </span>
                             <span className="text-xs text-[#6B7280] font-medium group-hover:text-[#1A1A1A] transition-colors">
-                              Lihat →
+                              {t("viewProduct")}
                             </span>
                           </div>
                         )}

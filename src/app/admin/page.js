@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import AdminLayout from "@/components/layout/AdminLayout";
 import StatCard from "@/components/admin/StatCard";
 import Loading from "@/components/ui/Loading";
@@ -10,6 +11,7 @@ import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
 
 export default function AdminDashboard() {
+  const t = useTranslations("admin.dashboardPage");
   const { data: session, status } = useSession();
   const router = useRouter();
   const [stats, setStats] = useState(null);
@@ -53,7 +55,7 @@ export default function AdminDashboard() {
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-[#E5E7EB] border-t-[#1A1A1A] rounded-full animate-spin mx-auto" />
             <p className="mt-4 text-sm text-[#6B7280] uppercase tracking-widest">
-              Memuat dashboard...
+              {t("loadingDashboard")}
             </p>
           </div>
         </div>
@@ -66,16 +68,16 @@ export default function AdminDashboard() {
       <AdminLayout>
         <div className="text-center py-12">
           <p className="text-[#1A1A1A] font-semibold text-xl mb-2">
-            Gagal memuat data
+            {t("loadFailed")}
           </p>
           <p className="text-[#6B7280] mb-4">
-            Silakan refresh halaman atau cek console untuk detail error
+            {t("refreshHint")}
           </p>
           <button
             onClick={() => window.location.reload()}
             className="px-6 py-3 bg-[#1A1A1A] text-white hover:bg-black transition-colors font-semibold uppercase tracking-wider"
           >
-            Refresh Halaman
+            {t("refreshPage")}
           </button>
         </div>
       </AdminLayout>
@@ -90,37 +92,37 @@ export default function AdminDashboard() {
       <div className="space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-[#1A1A1A]">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-[#1A1A1A]">{t("title")}</h1>
           <p className="text-[#6B7280] mt-2">
-            Selamat datang di Admin Panel MOTIV Coffee
+            {t("welcome")}
           </p>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
-            title="Total Pesanan"
+            title={t("totalOrders")}
             value={overview?.totalOrders || 0}
             icon="🛒"
-            change={`${growth?.ordersThisMonth || 0} bulan ini`}
+            change={`${growth?.ordersThisMonth || 0} ${t("thisMonth")}`}
             changeType="positive"
           />
           <StatCard
-            title="Total Revenue"
+            title={t("totalRevenue")}
             value={formatCurrency(overview?.totalRevenue || 0)}
             icon="💰"
             change={`${formatCurrency(
               growth?.revenueThisMonth || 0
-            )} bulan ini`}
+            )} ${t("thisMonth")}`}
             changeType="positive"
           />
           <StatCard
-            title="Total Produk"
+            title={t("totalProducts")}
             value={overview?.totalProducts || 0}
             icon="📦"
           />
           <StatCard
-            title="Total Pelanggan"
+            title={t("totalCustomers")}
             value={overview?.totalUsers || 0}
             icon="👥"
           />
@@ -133,17 +135,17 @@ export default function AdminDashboard() {
               <span className="text-2xl">⚠️</span>
               <div className="flex-1">
                 <p className="font-medium text-[#854D0E]">
-                  {overview.pendingOrders} pesanan perlu diproses
+                  {t("pendingOrders", { count: overview.pendingOrders })}
                 </p>
                 <p className="text-sm text-[#A16207]">
-                  Ada pesanan yang menunggu konfirmasi atau pengiriman
+                  {t("pendingOrdersHint")}
                 </p>
               </div>
               <Link
                 href="/admin/orders"
                 className="px-4 py-2 bg-[#854D0E] text-white hover:bg-[#713F12] transition-colors font-medium"
               >
-                Lihat Pesanan
+                {t("viewOrders")}
               </Link>
             </div>
           </div>
@@ -156,20 +158,20 @@ export default function AdminDashboard() {
             <div className="p-6 border-b border-[#E5E7EB]">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-[#1A1A1A]">
-                  Pesanan Terbaru
+                  {t("recentOrders")}
                 </h2>
                 <Link
                   href="/admin/orders"
                   className="text-[#1A1A1A] hover:text-[#6B7280] font-medium text-sm"
                 >
-                  Lihat Semua →
+                  {t("viewAll")} →
                 </Link>
               </div>
             </div>
             <div className="divide-y divide-[#E5E7EB]">
               {!recentOrders || recentOrders.length === 0 ? (
                 <div className="p-6 text-center text-[#6B7280]">
-                  Belum ada pesanan
+                  {t("noOrders")}
                 </div>
               ) : (
                 recentOrders.map((order) => (
@@ -225,13 +227,13 @@ export default function AdminDashboard() {
           <div className="bg-white border border-[#E5E7EB] shadow-sm">
             <div className="p-6 border-b border-[#E5E7EB]">
               <h2 className="text-xl font-semibold text-[#1A1A1A]">
-                Produk Terlaris
+                {t("topProducts")}
               </h2>
             </div>
             <div className="divide-y divide-[#E5E7EB]">
               {!topProducts || topProducts.length === 0 ? (
                 <div className="p-6 text-center text-[#6B7280]">
-                  Belum ada data penjualan
+                  {t("noSalesData")}
                 </div>
               ) : (
                 topProducts.map((item, index) => (
@@ -265,7 +267,7 @@ export default function AdminDashboard() {
                           {item.totalQuantity || 0}x
                         </p>
                         <p className="text-xs text-[#6B7280]">
-                          {item.orderCount || 0} orders
+                          {item.orderCount || 0} {t("orders")}
                         </p>
                       </div>
                     </div>
@@ -284,14 +286,14 @@ export default function AdminDashboard() {
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">⚠️</span>
                   <h2 className="text-xl font-semibold text-[#1A1A1A]">
-                    Stok Menipis
+                    {t("lowStock")}
                   </h2>
                 </div>
                 <Link
                   href="/admin/products"
                   className="text-[#1A1A1A] hover:text-[#6B7280] font-medium text-sm"
                 >
-                  Kelola Produk →
+                  {t("manageProducts")} →
                 </Link>
               </div>
             </div>
@@ -319,7 +321,7 @@ export default function AdminDashboard() {
                         {variant.size || "Default"}
                       </p>
                       <p className="text-sm font-bold text-red-600 mt-2">
-                        Stok: {variant.stock}
+                        {t("stock")}: {variant.stock}
                       </p>
                     </div>
                   </div>

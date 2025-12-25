@@ -134,8 +134,7 @@ export default function CartPage() {
             </h1>
             {cartItems.length > 0 && (
               <p className="text-sm text-gray-500 mt-1">
-                {cartItems.length} item{cartItems.length > 1 ? "s" : ""} in your
-                cart
+                {t("itemsInCart", { count: cartItems.length })}
               </p>
             )}
           </div>

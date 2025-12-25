@@ -8,12 +8,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import ProductVariantSelector from "./ProductVariantSelector";
 import Button from "@/components/ui/Button";
 import Alert from "@/components/ui/Alert";
 import Loading from "@/components/ui/Loading";
 
 export default function ProductDetail({ product }) {
+  const t = useTranslations("productDetail");
   const router = useRouter();
   const { data: session } = useSession();
   const [selectedVariant, setSelectedVariant] = useState(
@@ -79,7 +81,7 @@ export default function ProductDetail({ product }) {
       if (data.success) {
         setAlert({
           type: "success",
-          message: "Produk berhasil ditambahkan ke keranjang!",
+          message: t("addedToCart"),
         });
         setTimeout(() => {
           router.push("/cart");
@@ -91,7 +93,7 @@ export default function ProductDetail({ product }) {
       console.error("❌ Add to cart error:", error);
       setAlert({
         type: "error",
-        message: "Terjadi kesalahan. Silakan coba lagi.",
+        message: t("addToCartError"),
       });
     } finally {
       setIsAdding(false);
@@ -150,7 +152,7 @@ export default function ProductDetail({ product }) {
         {/* B2B Badge */}
         {hasB2BDiscount && (
           <div className="inline-block bg-gray-100 text-gray-900 px-3 sm:px-4 py-2 rounded-lg mb-4 text-sm sm:text-base">
-            <span className="font-semibold">Harga Khusus B2B</span>
+            <span className="font-semibold">{t("b2bSpecialPrice")}</span>
             <span className="ml-2">-{discount}%</span>
           </div>
         )}
@@ -168,7 +170,7 @@ export default function ProductDetail({ product }) {
                     Rp {originalPrice.toLocaleString("id-ID")}
                   </span>
                   <span className="text-xs sm:text-sm text-gray-900 font-semibold">
-                    Hemat Rp{" "}
+                    {t("save")}{" "}
                     {(originalPrice - b2bPrice).toLocaleString("id-ID")}
                   </span>
                 </div>
@@ -180,7 +182,7 @@ export default function ProductDetail({ product }) {
             )
           ) : (
             <div className="text-gray-500 text-sm sm:text-base">
-              Pilih varian
+              {t("selectVariant")}
             </div>
           )}
         </div>
@@ -202,7 +204,7 @@ export default function ProductDetail({ product }) {
         {selectedVariant && selectedVariant.stock > 0 && (
           <div className="mb-6">
             <label className="block text-xs sm:text-sm font-semibold text-gray-900 mb-2 uppercase tracking-wider">
-              Jumlah
+              {t("quantity")}
             </label>
             <div className="flex items-center space-x-3 sm:space-x-4">
               <button
@@ -223,7 +225,7 @@ export default function ProductDetail({ product }) {
                 +
               </button>
               <span className="text-xs sm:text-sm text-gray-600">
-                Stok: {selectedVariant.stock}
+                {t("stock")}: {selectedVariant.stock}
               </span>
             </div>
           </div>
@@ -250,27 +252,27 @@ export default function ProductDetail({ product }) {
           {isAdding ? (
             <span className="flex items-center justify-center">
               <Loading size="sm" />
-              <span className="ml-2">Menambahkan...</span>
+              <span className="ml-2">{t("addingToCart")}</span>
             </span>
           ) : selectedVariant && selectedVariant.stock > 0 ? (
             hasB2BDiscount ? (
-              `Tambah ke Keranjang - Rp ${(b2bPrice * quantity).toLocaleString(
+              `${t("addToCart")} - Rp ${(b2bPrice * quantity).toLocaleString(
                 "id-ID"
               )}`
             ) : (
-              `Tambah ke Keranjang - Rp ${(
+              `${t("addToCart")} - Rp ${(
                 originalPrice * quantity
               ).toLocaleString("id-ID")}`
             )
           ) : (
-            "Stok Habis"
+            t("outOfStock")
           )}
         </Button>
 
         {/* Product Description */}
         <div className="mt-6 pt-6 border-t border-gray-200">
           <h3 className="font-bold text-gray-900 mb-4 text-lg uppercase tracking-wider">
-            Deskripsi Produk
+            {t("productDescription")}
           </h3>
           <div className="text-gray-700 leading-relaxed whitespace-pre-line">
             {product.description}
@@ -291,7 +293,7 @@ export default function ProductDetail({ product }) {
           {hasB2BDiscount && (
             <div className="mt-4 flex items-start text-sm text-gray-900 font-semibold bg-gray-100 p-3 rounded-lg">
               <span className="mr-2 font-bold">✓</span>
-              <span>Harga khusus B2B dengan diskon {discount}%</span>
+              <span>{t("b2bDiscount", { discount: discount })}</span>
             </div>
           )}
         </div>

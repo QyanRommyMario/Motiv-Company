@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 
 export default function ProductCard({ product }) {
   const t = useTranslations("products");
+  const tCart = useTranslations("cart");
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -69,7 +70,7 @@ export default function ProductCard({ product }) {
           {isOutOfStock && (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
               <span className="bg-[#1A1A1A] text-white text-xs sm:text-sm font-bold uppercase tracking-wider px-3 py-2">
-                Stok Habis
+                {tCart("outOfStock")}
               </span>
             </div>
           )}
@@ -129,11 +130,11 @@ export default function ProductCard({ product }) {
             {/* Stock indicator */}
             {isOutOfStock ? (
               <p className="text-[10px] text-red-500 font-medium mt-1">
-                Stok habis
+                {tCart("outOfStock")}
               </p>
             ) : hasMultipleVariants ? (
               <p className="text-[10px] text-gray-400 mt-1">
-                {variants.length} varian tersedia
+                {tCart("variantsAvailable", { count: variants.length })}
               </p>
             ) : null}
           </div>
