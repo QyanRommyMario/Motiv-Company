@@ -265,9 +265,7 @@ export default function PaymentPage() {
             <h1 className="text-3xl font-bold text-[#1A1A1A] mb-2">
               {t("title")}
             </h1>
-            <p className="text-[#6B7280]">
-              {t("subtitle")}
-            </p>
+            <p className="text-[#6B7280]">{t("subtitle")}</p>
           </div>
 
           {!existingSnapToken && <CheckoutSteps currentStep={3} />}
@@ -319,7 +317,9 @@ export default function PaymentPage() {
                 </div>
               ) : (
                 <div className="flex justify-between text-green-700 font-medium my-2">
-                  <span>{t("voucherDiscount")} ({voucherCode})</span>
+                  <span>
+                    {t("voucherDiscount")} ({voucherCode})
+                  </span>
                   <div className="flex items-center gap-2">
                     <span>- Rp {voucherDiscount.toLocaleString("id-ID")}</span>
                     <button

@@ -70,9 +70,7 @@ export default function AdminDashboard() {
           <p className="text-[#1A1A1A] font-semibold text-xl mb-2">
             {t("loadFailed")}
           </p>
-          <p className="text-[#6B7280] mb-4">
-            {t("refreshHint")}
-          </p>
+          <p className="text-[#6B7280] mb-4">{t("refreshHint")}</p>
           <button
             onClick={() => window.location.reload()}
             className="px-6 py-3 bg-[#1A1A1A] text-white hover:bg-black transition-colors font-semibold uppercase tracking-wider"
@@ -93,9 +91,7 @@ export default function AdminDashboard() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-[#1A1A1A]">{t("title")}</h1>
-          <p className="text-[#6B7280] mt-2">
-            {t("welcome")}
-          </p>
+          <p className="text-[#6B7280] mt-2">{t("welcome")}</p>
         </div>
 
         {/* Stats Grid */}
@@ -111,9 +107,9 @@ export default function AdminDashboard() {
             title={t("totalRevenue")}
             value={formatCurrency(overview?.totalRevenue || 0)}
             icon="💰"
-            change={`${formatCurrency(
-              growth?.revenueThisMonth || 0
-            )} ${t("thisMonth")}`}
+            change={`${formatCurrency(growth?.revenueThisMonth || 0)} ${t(
+              "thisMonth"
+            )}`}
             changeType="positive"
           />
           <StatCard

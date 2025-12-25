@@ -245,12 +245,8 @@ export default function CreateProductPage() {
             </svg>
             {t("back")}
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {t("title")}
-          </h1>
-          <p className="text-gray-600 mt-2">
-            {t("subtitle")}
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
+          <p className="text-gray-600 mt-2">{t("subtitle")}</p>
         </div>
 
         {/* Form */}
@@ -319,7 +315,9 @@ export default function CreateProductPage() {
           {/* Images */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900">{t("productImages")}</h2>
+              <h2 className="text-xl font-bold text-gray-900">
+                {t("productImages")}
+              </h2>
               <button
                 type="button"
                 onClick={addImageField}
@@ -458,9 +456,7 @@ export default function CreateProductPage() {
                 </div>
               ))}
             </div>
-            <p className="text-xs text-gray-500 mt-3">
-              {t("imageHint")}
-            </p>
+            <p className="text-xs text-gray-500 mt-3">{t("imageHint")}</p>
           </div>
 
           {/* Features */}
@@ -500,9 +496,7 @@ export default function CreateProductPage() {
                 </div>
               ))}
             </div>
-            <p className="text-xs text-gray-500 mt-3">
-              {t("featureHint")}
-            </p>
+            <p className="text-xs text-gray-500 mt-3">{t("featureHint")}</p>
           </div>
 
           {/* Variants */}

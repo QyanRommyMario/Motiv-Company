@@ -10,7 +10,7 @@ import Link from "next/link";
 export default function AdminOrdersPage() {
   const t = useTranslations("admin.ordersPage");
   const tStatus = useTranslations("orders.status");
-  
+
   const statusOptions = [
     { value: "", label: t("allStatus") },
     { value: "PENDING", label: tStatus("PENDING"), color: "yellow" },
@@ -20,7 +20,7 @@ export default function AdminOrdersPage() {
     { value: "DELIVERED", label: tStatus("DELIVERED"), color: "green" },
     { value: "CANCELLED", label: tStatus("CANCELLED"), color: "red" },
   ];
-  
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
@@ -127,9 +127,7 @@ export default function AdminOrdersPage() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-[#1A1A1A]">
-            {t("title")}
-          </h1>
+          <h1 className="text-3xl font-bold text-[#1A1A1A]">{t("title")}</h1>
           <p className="text-[#6B7280] mt-2">{t("subtitle")}</p>
         </div>
 

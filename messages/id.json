@@ -329,6 +329,21 @@
     "orders": "Pesanan Masuk",
     "vouchers": "Voucher",
     "b2bRequests": "Permintaan B2B",
+    "homeCards": {
+      "title": "Dashboard Admin",
+      "subtitle": "Kelola Bisnis Kopi Anda",
+      "products": "Produk",
+      "productsDesc": "Kelola Inventori",
+      "orders": "Pesanan",
+      "ordersDesc": "Proses Pesanan",
+      "vouchers": "Voucher",
+      "vouchersDesc": "Kelola Diskon",
+      "stories": "Cerita",
+      "storiesDesc": "Cerita Landing Page",
+      "b2bRequests": "Permintaan B2B",
+      "b2bRequestsDesc": "Setujui Mitra Bisnis",
+      "dashboardDesc": "Statistik & Laporan"
+    },
     "sidebar": {
       "dashboard": "Dasbor",
       "products": "Produk",

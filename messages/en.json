@@ -329,6 +329,21 @@
     "orders": "Incoming Orders",
     "vouchers": "Vouchers",
     "b2bRequests": "B2B Requests",
+    "homeCards": {
+      "title": "Admin Dashboard",
+      "subtitle": "Manage Your Coffee Business",
+      "products": "Products",
+      "productsDesc": "Manage Inventory",
+      "orders": "Orders",
+      "ordersDesc": "Process Orders",
+      "vouchers": "Vouchers",
+      "vouchersDesc": "Manage Discounts",
+      "stories": "Stories",
+      "storiesDesc": "Landing Page Stories",
+      "b2bRequests": "B2B Requests",
+      "b2bRequestsDesc": "Approve Businesses",
+      "dashboardDesc": "Statistics & Reports"
+    },
     "sidebar": {
       "dashboard": "Dashboard",
       "products": "Products",

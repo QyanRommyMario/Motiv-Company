@@ -137,9 +137,7 @@ export default function VouchersPage() {
               <h2 className="text-2xl font-semibold text-[#1A1A1A] mb-2">
                 {t("noVouchers")}
               </h2>
-              <p className="text-[#6B7280]">
-                {t("noVouchersDesc")}
-              </p>
+              <p className="text-[#6B7280]">{t("noVouchersDesc")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -185,7 +183,9 @@ export default function VouchersPage() {
                             onClick={() => copyVoucherCode(voucher.code)}
                             className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-sm transition-colors"
                           >
-                            {copiedCode === voucher.code ? t("copied") : t("copy")}
+                            {copiedCode === voucher.code
+                              ? t("copied")
+                              : t("copy")}
                           </button>
                         </div>
                       </div>

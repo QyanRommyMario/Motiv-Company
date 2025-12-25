@@ -111,9 +111,7 @@ export default function ProductDetailPage() {
             <h2 className="text-2xl font-bold text-[#1A1A1A] mb-2">
               {error || t("productNotFound")}
             </h2>
-            <p className="text-[#6B7280] mb-6">
-              {t("productNotFoundDesc")}
-            </p>
+            <p className="text-[#6B7280] mb-6">{t("productNotFoundDesc")}</p>
             <Link href="/products">
               <Button variant="primary">{t("backToCatalog")}</Button>
             </Link>
