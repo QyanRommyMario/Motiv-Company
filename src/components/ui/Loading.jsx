@@ -94,7 +94,12 @@ export function Skeleton({
     card: "rounded-lg",
   };
 
-  return <div className={`${baseClass} ${variants[variant]} ${className}`} />;
+  return (
+    <div
+      className={`${baseClass} ${variants[variant]} ${className}`}
+      aria-hidden="true"
+    />
+  );
 }
 
 // Product card skeleton
@@ -117,7 +122,13 @@ export function ProductCardSkeleton() {
 // Grid of product skeletons
 export function ProductGridSkeleton({ count = 8 }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+    <div
+      className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
+      role="status"
+      aria-label="Loading products"
+      aria-busy="true"
+    >
+      <span className="sr-only">Loading products, please wait...</span>
       {Array.from({ length: count }).map((_, i) => (
         <ProductCardSkeleton key={i} />
       ))}

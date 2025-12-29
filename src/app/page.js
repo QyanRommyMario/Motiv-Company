@@ -37,12 +37,20 @@ export default function Home() {
 
   if (activeStatus === "loading") {
     return (
-      <div className="min-h-screen bg-[#FDFCFA] flex items-center justify-center">
+      <div
+        className="min-h-screen bg-[#FDFCFA] flex items-center justify-center"
+        role="status"
+        aria-label="Loading page"
+      >
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#1A1A1A] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div
+            className="w-16 h-16 border-4 border-[#1A1A1A] border-t-transparent rounded-full animate-spin mx-auto mb-4"
+            aria-hidden="true"
+          ></div>
           <p className="text-[#1A1A1A] uppercase tracking-[0.15em] text-sm font-bold">
             Loading...
           </p>
+          <span className="sr-only">Please wait while the page loads</span>
         </div>
       </div>
     );

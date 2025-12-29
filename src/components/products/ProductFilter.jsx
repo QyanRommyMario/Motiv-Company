@@ -53,20 +53,29 @@ export default function ProductFilter({ onFilterChange }) {
   };
 
   return (
-    <div className="bg-white border border-[#E5E7EB] p-4 sm:p-6 md:p-8 mb-8 md:mb-12">
-      <h3 className="text-xs uppercase tracking-widest text-[#9CA3AF] mb-4 sm:mb-6">
+    <div
+      className="bg-white border border-[#E5E7EB] p-4 sm:p-6 md:p-8 mb-8 md:mb-12"
+      role="search"
+      aria-label="Product filters"
+    >
+      <h3 className="text-xs uppercase tracking-widest text-[#6B7280] mb-4 sm:mb-6">
         {tCommon("filter")} {t("title")}
       </h3>
 
       {/* Search */}
       <form onSubmit={handleSearchSubmit} className="mb-4 sm:mb-6">
+        <label htmlFor="product-search" className="sr-only">
+          Search products
+        </label>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <input
-            type="text"
+            id="product-search"
+            type="search"
             placeholder={tCommon("search")}
             value={searchTerm}
             onChange={handleSearchChange}
             className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border border-[#E5E7EB] bg-white text-[#1A1A1A] focus:outline-none focus:border-[#1A1A1A] transition-colors text-sm"
+            aria-label="Search products"
           />
           <button
             type="submit"

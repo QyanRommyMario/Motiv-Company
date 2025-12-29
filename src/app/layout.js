@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { cookies } from "next/headers";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import OfflineIndicator from "@/components/ui/OfflineIndicator";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -26,8 +27,8 @@ export const viewport = {
   themeColor: "#1A1A1A",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export const metadata = {
@@ -62,6 +63,7 @@ export default async function RootLayout({ children }) {
             <AuthProvider>
               <ToastProvider>
                 <ServiceWorkerRegister />
+                <OfflineIndicator />
                 {children}
               </ToastProvider>
             </AuthProvider>

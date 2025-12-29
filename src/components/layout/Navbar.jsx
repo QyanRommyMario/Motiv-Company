@@ -100,13 +100,20 @@ export default function Navbar() {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 border-b ${navBg}`}
+        role="navigation"
+        aria-label="Main navigation"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center shrink-0">
+            <Link
+              href="/"
+              className="flex items-center shrink-0"
+              aria-label="MOTIV Coffee - Home"
+            >
               <span
                 className={`text-2xl sm:text-3xl font-display font-bold tracking-tight transition-colors duration-300 ${textColor}`}
+                aria-hidden="true"
               >
                 MOTIV
               </span>
@@ -142,7 +149,10 @@ export default function Navbar() {
               {session && session.user.role !== "ADMIN" && (
                 <Link
                   href="/cart"
-                  className={`relative p-2 transition-colors ${textColor} hover:opacity-70`}
+                  className={`relative p-2 transition-colors ${textColor} hover:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1A1A1A]`}
+                  aria-label={`Shopping cart${
+                    cartCount > 0 ? `, ${cartCount} items` : ", empty"
+                  }`}
                 >
                   <svg
                     className="w-5 h-5 sm:w-6 sm:h-6"
@@ -255,8 +265,14 @@ export default function Navbar() {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`md:hidden p-2 ${textColor}`}
-                aria-label="Toggle menu"
+                className={`md:hidden p-2 ${textColor} focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1A1A1A]`}
+                aria-label={
+                  mobileMenuOpen
+                    ? "Close navigation menu"
+                    : "Open navigation menu"
+                }
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-menu"
               >
                 <svg
                   className="w-6 h-6"
@@ -295,7 +311,10 @@ export default function Navbar() {
       />
 
       {/* Mobile Menu Panel */}
-      <div
+      <nav
+        id="mobile-menu"
+        role="navigation"
+        aria-label="Mobile navigation"
         className={`fixed top-0 right-0 h-full w-[280px] sm:w-[320px] bg-white z-[95] md:hidden transform transition-transform duration-300 ease-out shadow-2xl ${
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
@@ -411,7 +430,7 @@ export default function Navbar() {
             )}
           </div>
         </div>
-      </div>
+      </nav>
     </>
   );
 }

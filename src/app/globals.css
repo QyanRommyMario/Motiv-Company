@@ -6,6 +6,7 @@
   --accent: #d4af37;
   --gray-light: #f5f4f0;
   --gray-medium: #4b5563;
+  --gray-accessible: #595959; /* Better contrast ratio 7:1 */
   --border: #e5e7eb;
 }
 
@@ -16,8 +17,44 @@
   --font-display: var(--font-playfair);
 }
 
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 * {
   scroll-behavior: smooth;
+}
+
+/* Skip to content link for accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
 }
 
 body {
@@ -54,8 +91,20 @@ select {
 input:focus,
 textarea:focus,
 select:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px #1a1a1a;
+  outline: 2px solid #1a1a1a;
+  outline-offset: 2px;
+}
+
+/* Focus visible for better keyboard accessibility */
+:focus-visible {
+  outline: 2px solid #1a1a1a;
+  outline-offset: 2px;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid #1a1a1a;
+  outline-offset: 2px;
 }
 
 ::-webkit-scrollbar {

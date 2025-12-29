@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 export default function ProductCard({ product }) {
   const t = useTranslations("products");
   const tCart = useTranslations("cart");
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   // Ambil harga terendah dari varian produk
@@ -41,27 +41,31 @@ export default function ProductCard({ product }) {
       >
         {/* Image Container */}
         <div className="relative aspect-square bg-[#F9FAFB] overflow-hidden">
-          {/* Loading Skeleton */}
-          {!imageLoaded && !imageError && imageSrc && (
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 animate-pulse" />
-          )}
-
           {imageSrc && !imageError ? (
-            <img
+            <Image
               src={imageSrc}
-              alt={product?.name || "Product"}
-              className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
-                imageLoaded ? "opacity-100" : "opacity-0"
-              } ${isOutOfStock ? "grayscale" : ""}`}
-              onLoad={() => setImageLoaded(true)}
+              alt={product?.name || "Product image"}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className={`object-cover transition-all duration-500 group-hover:scale-105 ${
+                isOutOfStock ? "grayscale" : ""
+              }`}
               onError={() => setImageError(true)}
               loading="lazy"
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAB//2Q=="
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+            <div
+              className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100"
+              role="img"
+              aria-label="No product image available"
+            >
               <div className="text-center">
-                <span className="text-5xl">☕</span>
-                <p className="text-xs text-gray-400 mt-2">No Image</p>
+                <span className="text-5xl" aria-hidden="true">
+                  ☕
+                </span>
+                <p className="text-xs text-gray-500 mt-2">No Image</p>
               </div>
             </div>
           )}
@@ -96,7 +100,7 @@ export default function ProductCard({ product }) {
         <div className="p-3 sm:p-4 flex flex-col grow">
           {/* Category Badge */}
           {product?.category && (
-            <span className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">
+            <span className="text-[10px] uppercase tracking-wider text-gray-600 mb-1">
               {product.category}
             </span>
           )}
@@ -112,19 +116,19 @@ export default function ProductCard({ product }) {
               <div className="flex items-baseline gap-2 flex-wrap">
                 <p
                   className={`text-base sm:text-lg font-bold ${
-                    isOutOfStock ? "text-gray-400" : "text-[#1A1A1A]"
+                    isOutOfStock ? "text-gray-500" : "text-[#1A1A1A]"
                   }`}
                 >
                   Rp {displayPrice.toLocaleString("id-ID")}
                 </p>
                 {hasDiscount && !isOutOfStock && (
-                  <p className="text-xs text-gray-400 line-through">
+                  <p className="text-xs text-gray-500 line-through">
                     Rp {originalPrice.toLocaleString("id-ID")}
                   </p>
                 )}
               </div>
             ) : (
-              <p className="text-xs text-gray-400">{t("priceNotAvailable")}</p>
+              <p className="text-xs text-gray-600">{t("priceNotAvailable")}</p>
             )}
 
             {/* Stock indicator */}
@@ -133,7 +137,7 @@ export default function ProductCard({ product }) {
                 {tCart("outOfStock")}
               </p>
             ) : hasMultipleVariants ? (
-              <p className="text-[10px] text-gray-400 mt-1">
+              <p className="text-[10px] text-gray-600 mt-1">
                 {tCart("variantsAvailable", { count: variants.length })}
               </p>
             ) : null}
@@ -143,7 +147,7 @@ export default function ProductCard({ product }) {
           <div className="mt-3 pt-3 border-t border-gray-100 sm:hidden">
             <span
               className={`text-xs font-medium flex items-center justify-center gap-1 ${
-                isOutOfStock ? "text-gray-400" : "text-[#1A1A1A]"
+                isOutOfStock ? "text-gray-500" : "text-[#1A1A1A]"
               }`}
             >
               {t("viewDetail")}

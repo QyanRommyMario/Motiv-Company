@@ -4,21 +4,101 @@ export default function manifest() {
     short_name: "MOTIV",
     description: "Premium Coffee Experience - B2B & B2C Platform",
     start_url: "/",
+    scope: "/",
     display: "standalone",
+    orientation: "portrait-primary",
     background_color: "#FDFCFA",
     theme_color: "#1A1A1A",
+    categories: ["shopping", "food", "lifestyle"],
+    lang: "en",
+    dir: "ltr",
+    prefer_related_applications: false,
     icons: [
       {
-        src: "/icons/ikon-motiv.png", // Mengarah ke file Anda
-        sizes: "192x192",
+        src: "/icons/ikon-motiv.png",
+        sizes: "72x72",
         type: "image/png",
-        purpose: "any maskable", // Agar ikon terlihat bagus di Android (bulat/kotak)
+        purpose: "any",
       },
       {
-        src: "/icons/ikon-motiv.png", // Mengarah ke file yang sama
+        src: "/icons/ikon-motiv.png",
+        sizes: "96x96",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/ikon-motiv.png",
+        sizes: "128x128",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/ikon-motiv.png",
+        sizes: "144x144",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/ikon-motiv.png",
+        sizes: "152x152",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/ikon-motiv.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/ikon-motiv.png",
+        sizes: "384x384",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/ikon-motiv.png",
         sizes: "512x512",
         type: "image/png",
-        purpose: "any maskable",
+        purpose: "any",
+      },
+      {
+        src: "/icons/ikon-motiv.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
+    ],
+    screenshots: [
+      {
+        src: "/icons/ikon-motiv.png",
+        sizes: "512x512",
+        type: "image/png",
+        form_factor: "wide",
+        label: "MOTIV Coffee Homepage",
+      },
+      {
+        src: "/icons/ikon-motiv.png",
+        sizes: "512x512",
+        type: "image/png",
+        form_factor: "narrow",
+        label: "MOTIV Coffee Mobile",
+      },
+    ],
+    shortcuts: [
+      {
+        name: "Browse Products",
+        short_name: "Products",
+        description: "Browse our premium coffee products",
+        url: "/products",
+        icons: [{ src: "/icons/ikon-motiv.png", sizes: "192x192" }],
+      },
+      {
+        name: "My Cart",
+        short_name: "Cart",
+        description: "View your shopping cart",
+        url: "/cart",
+        icons: [{ src: "/icons/ikon-motiv.png", sizes: "192x192" }],
       },
     ],
   };

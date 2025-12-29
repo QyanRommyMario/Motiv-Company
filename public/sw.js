@@ -1,18 +1,34 @@
 // public/sw.js
 
-const CACHE_NAME = "motiv-cache-v2";
+const CACHE_NAME = "motiv-cache-v4";
 const OFFLINE_URL = "/offline";
+const API_CACHE_NAME = "motiv-api-cache-v1";
 
-// Daftar file yang wajib di-cache saat install
-const STATIC_ASSETS = [
-  OFFLINE_URL,
-  "/icons/ikon-motiv.png",
-  "/manifest.json",
-  "/file.svg",
-  "/globe.svg",
-  "/next.svg",
-  "/vercel.svg",
-  "/window.svg",
+// Daftar file yang wajib di-cache saat install (App Shell)
+const STATIC_ASSETS = [OFFLINE_URL, "/", "/products", "/icons/ikon-motiv.png"];
+
+// API endpoints yang boleh di-cache untuk offline browsing
+const CACHEABLE_API_PATTERNS = [
+  /\/api\/products($|\?)/, // Product listing
+  /\/api\/products\/[^/]+$/, // Product detail
+  /\/api\/products\/categories/, // Categories
+  /\/api\/stories/, // Stories
+];
+
+// API yang TIDAK boleh di-cache (harus selalu fresh)
+const NON_CACHEABLE_API = [
+  /\/api\/auth/, // Authentication
+  /\/api\/cart/, // Cart (harus real-time)
+  /\/api\/orders/, // Orders
+  /\/api\/checkout/, // Checkout
+  /\/api\/payment/, // Payment
+];
+
+// Assets yang akan di-cache secara runtime
+const RUNTIME_CACHE_PATTERNS = [
+  /\/_next\/static\/.*/,
+  /\.(?:png|jpg|jpeg|svg|gif|webp|avif|ico)$/,
+  /\.(?:woff|woff2|ttf|otf|eot)$/,
 ];
 
 // 1. INSTALL: Cache aset statis & halaman offline
@@ -37,8 +53,9 @@ self.addEventListener("activate", (event) => {
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cache) => {
-            if (cache !== CACHE_NAME) {
-              console.log("Service Worker: Clearing Old Cache");
+            // Hapus cache lama kecuali yang aktif
+            if (cache !== CACHE_NAME && cache !== API_CACHE_NAME) {
+              console.log("Service Worker: Clearing Old Cache", cache);
               return caches.delete(cache);
             }
           })
@@ -48,29 +65,97 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// 3. FETCH: Strategi Caching (Offline Mode)
+// Helper: Check if API should be cached
+function isApiCacheable(url) {
+  const pathname = url.pathname;
+
+  // Check if it's a non-cacheable API first
+  if (NON_CACHEABLE_API.some((pattern) => pattern.test(pathname))) {
+    return false;
+  }
+
+  // Check if it matches cacheable patterns
+  return CACHEABLE_API_PATTERNS.some((pattern) => pattern.test(pathname));
+}
+
+// 3. FETCH: Strategi Caching (Offline Mode dengan API Caching)
 self.addEventListener("fetch", (event) => {
-  // Abaikan request API (biarkan network only agar data tidak stale)
-  // Kecuali Anda ingin cache GET request tertentu
-  if (event.request.url.includes("/api/")) {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Abaikan request non-GET
+  if (request.method !== "GET") {
     return;
   }
 
-  // Strategi: Network First, Fallback to Cache, Fallback to Offline Page
-  if (event.request.mode === "navigate") {
+  // Handle API requests dengan strategi Network-First + Cache Fallback
+  if (url.pathname.startsWith("/api/")) {
+    // Skip non-cacheable APIs
+    if (!isApiCacheable(url)) {
+      return; // Let browser handle normally (network only)
+    }
+
+    // Cacheable API: Network first, fallback to cache
     event.respondWith(
-      fetch(event.request)
+      fetch(request)
+        .then((response) => {
+          // Cache successful API responses
+          if (response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(API_CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Offline: Return cached API response if available
+          return caches.match(request).then((cachedResponse) => {
+            if (cachedResponse) {
+              // Add header to indicate this is cached data
+              const headers = new Headers(cachedResponse.headers);
+              headers.set("X-Cache-Status", "offline");
+              return new Response(cachedResponse.body, {
+                status: cachedResponse.status,
+                statusText: cachedResponse.statusText,
+                headers: headers,
+              });
+            }
+            // No cache available, return error
+            return new Response(
+              JSON.stringify({
+                success: false,
+                offline: true,
+                message: "You are offline and this data is not cached",
+              }),
+              {
+                status: 503,
+                headers: { "Content-Type": "application/json" },
+              }
+            );
+          });
+        })
+    );
+    return;
+  }
+
+  // Strategi: Network First untuk navigasi (halaman HTML)
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request)
         .then((response) => {
           // Jika berhasil fetch, simpan copy-nya ke cache
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+          if (response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
           return response;
         })
         .catch(() => {
           // Jika offline/gagal, ambil dari cache
-          return caches.match(event.request).then((cachedResponse) => {
+          return caches.match(request).then((cachedResponse) => {
             if (cachedResponse) {
               return cachedResponse;
             }
@@ -80,20 +165,24 @@ self.addEventListener("fetch", (event) => {
         })
     );
   } else {
-    // Strategi: Cache First untuk aset statis (gambar, js, css)
+    // Strategi: Stale-While-Revalidate untuk aset statis
     event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        return (
-          cachedResponse ||
-          fetch(event.request).then((response) => {
-            // Cache aset baru yang di-load
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-            return response;
+      caches.match(request).then((cachedResponse) => {
+        const fetchPromise = fetch(request)
+          .then((networkResponse) => {
+            // Update cache dengan response baru
+            if (networkResponse.status === 200) {
+              const responseToCache = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, responseToCache);
+              });
+            }
+            return networkResponse;
           })
-        );
+          .catch(() => cachedResponse);
+
+        // Return cached response segera, update di background
+        return cachedResponse || fetchPromise;
       })
     );
   }

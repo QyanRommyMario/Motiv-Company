@@ -56,8 +56,19 @@ function ProductsContent() {
     <div className="min-h-screen bg-[#FDFCFA]">
       <Navbar />
 
+      {/* Skip to main content link */}
+      <a
+        href="#products-section"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[200] focus:bg-white focus:px-4 focus:py-2 focus:text-[#1A1A1A] focus:font-medium focus:shadow-lg"
+      >
+        Skip to products
+      </a>
+
       {/* Products Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-6 sm:pb-8 md:pb-12">
+      <main
+        id="products-section"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-6 sm:pb-8 md:pb-12"
+      >
         {/* Page Title */}
         <div className="mb-6 sm:mb-8 text-center">
           <h1 className="text-2xl sm:text-3xl font-display font-bold text-[#1A1A1A] tracking-tight">
@@ -72,7 +83,11 @@ function ProductsContent() {
 
         {/* Results Count */}
         {!loading && !error && (
-          <div className="mb-4 sm:mb-6 flex flex-wrap items-center gap-2 text-xs sm:text-sm text-[#9CA3AF]">
+          <div
+            className="mb-4 sm:mb-6 flex flex-wrap items-center gap-2 text-xs sm:text-sm text-[#6B7280]"
+            role="status"
+            aria-live="polite"
+          >
             <span className="uppercase tracking-wider">
               {products.length} {t("productCount")}
             </span>
@@ -119,7 +134,7 @@ function ProductsContent() {
 
         {/* Products Grid */}
         {!error && <ProductGrid products={products} loading={loading} />}
-      </div>
+      </main>
     </div>
   );
 }

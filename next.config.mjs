@@ -17,8 +17,16 @@ const nextConfig = {
       },
     ],
     formats: ["image/avif", "image/webp"], // Prioritaskan format AVIF (lebih kecil dari WebP)
-    minimumCacheTTL: 60,
+    minimumCacheTTL: 31536000, // Cache images for 1 year
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
+
+  // Compress responses
+  compress: true,
+
+  // Power optimizations for better performance
+  poweredByHeader: false,
 
   turbopack: {
     resolveAlias: {
@@ -33,7 +41,26 @@ const nextConfig = {
   },
 
   async headers() {
-    return [];
+    return [
+      {
+        source: "/:all*(svg|jpg|png|webp|avif|ico|woff|woff2)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
   },
 };
 

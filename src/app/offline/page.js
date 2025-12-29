@@ -1,4 +1,5 @@
 // src/app/offline/page.js
+"use client";
 
 import Link from "next/link";
 
