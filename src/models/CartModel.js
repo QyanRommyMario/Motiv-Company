@@ -3,33 +3,24 @@
  * Handles shopping cart operations
  */
 
-import prisma from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 
 export class CartModel {
   /**
    * Get user's cart
    */
   static async getByUserId(userId) {
-    return await prisma.cartItem.findMany({
-      where: { userId },
-      include: {
-        product: {
-          select: {
-            id: true,
-            name: true,
-            images: true,
-          },
-        },
-        variant: {
-          select: {
-            id: true,
-            name: true,
-            price: true,
-            stock: true,
-          },
-        },
-      },
-    });
+    const { data, error } = await supabase
+      .from("CartItem")
+      .select(`
+        *,
+        product:Product(id, name, images),
+        variant:ProductVariant(id, name, price, stock)
+      `)
+      .eq("userId", userId);
+
+    if (error) throw error;
+    return data;
   }
 
   /**
@@ -37,61 +28,75 @@ export class CartModel {
    */
   static async addItem(userId, productId, variantId, quantity) {
     // Check if item already exists
-    const existingItem = await prisma.cartItem.findUnique({
-      where: {
-        userId_variantId: {
-          userId,
-          variantId,
-        },
-      },
-    });
+    const { data: existingItem } = await supabase
+      .from("CartItem")
+      .select("*")
+      .eq("userId", userId)
+      .eq("variantId", variantId)
+      .single();
 
     if (existingItem) {
       // Update quantity
-      return await prisma.cartItem.update({
-        where: { id: existingItem.id },
-        data: {
-          quantity: existingItem.quantity + quantity,
-        },
-      });
+      const { data, error } = await supabase
+        .from("CartItem")
+        .update({ quantity: existingItem.quantity + quantity })
+        .eq("id", existingItem.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
     }
 
     // Create new cart item
-    return await prisma.cartItem.create({
-      data: {
-        userId,
-        productId,
-        variantId,
-        quantity,
-      },
-    });
+    const { data, error } = await supabase
+      .from("CartItem")
+      .insert({ userId, productId, variantId, quantity })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 
   /**
    * Update cart item quantity
    */
   static async updateQuantity(cartItemId, quantity) {
-    return await prisma.cartItem.update({
-      where: { id: cartItemId },
-      data: { quantity },
-    });
+    const { data, error } = await supabase
+      .from("CartItem")
+      .update({ quantity })
+      .eq("id", cartItemId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 
   /**
    * Remove item from cart
    */
   static async removeItem(cartItemId) {
-    return await prisma.cartItem.delete({
-      where: { id: cartItemId },
-    });
+    const { error } = await supabase
+      .from("CartItem")
+      .delete()
+      .eq("id", cartItemId);
+
+    if (error) throw error;
+    return { id: cartItemId };
   }
 
   /**
    * Clear user's cart
    */
   static async clearCart(userId) {
-    return await prisma.cartItem.deleteMany({
-      where: { userId },
-    });
+    const { error } = await supabase
+      .from("CartItem")
+      .delete()
+      .eq("userId", userId);
+
+    if (error) throw error;
+    return { userId };
   }
 }

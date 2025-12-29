@@ -6,7 +6,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 
 export async function GET(request) {
   try {
@@ -22,148 +22,116 @@ export async function GET(request) {
 
     // Get statistics in parallel
     const [
-      totalOrders,
-      totalProducts,
-      totalUsers,
-      totalRevenue,
-      pendingOrders,
-      recentOrders,
-      lowStockProducts,
-      topProducts,
+      ordersCount,
+      productsCount,
+      usersCount,
+      paidOrders,
+      pendingOrdersCount,
+      recentOrdersData,
+      lowStockData,
     ] = await Promise.all([
       // Total orders
-      prisma.order.count(),
+      supabase.from("Order").select("id", { count: "exact", head: true }),
 
       // Total products
-      prisma.product.count(),
+      supabase.from("Product").select("id", { count: "exact", head: true }),
 
       // Total users (customers only)
-      prisma.user.count({
-        where: { role: "B2C" },
-      }),
+      supabase.from("User").select("id", { count: "exact", head: true }).eq("role", "B2C"),
 
-      // Total revenue (paid orders only)
-      prisma.order.aggregate({
-        where: { paymentStatus: "PAID" },
-        _sum: { total: true },
-      }),
+      // Paid orders for revenue
+      supabase.from("Order").select("total").eq("paymentStatus", "PAID"),
 
       // Pending orders
-      prisma.order.count({
-        where: {
-          status: { in: ["PENDING", "PAID", "PROCESSING"] },
-        },
-      }),
+      supabase.from("Order").select("id", { count: "exact", head: true }).in("status", ["PENDING", "PAID", "PROCESSING"]),
 
       // Recent orders (last 10)
-      prisma.order.findMany({
-        take: 10,
-        orderBy: { createdAt: "desc" },
-        include: {
-          user: {
-            select: {
-              name: true,
-              email: true,
-            },
-          },
-          items: {
-            include: {
-              variant: {
-                include: {
-                  product: {
-                    select: {
-                      name: true,
-                      images: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      }),
+      supabase
+        .from("Order")
+        .select(`
+          *,
+          user:User(name, email),
+          items:OrderItem(
+            *,
+            variant:ProductVariant(*, product:Product(name, images))
+          )
+        `)
+        .order("createdAt", { ascending: false })
+        .limit(10),
 
       // Low stock products (stock < 10)
-      prisma.productVariant.findMany({
-        where: {
-          stock: { lt: 10 },
-        },
-        include: {
-          product: {
-            select: {
-              name: true,
-              images: true,
-            },
-          },
-        },
-        take: 5,
-      }),
-
-      // Top selling products (by order items count)
-      prisma.orderItem.groupBy({
-        by: ["variantId"],
-        _sum: {
-          quantity: true,
-        },
-        _count: {
-          id: true,
-        },
-        orderBy: {
-          _sum: {
-            quantity: "desc",
-          },
-        },
-        take: 5,
-      }),
+      supabase
+        .from("ProductVariant")
+        .select(`*, product:Product(name, images)`)
+        .lt("stock", 10)
+        .limit(5),
     ]);
 
-    // Get product details for top products in a single query
-    const topProductIds = topProducts.map((p) => p.variantId);
-    const topProductDetails =
-      topProductIds.length > 0
-        ? await prisma.productVariant.findMany({
-            where: {
-              id: { in: topProductIds },
-            },
-            include: {
-              product: {
-                select: {
-                  name: true,
-                  images: true,
-                },
-              },
-            },
-          })
-        : [];
+    const totalOrders = ordersCount.count || 0;
+    const totalProducts = productsCount.count || 0;
+    const totalUsers = usersCount.count || 0;
+    const totalRevenue = paidOrders.data?.reduce((sum, o) => sum + (o.total || 0), 0) || 0;
+    const pendingOrders = pendingOrdersCount.count || 0;
+    const recentOrders = recentOrdersData.data || [];
+    const lowStockProducts = lowStockData.data || [];
 
-    // Merge top products with details
-    const topProductsWithDetails = topProducts.map((tp) => {
-      const detail = topProductDetails.find((d) => d.id === tp.variantId);
-      return {
-        totalQuantity: tp._sum.quantity,
-        orderCount: tp._count.id,
-        variant: detail,
-      };
+    // Top selling products (simplified approach)
+    const { data: orderItems } = await supabase
+      .from("OrderItem")
+      .select("variantId, quantity");
+
+    // Group by variantId and sum quantities
+    const topProductsMap = new Map();
+    (orderItems || []).forEach(item => {
+      const current = topProductsMap.get(item.variantId) || { quantity: 0, count: 0 };
+      topProductsMap.set(item.variantId, {
+        quantity: current.quantity + item.quantity,
+        count: current.count + 1
+      });
     });
+
+    // Get top 5
+    const topProductIds = Array.from(topProductsMap.entries())
+      .sort((a, b) => b[1].quantity - a[1].quantity)
+      .slice(0, 5)
+      .map(([id]) => id);
+
+    let topProductsWithDetails = [];
+    if (topProductIds.length > 0) {
+      const { data: topProductDetails } = await supabase
+        .from("ProductVariant")
+        .select(`*, product:Product(name, images)`)
+        .in("id", topProductIds);
+
+      topProductsWithDetails = topProductIds.map(id => {
+        const detail = topProductDetails?.find(d => d.id === id);
+        const stats = topProductsMap.get(id);
+        return {
+          totalQuantity: stats?.quantity || 0,
+          orderCount: stats?.count || 0,
+          variant: detail,
+        };
+      });
+    }
 
     // Calculate growth (compared to last month)
     const lastMonth = new Date();
     lastMonth.setMonth(lastMonth.getMonth() - 1);
 
-    const [lastMonthOrders, lastMonthRevenue] = await Promise.all([
-      prisma.order.count({
-        where: {
-          createdAt: { gte: lastMonth },
-        },
-      }),
-      prisma.order.aggregate({
-        where: {
-          paymentStatus: "PAID",
-          createdAt: { gte: lastMonth },
-        },
-        _sum: { total: true },
-      }),
+    const [lastMonthOrdersData, lastMonthRevenueData] = await Promise.all([
+      supabase
+        .from("Order")
+        .select("id", { count: "exact", head: true })
+        .gte("createdAt", lastMonth.toISOString()),
+      supabase
+        .from("Order")
+        .select("total")
+        .eq("paymentStatus", "PAID")
+        .gte("createdAt", lastMonth.toISOString()),
     ]);
+
+    const lastMonthOrders = lastMonthOrdersData.count || 0;
+    const lastMonthRevenue = lastMonthRevenueData.data?.reduce((sum, o) => sum + (o.total || 0), 0) || 0;
 
     console.log("📊 Dashboard stats calculated successfully");
 
@@ -174,12 +142,12 @@ export async function GET(request) {
           totalOrders,
           totalProducts,
           totalUsers,
-          totalRevenue: totalRevenue._sum.total || 0,
+          totalRevenue,
           pendingOrders,
         },
         growth: {
           ordersThisMonth: lastMonthOrders,
-          revenueThisMonth: lastMonthRevenue._sum.total || 0,
+          revenueThisMonth: lastMonthRevenue,
         },
         recentOrders,
         lowStockProducts,

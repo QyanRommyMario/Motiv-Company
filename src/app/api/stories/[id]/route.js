@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -10,9 +10,13 @@ export async function GET(request, { params }) {
     const isAdmin = session?.user?.role === "ADMIN";
     const { id } = await params;
 
-    const story = await prisma.story.findUnique({
-      where: { id },
-    });
+    const { data: story, error } = await supabase
+      .from("Story")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error && error.code !== "PGRST116") throw error;
 
     if (!story) {
       return NextResponse.json(
@@ -52,16 +56,20 @@ export async function PUT(request, { params }) {
     const { title, content, imageUrl, featuredImage, isPublished, order } =
       await request.json();
 
-    const story = await prisma.story.update({
-      where: { id },
-      data: {
+    const { data: story, error } = await supabase
+      .from("Story")
+      .update({
         title,
         content,
-        featuredImage: featuredImage || imageUrl, // Support both field names
+        featuredImage: featuredImage || imageUrl,
         isPublished,
         order,
-      },
-    });
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
 
     return NextResponse.json({ story });
   } catch (error) {
@@ -84,9 +92,12 @@ export async function DELETE(request, { params }) {
 
     const { id } = await params;
 
-    await prisma.story.delete({
-      where: { id },
-    });
+    const { error } = await supabase
+      .from("Story")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
 
     return NextResponse.json({ message: "Story deleted successfully" });
   } catch (error) {

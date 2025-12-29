@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 
 /**
  * ShippingAddress Model
@@ -9,51 +9,73 @@ class ShippingAddressModel {
    * Create new shipping address
    */
   static async create(data) {
-    return await prisma.shippingAddress.create({
-      data,
-    });
+    const { data: address, error } = await supabase
+      .from("ShippingAddress")
+      .insert(data)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return address;
   }
 
   /**
    * Get user's shipping addresses
    */
   static async getUserAddresses(userId) {
-    return await prisma.shippingAddress.findMany({
-      where: { userId },
-      orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
-    });
+    const { data, error } = await supabase
+      .from("ShippingAddress")
+      .select("*")
+      .eq("userId", userId)
+      .order("isDefault", { ascending: false })
+      .order("createdAt", { ascending: false });
+
+    if (error) throw error;
+    return data;
   }
 
   /**
    * Get address by ID
    */
   static async getById(id) {
-    return await prisma.shippingAddress.findUnique({
-      where: { id },
-      include: { user: true },
-    });
+    const { data, error } = await supabase
+      .from("ShippingAddress")
+      .select(`*, user:User(*)`)
+      .eq("id", id)
+      .single();
+
+    if (error && error.code !== "PGRST116") throw error;
+    return data;
   }
 
   /**
    * Get default address for user
    */
   static async getDefaultAddress(userId) {
-    return await prisma.shippingAddress.findFirst({
-      where: {
-        userId,
-        isDefault: true,
-      },
-    });
+    const { data, error } = await supabase
+      .from("ShippingAddress")
+      .select("*")
+      .eq("userId", userId)
+      .eq("isDefault", true)
+      .single();
+
+    if (error && error.code !== "PGRST116") throw error;
+    return data;
   }
 
   /**
    * Update address
    */
   static async update(id, data) {
-    return await prisma.shippingAddress.update({
-      where: { id },
-      data,
-    });
+    const { data: address, error } = await supabase
+      .from("ShippingAddress")
+      .update(data)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return address;
   }
 
   /**
@@ -61,34 +83,47 @@ class ShippingAddressModel {
    */
   static async setAsDefault(id, userId) {
     // Unset all default addresses for user
-    await prisma.shippingAddress.updateMany({
-      where: { userId },
-      data: { isDefault: false },
-    });
+    await supabase
+      .from("ShippingAddress")
+      .update({ isDefault: false })
+      .eq("userId", userId);
 
     // Set this address as default
-    return await prisma.shippingAddress.update({
-      where: { id },
-      data: { isDefault: true },
-    });
+    const { data, error } = await supabase
+      .from("ShippingAddress")
+      .update({ isDefault: true })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 
   /**
    * Delete address
    */
   static async delete(id) {
-    return await prisma.shippingAddress.delete({
-      where: { id },
-    });
+    const { error } = await supabase
+      .from("ShippingAddress")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+    return { id };
   }
 
   /**
    * Count user addresses
    */
   static async countUserAddresses(userId) {
-    return await prisma.shippingAddress.count({
-      where: { userId },
-    });
+    const { count, error } = await supabase
+      .from("ShippingAddress")
+      .select("id", { count: "exact", head: true })
+      .eq("userId", userId);
+
+    if (error) throw error;
+    return count || 0;
   }
 }
 

@@ -12,26 +12,26 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
 export async function GET() {
-  let prisma = null;
+  let supabase = null;
   
   try {
-    // Test 1: Import Prisma
-    let prismaImportError = null;
+    // Test 1: Import Supabase
+    let supabaseImportError = null;
     try {
-      const { default: prismaClient } = await import("@/lib/prisma");
-      prisma = prismaClient;
+      const { default: supabaseClient } = await import("@/lib/prisma");
+      supabase = supabaseClient;
     } catch (err) {
-      prismaImportError = {
+      supabaseImportError = {
         message: err.message,
         stack: err.stack,
       };
     }
 
-    if (!prisma) {
+    if (!supabase) {
       return NextResponse.json({
         success: false,
-        error: "Failed to import Prisma Client",
-        prismaImportError,
+        error: "Failed to import Supabase Client",
+        supabaseImportError,
         timestamp: new Date().toISOString(),
       }, { status: 500 });
     }
@@ -40,12 +40,22 @@ export async function GET() {
     let dbTest = null;
     let dbError = null;
     try {
-      dbTest = await prisma.$queryRaw`SELECT NOW() as current_time, version() as db_version`;
+      const { data, error } = await supabase.rpc("get_db_info");
+      if (error) {
+        // Fallback: just test connection with simple query
+        const { data: testData, error: testError } = await supabase
+          .from("User")
+          .select("id")
+          .limit(1);
+        if (testError) throw testError;
+        dbTest = [{ current_time: new Date().toISOString(), db_version: "Supabase PostgreSQL" }];
+      } else {
+        dbTest = data;
+      }
     } catch (err) {
       dbError = {
         message: err.message,
         code: err.code,
-        stack: err.stack,
       };
     }
     
@@ -53,23 +63,18 @@ export async function GET() {
     let adminUser = null;
     let userError = null;
     try {
-      adminUser = await prisma.user.findUnique({
-        where: { email: 'admin@motiv.com' },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          password: true,
-          status: true,
-          createdAt: true,
-        }
-      });
+      const { data, error } = await supabase
+        .from("User")
+        .select("id, name, email, role, password, status, createdAt")
+        .eq("email", "admin@motiv.com")
+        .single();
+      
+      if (error && error.code !== "PGRST116") throw error;
+      adminUser = data;
     } catch (err) {
       userError = {
         message: err.message,
         code: err.code,
-        stack: err.stack,
       };
     }
 
@@ -83,7 +88,12 @@ export async function GET() {
     let totalUsers = null;
     let countError = null;
     try {
-      totalUsers = await prisma.user.count();
+      const { count, error } = await supabase
+        .from("User")
+        .select("id", { count: "exact", head: true });
+      
+      if (error) throw error;
+      totalUsers = count;
     } catch (err) {
       countError = {
         message: err.message,
@@ -95,14 +105,14 @@ export async function GET() {
       success: !dbError && !userError,
       timestamp: new Date().toISOString(),
       tests: {
-        prismaClient: {
-          status: prisma ? "✅ Imported" : "❌ Failed",
-          error: prismaImportError
+        supabaseClient: {
+          status: supabase ? "✅ Imported" : "❌ Failed",
+          error: supabaseImportError
         },
         databaseConnection: {
           status: dbError ? "❌ Failed" : "✅ Connected",
-          time: dbTest?.[0]?.current_time || "N/A",
-          version: dbTest?.[0]?.db_version || "N/A",
+          time: dbTest?.[0]?.current_time || new Date().toISOString(),
+          version: dbTest?.[0]?.db_version || "Supabase PostgreSQL",
           error: dbError
         },
         adminUserQuery: {
@@ -134,15 +144,9 @@ export async function GET() {
         nodeEnv: process.env.NODE_ENV,
         hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
         hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
-        hasDatabaseUrl: !!process.env.DATABASE_URL,
-        hasDirectUrl: !!process.env.DIRECT_URL,
+        hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasSupabaseKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY || !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         nextAuthUrl: process.env.NEXTAUTH_URL,
-        databaseUrlPreview: process.env.DATABASE_URL 
-          ? process.env.DATABASE_URL.substring(0, 40) + "..." 
-          : "Not Set",
-        directUrlPreview: process.env.DIRECT_URL
-          ? process.env.DIRECT_URL.substring(0, 40) + "..."
-          : "Not Set"
       }
     });
 
@@ -157,10 +161,5 @@ export async function GET() {
       },
       timestamp: new Date().toISOString(),
     }, { status: 500 });
-  } finally {
-    // Disconnect Prisma if connected
-    if (prisma) {
-      await prisma.$disconnect();
-    }
   }
 }

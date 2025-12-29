@@ -3,16 +3,21 @@
  * Handles voucher operations
  */
 
-import prisma from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 
 export class VoucherModel {
   /**
    * Create new voucher
    */
   static async create(data) {
-    return await prisma.voucher.create({
-      data,
-    });
+    const { data: voucher, error } = await supabase
+      .from("Voucher")
+      .insert(data)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return voucher;
   }
 
   /**
@@ -21,17 +26,19 @@ export class VoucherModel {
   static async getAll(options = {}) {
     const { isActive, skip = 0, take = 20 } = options;
 
-    const where = {};
+    let query = supabase
+      .from("Voucher")
+      .select("*")
+      .order("createdAt", { ascending: false })
+      .range(skip, skip + take - 1);
+
     if (isActive !== undefined) {
-      where.isActive = isActive;
+      query = query.eq("isActive", isActive);
     }
 
-    return await prisma.voucher.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take,
-    });
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
   }
 
   /**
@@ -45,28 +52,42 @@ export class VoucherModel {
    * Find voucher by code
    */
   static async findByCode(code) {
-    return await prisma.voucher.findUnique({
-      where: { code },
-    });
+    const { data, error } = await supabase
+      .from("Voucher")
+      .select("*")
+      .eq("code", code)
+      .single();
+
+    if (error && error.code !== "PGRST116") throw error;
+    return data;
   }
 
   /**
    * Update voucher
    */
   static async update(id, data) {
-    return await prisma.voucher.update({
-      where: { id },
-      data,
-    });
+    const { data: voucher, error } = await supabase
+      .from("Voucher")
+      .update(data)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return voucher;
   }
 
   /**
    * Delete voucher
    */
   static async delete(id) {
-    return await prisma.voucher.delete({
-      where: { id },
-    });
+    const { error } = await supabase
+      .from("Voucher")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+    return { id };
   }
 
   /**
@@ -90,14 +111,14 @@ export class VoucherModel {
     }
 
     const now = new Date();
-    if (now < voucher.validFrom) {
+    if (now < new Date(voucher.validFrom)) {
       return {
         valid: false,
         message: "Voucher belum berlaku",
       };
     }
 
-    if (now > voucher.validUntil) {
+    if (now > new Date(voucher.validUntil)) {
       return {
         valid: false,
         message: "Voucher sudah tidak berlaku",
@@ -156,7 +177,7 @@ export class VoucherModel {
     }
 
     const now = new Date();
-    if (now < voucher.validFrom || now > voucher.validUntil) {
+    if (now < new Date(voucher.validFrom) || now > new Date(voucher.validUntil)) {
       throw new Error("Voucher sudah tidak berlaku");
     }
 
@@ -187,13 +208,20 @@ export class VoucherModel {
    * Increment voucher usage
    */
   static async incrementUsage(id) {
-    return await prisma.voucher.update({
-      where: { id },
-      data: {
-        used: {
-          increment: 1,
-        },
-      },
-    });
+    const { data: voucher } = await supabase
+      .from("Voucher")
+      .select("used")
+      .eq("id", id)
+      .single();
+
+    const { data, error } = await supabase
+      .from("Voucher")
+      .update({ used: (voucher?.used || 0) + 1 })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 }

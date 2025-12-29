@@ -7,7 +7,7 @@ import { OrderModel } from "@/models/OrderModel";
 import { CartModel } from "@/models/CartModel";
 import { VoucherModel } from "@/models/VoucherModel";
 import { ProductVariantModel } from "@/models/ProductVariantModel";
-import prisma from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 
 export class OrderViewModel {
   /**
@@ -23,9 +23,13 @@ export class OrderViewModel {
       }
 
       // Get user info
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-      });
+      const { data: user, error: userError } = await supabase
+        .from("User")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (userError) throw userError;
 
       // Validate stock
       for (const item of cartItems) {

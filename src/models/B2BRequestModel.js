@@ -3,25 +3,24 @@
  * Handles B2B request operations
  */
 
-import prisma from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 
 export class B2BRequestModel {
   /**
    * Create B2B request
    */
   static async create(data) {
-    return await prisma.b2BRequest.create({
-      data,
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    });
+    const { data: request, error } = await supabase
+      .from("B2BRequest")
+      .insert(data)
+      .select(`
+        *,
+        user:User(id, name, email)
+      `)
+      .single();
+
+    if (error) throw error;
+    return request;
   }
 
   /**
@@ -30,56 +29,64 @@ export class B2BRequestModel {
   static async getAll(options = {}) {
     const { status, skip = 0, take = 20 } = options;
 
-    const where = {};
+    let query = supabase
+      .from("B2BRequest")
+      .select(`
+        *,
+        user:User(id, name, email)
+      `)
+      .order("createdAt", { ascending: false })
+      .range(skip, skip + take - 1);
+
     if (status) {
-      where.status = status;
+      query = query.eq("status", status);
     }
 
-    return await prisma.b2BRequest.findMany({
-      where,
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-      skip,
-      take,
-    });
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
   }
 
   /**
    * Get request by user ID
    */
   static async findByUserId(userId) {
-    return await prisma.b2BRequest.findUnique({
-      where: { userId },
-    });
+    const { data, error } = await supabase
+      .from("B2BRequest")
+      .select("*")
+      .eq("userId", userId)
+      .single();
+
+    if (error && error.code !== "PGRST116") throw error;
+    return data;
   }
 
   /**
    * Update request status
    */
   static async updateStatus(id, status) {
-    return await prisma.b2BRequest.update({
-      where: { id },
-      data: { status },
-    });
+    const { data, error } = await supabase
+      .from("B2BRequest")
+      .update({ status })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 
   /**
    * Approve request
    */
   static async approve(id, discount = 0) {
-    const request = await prisma.b2BRequest.findUnique({
-      where: { id },
-    });
+    const { data: request, error: findError } = await supabase
+      .from("B2BRequest")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-    if (!request) {
+    if (findError || !request) {
       throw new Error("Pengajuan tidak ditemukan");
     }
 
@@ -87,17 +94,19 @@ export class B2BRequestModel {
     await this.updateStatus(id, "APPROVED");
 
     // Update user role to B2B
-    await prisma.user.update({
-      where: { id: request.userId },
-      data: {
+    const { error: userError } = await supabase
+      .from("User")
+      .update({
         role: "B2B",
         status: "ACTIVE",
         businessName: request.businessName,
         phone: request.phone,
         address: request.address,
         discount,
-      },
-    });
+      })
+      .eq("id", request.userId);
+
+    if (userError) throw userError;
 
     return request;
   }

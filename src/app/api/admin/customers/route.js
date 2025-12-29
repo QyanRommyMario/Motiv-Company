@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 
 export async function GET(request) {
   try {
@@ -19,50 +19,35 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const skip = (page - 1) * limit;
 
-    // Fetch customers with pagination and aggregated data
-    const [customers, totalCount] = await Promise.all([
-      prisma.user.findMany({
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          createdAt: true,
-          _count: {
-            select: {
-              orders: true,
-            },
-          },
-          b2bRequest: {
-            select: {
-              businessName: true,
-              phone: true,
-              address: true,
-              status: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-        skip,
-        take: limit,
-      }),
-      prisma.user.count(),
-    ]);
+    // Fetch customers with pagination
+    const { data: customers, count: totalCount, error } = await supabase
+      .from("User")
+      .select(`
+        id, name, email, role, createdAt,
+        b2bRequest:B2BRequest(businessName, phone, address, status)
+      `, { count: "exact" })
+      .order("createdAt", { ascending: false })
+      .range(skip, skip + limit - 1);
 
-    // Calculate total spent for each customer using aggregation
-    const customersWithStats = await Promise.all(
-      customers.map(async (customer) => {
-        const orderStats = await prisma.order.aggregate({
-          where: {
-            userId: customer.id,
-            status: { not: "CANCELLED" },
-          },
-          _sum: {
-            total: true,
-          },
-        });
+    if (error) throw error;
+
+    // Get order counts for each customer
+    const customerIds = customers?.map(c => c.id) || [];
+    
+    let customersWithStats = customers || [];
+    
+    if (customerIds.length > 0) {
+      // Get order data for all customers at once
+      const { data: orderData } = await supabase
+        .from("Order")
+        .select("userId, total, status")
+        .in("userId", customerIds);
+
+      // Calculate stats per customer
+      customersWithStats = (customers || []).map(customer => {
+        const customerOrders = (orderData || []).filter(o => o.userId === customer.id);
+        const activeOrders = customerOrders.filter(o => o.status !== "CANCELLED");
+        const totalSpent = activeOrders.reduce((sum, o) => sum + (o.total || 0), 0);
 
         return {
           id: customer.id,
@@ -70,12 +55,12 @@ export async function GET(request) {
           email: customer.email,
           role: customer.role,
           createdAt: customer.createdAt,
-          _count: customer._count,
-          totalSpent: orderStats._sum.total || 0,
+          _count: { orders: customerOrders.length },
+          totalSpent,
           b2bRequest: customer.b2bRequest,
         };
-      })
-    );
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -83,8 +68,8 @@ export async function GET(request) {
       pagination: {
         page,
         limit,
-        total: totalCount,
-        totalPages: Math.ceil(totalCount / limit),
+        total: totalCount || 0,
+        totalPages: Math.ceil((totalCount || 0) / limit),
       },
     });
   } catch (error) {

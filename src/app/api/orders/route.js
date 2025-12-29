@@ -10,7 +10,7 @@ import { OrderModel } from "@/models/OrderModel";
 import { TransactionModel } from "@/models/TransactionModel";
 import { VoucherModel } from "@/models/VoucherModel";
 import { MidtransService } from "@/lib/midtrans";
-import prisma from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 
 export async function POST(request) {
   try {
@@ -30,12 +30,14 @@ export async function POST(request) {
     }
 
     // 2. Ambil Data Keranjang & Hitung Ulang Harga (Security)
-    const cartItems = await prisma.cartItem.findMany({
-      where: { userId: session.user.id },
-      include: { product: true, variant: true },
-    });
+    const { data: cartItems, error: cartError } = await supabase
+      .from("CartItem")
+      .select(`*, product:Product(*), variant:ProductVariant(*)`)
+      .eq("userId", session.user.id);
 
-    if (cartItems.length === 0)
+    if (cartError) throw cartError;
+
+    if (!cartItems || cartItems.length === 0)
       return NextResponse.json(
         { message: "Keranjang kosong" },
         { status: 400 }
@@ -84,11 +86,13 @@ export async function POST(request) {
     const total = subtotal + shippingCost - voucherDiscount;
 
     // 3. Simpan Order ke Database (Stok berkurang disini)
-    const shippingAddress = await prisma.shippingAddress.findUnique({
-      where: { id: body.shippingAddressId },
-    });
+    const { data: shippingAddress, error: addrError } = await supabase
+      .from("ShippingAddress")
+      .select("*")
+      .eq("id", body.shippingAddressId)
+      .single();
 
-    if (!shippingAddress) {
+    if (addrError || !shippingAddress) {
       return NextResponse.json(
         { message: "Alamat pengiriman tidak ditemukan" },
         { status: 400 }
@@ -120,13 +124,13 @@ export async function POST(request) {
     if (paymentMethod === "MANUAL") {
       // [PERBAIKAN] Logic Production: Set ke PENDING, bukan PAID.
 
-      await prisma.order.update({
-        where: { id: order.id },
-        data: {
-          status: "PENDING", // Menunggu Admin
-          paymentStatus: "UNPAID", // Belum dibayar
-        },
-      });
+      await supabase
+        .from("Order")
+        .update({
+          status: "PENDING",
+          paymentStatus: "UNPAID",
+        })
+        .eq("id", order.id);
 
       // Catat transaksi manual pending
       await TransactionModel.create({
@@ -140,7 +144,10 @@ export async function POST(request) {
       });
 
       // Bersihkan Keranjang
-      await prisma.cartItem.deleteMany({ where: { userId: session.user.id } });
+      await supabase
+        .from("CartItem")
+        .delete()
+        .eq("userId", session.user.id);
 
       return NextResponse.json({
         success: true,
@@ -153,13 +160,17 @@ export async function POST(request) {
       });
     } else {
       // --- LOGIKA OTOMATIS (MIDTRANS) ---
-      const fullOrder = await prisma.order.findUnique({
-        where: { id: order.id },
-        include: {
-          user: true,
-          items: { include: { product: true, variant: true } },
-        },
-      });
+      const { data: fullOrder, error: orderError } = await supabase
+        .from("Order")
+        .select(`
+          *,
+          user:User(*),
+          items:OrderItem(*, product:Product(*), variant:ProductVariant(*))
+        `)
+        .eq("id", order.id)
+        .single();
+
+      if (orderError) throw orderError;
 
       let midtransData;
       try {
@@ -167,7 +178,7 @@ export async function POST(request) {
       } catch (midtransError) {
         console.error("❌ Midtrans Error:", midtransError.message);
         // Hapus order agar stok kembali jika gagal connect
-        await prisma.order.delete({ where: { id: order.id } });
+        await supabase.from("Order").delete().eq("id", order.id);
 
         return NextResponse.json(
           {
@@ -190,7 +201,10 @@ export async function POST(request) {
       });
 
       // Bersihkan Keranjang
-      await prisma.cartItem.deleteMany({ where: { userId: session.user.id } });
+      await supabase
+        .from("CartItem")
+        .delete()
+        .eq("userId", session.user.id);
 
       return NextResponse.json({
         success: true,

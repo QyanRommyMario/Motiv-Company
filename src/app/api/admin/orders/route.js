@@ -6,7 +6,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 
 export async function GET(request) {
   try {
@@ -27,68 +27,45 @@ export async function GET(request) {
 
     const skip = (page - 1) * limit;
 
-    // Build where clause
-    const where = {};
-    if (status) {
-      where.status = status;
-    }
-
     console.log("🔍 Admin fetching orders with filters:", {
       status,
       page,
       limit,
     });
 
-    // Fetch orders with user info
-    const [orders, total] = await Promise.all([
-      prisma.order.findMany({
-        where,
-        include: {
-          items: {
-            include: {
-              product: {
-                select: {
-                  id: true,
-                  name: true,
-                  images: true,
-                },
-              },
-              variant: {
-                select: {
-                  id: true,
-                  name: true,
-                  price: true,
-                },
-              },
-            },
-          },
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-              phone: true,
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: limit,
-      }),
-      prisma.order.count({ where }),
-    ]);
+    // Build query
+    let query = supabase
+      .from("Order")
+      .select(`
+        *,
+        items:OrderItem(
+          *,
+          product:Product(id, name, images),
+          variant:ProductVariant(id, name, price)
+        ),
+        user:User(id, name, email, role, phone)
+      `, { count: "exact" })
+      .order("createdAt", { ascending: false })
+      .range(skip, skip + limit - 1);
 
-    console.log(`✅ Found ${orders.length} orders (total: ${total})`);
+    if (status) {
+      query = query.eq("status", status);
+    }
+
+    const { data: orders, count: total, error } = await query;
+
+    if (error) throw error;
+
+    console.log(`✅ Found ${orders?.length || 0} orders (total: ${total})`);
 
     return NextResponse.json({
       success: true,
-      orders,
+      orders: orders || [],
       pagination: {
         page,
         limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+        total: total || 0,
+        totalPages: Math.ceil((total || 0) / limit),
       },
     });
   } catch (error) {

@@ -6,8 +6,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { OrderModel } from "@/models/OrderModel"; // Pastikan import ini ada jika pakai OrderModel helper, atau pakai prisma langsung
-import prisma from "@/lib/prisma";
+import { OrderModel } from "@/models/OrderModel";
+import supabase from "@/lib/prisma";
 
 export async function GET(request, { params }) {
   try {
@@ -31,19 +31,17 @@ export async function GET(request, { params }) {
     }
 
     // [PERBAIKAN 2] Ambil data Order + Item + Transaksi (Token)
-    // Hapus 'shippingAddress: true' dari include karena di schema Anda itu cuma String, bukan Relasi.
-    const order = await prisma.order.findUnique({
-      where: { id },
-      include: {
-        items: {
-          include: {
-            product: true,
-            variant: true,
-          },
-        },
-        transaction: true, // PENTING: Ambil data transaksi untuk dapat Snap Token
-      },
-    });
+    const { data: order, error } = await supabase
+      .from("Order")
+      .select(`
+        *,
+        items:OrderItem(*, product:Product(*), variant:ProductVariant(*)),
+        transaction:Transaction(*)
+      `)
+      .eq("id", id)
+      .single();
+
+    if (error && error.code !== "PGRST116") throw error;
 
     if (!order) {
       return NextResponse.json(

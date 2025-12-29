@@ -7,7 +7,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 
 export async function GET(request, { params }) {
   try {
@@ -25,27 +25,18 @@ export async function GET(request, { params }) {
     const { id } = await params;
     console.log("🔍 Fetching order ID:", id);
 
-    const order = await prisma.order.findUnique({
-      where: { id },
-      include: {
-        items: {
-          include: {
-            product: true,
-            variant: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-            role: true,
-          },
-        },
-        transaction: true,
-      },
-    });
+    const { data: order, error } = await supabase
+      .from("Order")
+      .select(`
+        *,
+        items:OrderItem(*, product:Product(*), variant:ProductVariant(*)),
+        user:User(id, name, email, phone, role),
+        transaction:Transaction(*)
+      `)
+      .eq("id", id)
+      .single();
+
+    if (error && error.code !== "PGRST116") throw error;
 
     if (!order) {
       console.log("❌ Order not found:", id);
@@ -102,25 +93,18 @@ export async function PATCH(request, { params }) {
       updateData.paymentStatus = body.paymentStatus;
     }
 
-    const order = await prisma.order.update({
-      where: { id },
-      data: updateData,
-      include: {
-        items: {
-          include: {
-            product: true,
-            variant: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-    });
+    const { data: order, error } = await supabase
+      .from("Order")
+      .update(updateData)
+      .eq("id", id)
+      .select(`
+        *,
+        items:OrderItem(*, product:Product(*), variant:ProductVariant(*)),
+        user:User(id, name, email)
+      `)
+      .single();
+
+    if (error) throw error;
 
     console.log("✅ Order updated successfully:", order.id);
 

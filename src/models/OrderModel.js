@@ -3,7 +3,7 @@
  * Handles order operations
  */
 
-import prisma from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 
 export class OrderModel {
   /**
@@ -16,108 +16,84 @@ export class OrderModel {
       .substring(7)
       .toUpperCase()}`;
 
-    // Use transaction to ensure stock is updated atomically with validation
-    return await prisma.$transaction(async (tx) => {
-      // Validate and update stock for each item
-      for (const item of data.items) {
-        // Get current variant with row lock to prevent concurrent issues
-        const variant = await tx.productVariant.findUnique({
-          where: { id: item.variantId },
-          select: { stock: true, name: true },
-        });
+    // Validate and update stock for each item
+    for (const item of data.items) {
+      const { data: variant, error: variantError } = await supabase
+        .from("ProductVariant")
+        .select("stock, name")
+        .eq("id", item.variantId)
+        .single();
 
-        if (!variant) {
-          throw new Error(
-            `Variant dengan ID ${item.variantId} tidak ditemukan`
-          );
-        }
-
-        // Check if sufficient stock is available
-        if (variant.stock < item.quantity) {
-          throw new Error(
-            `Stok tidak mencukupi untuk ${variant.name}. Tersedia: ${variant.stock}, Diminta: ${item.quantity}`
-          );
-        }
-
-        // Update stock
-        await tx.productVariant.update({
-          where: { id: item.variantId },
-          data: {
-            stock: {
-              decrement: item.quantity,
-            },
-          },
-        });
+      if (variantError || !variant) {
+        throw new Error(`Variant dengan ID ${item.variantId} tidak ditemukan`);
       }
 
-      // Create the order
-      return await tx.order.create({
-        data: {
-          orderNumber,
-          ...data,
-          items: {
-            create: data.items,
-          },
-        },
-        include: {
-          items: {
-            include: {
-              product: true,
-              variant: true,
-            },
-          },
-        },
-      });
-    });
+      if (variant.stock < item.quantity) {
+        throw new Error(
+          `Stok tidak mencukupi untuk ${variant.name}. Tersedia: ${variant.stock}, Diminta: ${item.quantity}`
+        );
+      }
+
+      // Update stock
+      const { error: updateError } = await supabase
+        .from("ProductVariant")
+        .update({ stock: variant.stock - item.quantity })
+        .eq("id", item.variantId);
+
+      if (updateError) throw updateError;
+    }
+
+    // Create the order (without items first)
+    const { items, ...orderData } = data;
+    const { data: order, error: orderError } = await supabase
+      .from("Order")
+      .insert({ orderNumber, ...orderData })
+      .select()
+      .single();
+
+    if (orderError) throw orderError;
+
+    // Create order items
+    const orderItems = items.map((item) => ({
+      ...item,
+      orderId: order.id,
+    }));
+
+    const { data: createdItems, error: itemsError } = await supabase
+      .from("OrderItem")
+      .insert(orderItems)
+      .select(`
+        *,
+        product:Product(*),
+        variant:ProductVariant(*)
+      `);
+
+    if (itemsError) throw itemsError;
+
+    return { ...order, items: createdItems };
   }
 
   /**
    * Get order by ID
    */
   static async findById(id) {
-    return await prisma.order.findUnique({
-      where: { id },
-      include: {
-        items: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                images: true,
-              },
-            },
-            variant: {
-              select: {
-                id: true,
-                name: true,
-                price: true,
-              },
-            },
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-          },
-        },
-        transaction: {
-          select: {
-            id: true,
-            transactionId: true,
-            snapToken: true,
-            transactionStatus: true,
-            paymentType: true,
-            vaNumber: true,
-            bank: true,
-            settlementTime: true,
-          },
-        },
-      },
-    });
+    const { data, error } = await supabase
+      .from("Order")
+      .select(`
+        *,
+        items:OrderItem(
+          *,
+          product:Product(id, name, images),
+          variant:ProductVariant(id, name, price)
+        ),
+        user:User(id, name, email, role),
+        transaction:Transaction(id, transactionId, snapToken, transactionStatus, paymentType, vaNumber, bank, settlementTime)
+      `)
+      .eq("id", id)
+      .single();
+
+    if (error && error.code !== "PGRST116") throw error;
+    return data;
   }
 
   /**
@@ -126,29 +102,22 @@ export class OrderModel {
   static async getByUserId(userId, options = {}) {
     const { skip = 0, take = 10 } = options;
 
-    return await prisma.order.findMany({
-      where: { userId },
-      include: {
-        items: {
-          include: {
-            product: {
-              select: {
-                name: true,
-                images: true,
-              },
-            },
-            variant: {
-              select: {
-                name: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-      skip,
-      take,
-    });
+    const { data, error } = await supabase
+      .from("Order")
+      .select(`
+        *,
+        items:OrderItem(
+          *,
+          product:Product(name, images),
+          variant:ProductVariant(name)
+        )
+      `)
+      .eq("userId", userId)
+      .order("createdAt", { ascending: false })
+      .range(skip, skip + take - 1);
+
+    if (error) throw error;
+    return data;
   }
 
   /**
@@ -157,42 +126,28 @@ export class OrderModel {
   static async getUserOrders(userId, options = {}) {
     const { status, limit = 10, offset = 0 } = options;
 
-    const where = { userId };
+    let query = supabase
+      .from("Order")
+      .select(`
+        *,
+        items:OrderItem(
+          *,
+          product:Product(id, name, images),
+          variant:ProductVariant(id, name, price)
+        )
+      `, { count: "exact" })
+      .eq("userId", userId);
+
     if (status) {
-      where.status = status;
+      query = query.eq("status", status);
     }
 
-    const [orders, total] = await Promise.all([
-      prisma.order.findMany({
-        where,
-        include: {
-          items: {
-            include: {
-              product: {
-                select: {
-                  id: true,
-                  name: true,
-                  images: true,
-                },
-              },
-              variant: {
-                select: {
-                  id: true,
-                  name: true,
-                  price: true,
-                },
-              },
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-        skip: offset,
-        take: limit,
-      }),
-      prisma.order.count({ where }),
-    ]);
+    const { data: orders, count, error } = await query
+      .order("createdAt", { ascending: false })
+      .range(offset, offset + limit - 1);
 
-    return { orders, total };
+    if (error) throw error;
+    return { orders, total: count || 0 };
   }
 
   /**
@@ -201,176 +156,169 @@ export class OrderModel {
   static async getAll(options = {}) {
     const { status, skip = 0, take = 20 } = options;
 
-    const where = {};
+    let query = supabase
+      .from("Order")
+      .select(`
+        *,
+        user:User(name, email),
+        items:OrderItem(
+          *,
+          product:Product(name)
+        )
+      `)
+      .order("createdAt", { ascending: false })
+      .range(skip, skip + take - 1);
+
     if (status) {
-      where.status = status;
+      query = query.eq("status", status);
     }
 
-    return await prisma.order.findMany({
-      where,
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-        items: {
-          include: {
-            product: {
-              select: {
-                name: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-      skip,
-      take,
-    });
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
   }
 
   /**
    * Update order status
    */
   static async updateStatus(id, status, additionalData = {}) {
-    return await prisma.$transaction(async (tx) => {
-      // Get current order to validate status transition
-      const currentOrder = await tx.order.findUnique({
-        where: { id },
-        select: { status: true },
-      });
+    // Get current order to validate status transition
+    const { data: currentOrder, error: findError } = await supabase
+      .from("Order")
+      .select("status")
+      .eq("id", id)
+      .single();
 
-      if (!currentOrder) {
-        throw new Error("Order tidak ditemukan");
+    if (findError || !currentOrder) {
+      throw new Error("Order tidak ditemukan");
+    }
+
+    // Define valid status transitions
+    const validTransitions = {
+      PENDING: ["PROCESSING", "CANCELLED"],
+      PROCESSING: ["SHIPPED", "CANCELLED"],
+      SHIPPED: ["DELIVERED", "CANCELLED"],
+      DELIVERED: [],
+      CANCELLED: [],
+    };
+
+    const allowedNextStatuses = validTransitions[currentOrder.status];
+    if (!allowedNextStatuses.includes(status)) {
+      throw new Error(
+        `Transisi status tidak valid: ${currentOrder.status} → ${status}. Status yang diizinkan: ${
+          allowedNextStatuses.join(", ") || "Tidak ada (status final)"
+        }`
+      );
+    }
+
+    const updateData = { status };
+
+    if (additionalData.trackingNumber) {
+      updateData.trackingNumber = additionalData.trackingNumber;
+    }
+    if (additionalData.shippingCourier) {
+      updateData.shippingCourier = additionalData.shippingCourier;
+    }
+    if (additionalData.shippingService) {
+      updateData.shippingService = additionalData.shippingService;
+    }
+
+    if (status === "SHIPPED") {
+      updateData.shippedAt = new Date().toISOString();
+    } else if (status === "DELIVERED") {
+      updateData.deliveredAt = new Date().toISOString();
+    } else if (status === "CANCELLED") {
+      updateData.cancelledAt = new Date().toISOString();
+      if (additionalData.cancellationReason) {
+        updateData.cancellationReason = additionalData.cancellationReason;
       }
 
-      // Define valid status transitions
-      const validTransitions = {
-        PENDING: ["PROCESSING", "CANCELLED"],
-        PROCESSING: ["SHIPPED", "CANCELLED"],
-        SHIPPED: ["DELIVERED", "CANCELLED"],
-        DELIVERED: [], // Final state - cannot transition
-        CANCELLED: [], // Final state - cannot transition
-      };
+      // Restore stock when order is cancelled
+      const { data: order } = await supabase
+        .from("Order")
+        .select("*, items:OrderItem(*)")
+        .eq("id", id)
+        .single();
 
-      // Validate transition
-      const allowedNextStatuses = validTransitions[currentOrder.status];
-      if (!allowedNextStatuses.includes(status)) {
-        throw new Error(
-          `Transisi status tidak valid: ${
-            currentOrder.status
-          } → ${status}. Status yang diizinkan: ${
-            allowedNextStatuses.join(", ") || "Tidak ada (status final)"
-          }`
-        );
-      }
+      if (order && order.items) {
+        for (const item of order.items) {
+          const { data: variant } = await supabase
+            .from("ProductVariant")
+            .select("stock")
+            .eq("id", item.variantId)
+            .single();
 
-      const data = { status };
-
-      // Add tracking number if provided
-      if (additionalData.trackingNumber) {
-        data.trackingNumber = additionalData.trackingNumber;
-      }
-
-      // Add courier info if provided
-      if (additionalData.shippingCourier) {
-        data.shippingCourier = additionalData.shippingCourier;
-      }
-      if (additionalData.shippingService) {
-        data.shippingService = additionalData.shippingService;
-      }
-
-      // Update timestamps based on status
-      if (status === "SHIPPED") {
-        data.shippedAt = new Date();
-      } else if (status === "DELIVERED") {
-        data.deliveredAt = new Date();
-      } else if (status === "CANCELLED") {
-        data.cancelledAt = new Date();
-        if (additionalData.cancellationReason) {
-          data.cancellationReason = additionalData.cancellationReason;
-        }
-
-        // Restore stock when order is cancelled
-        const order = await tx.order.findUnique({
-          where: { id },
-          include: {
-            items: true,
-          },
-        });
-
-        if (order) {
-          for (const item of order.items) {
-            await tx.productVariant.update({
-              where: { id: item.variantId },
-              data: {
-                stock: {
-                  increment: item.quantity,
-                },
-              },
-            });
+          if (variant) {
+            await supabase
+              .from("ProductVariant")
+              .update({ stock: variant.stock + item.quantity })
+              .eq("id", item.variantId);
           }
         }
       }
+    }
 
-      return await tx.order.update({
-        where: { id },
-        data,
-        include: {
-          items: {
-            include: {
-              product: true,
-              variant: true,
-            },
-          },
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
-          transaction: true,
-        },
-      });
-    });
+    const { data, error } = await supabase
+      .from("Order")
+      .update(updateData)
+      .eq("id", id)
+      .select(`
+        *,
+        items:OrderItem(*, product:Product(*), variant:ProductVariant(*)),
+        user:User(id, name, email),
+        transaction:Transaction(*)
+      `)
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 
   /**
    * Update payment status
    */
   static async updatePaymentStatus(id, paymentStatus) {
-    return await prisma.order.update({
-      where: { id },
-      data: { paymentStatus },
-    });
+    const { data, error } = await supabase
+      .from("Order")
+      .update({ paymentStatus })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 
   /**
    * Get order statistics (for dashboard)
    */
   static async getStatistics() {
-    const [totalOrders, pendingOrders, processingOrders, completedOrders] =
-      await Promise.all([
-        prisma.order.count(),
-        prisma.order.count({ where: { status: "PENDING" } }),
-        prisma.order.count({ where: { status: "PROCESSING" } }),
-        prisma.order.count({ where: { status: "DELIVERED" } }),
-      ]);
+    const [
+      { count: totalOrders },
+      { count: pendingOrders },
+      { count: processingOrders },
+      { count: completedOrders },
+    ] = await Promise.all([
+      supabase.from("Order").select("id", { count: "exact", head: true }),
+      supabase.from("Order").select("id", { count: "exact", head: true }).eq("status", "PENDING"),
+      supabase.from("Order").select("id", { count: "exact", head: true }).eq("status", "PROCESSING"),
+      supabase.from("Order").select("id", { count: "exact", head: true }).eq("status", "DELIVERED"),
+    ]);
 
-    const totalRevenue = await prisma.order.aggregate({
-      where: { paymentStatus: "PAID" },
-      _sum: { total: true },
-    });
+    // Get total revenue from paid orders
+    const { data: paidOrders } = await supabase
+      .from("Order")
+      .select("total")
+      .eq("paymentStatus", "PAID");
+
+    const totalRevenue = paidOrders?.reduce((sum, o) => sum + (o.total || 0), 0) || 0;
 
     return {
-      totalOrders,
-      pendingOrders,
-      processingOrders,
-      completedOrders,
-      totalRevenue: totalRevenue._sum.total || 0,
+      totalOrders: totalOrders || 0,
+      pendingOrders: pendingOrders || 0,
+      processingOrders: processingOrders || 0,
+      completedOrders: completedOrders || 0,
+      totalRevenue,
     };
   }
 }

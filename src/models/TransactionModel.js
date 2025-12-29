@@ -3,7 +3,7 @@
  * Handles Midtrans payment transactions
  */
 
-import prisma from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 
 export class TransactionModel {
   /**
@@ -11,8 +11,9 @@ export class TransactionModel {
    */
   static async create(transactionData) {
     try {
-      const transaction = await prisma.transaction.create({
-        data: {
+      const { data: transaction, error } = await supabase
+        .from("Transaction")
+        .insert({
           orderId: transactionData.orderId,
           transactionId: transactionData.transactionId,
           orderNumber: transactionData.orderNumber,
@@ -20,27 +21,20 @@ export class TransactionModel {
           grossAmount: transactionData.grossAmount,
           transactionStatus: transactionData.transactionStatus || "pending",
           fraudStatus: transactionData.fraudStatus || null,
-
-          // Payment details (VA/Code)
           vaNumber: transactionData.vaNumber || null,
           bank: transactionData.bank || null,
           paymentCode: transactionData.paymentCode || null,
           billKey: transactionData.billKey || null,
           billerCode: transactionData.billerCode || null,
-
-          // Snap data
           snapToken: transactionData.snapToken || null,
           snapRedirectUrl: transactionData.snapRedirectUrl || null,
-
-          // Timestamps
           transactionTime: transactionData.transactionTime || null,
           expiryTime: transactionData.expiryTime || null,
-        },
-        include: {
-          order: true,
-        },
-      });
+        })
+        .select(`*, order:Order(*)`)
+        .single();
 
+      if (error) throw error;
       return transaction;
     } catch (error) {
       console.error("Error creating transaction:", error);
@@ -53,30 +47,21 @@ export class TransactionModel {
    */
   static async getById(transactionId) {
     try {
-      const transaction = await prisma.transaction.findUnique({
-        where: { id: transactionId },
-        include: {
-          order: {
-            include: {
-              items: {
-                include: {
-                  product: true,
-                  variant: true,
-                },
-              },
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                },
-              },
-            },
-          },
-        },
-      });
+      const { data, error } = await supabase
+        .from("Transaction")
+        .select(`
+          *,
+          order:Order(
+            *,
+            items:OrderItem(*, product:Product(*), variant:ProductVariant(*)),
+            user:User(id, name, email)
+          )
+        `)
+        .eq("id", transactionId)
+        .single();
 
-      return transaction;
+      if (error && error.code !== "PGRST116") throw error;
+      return data;
     } catch (error) {
       console.error("Error getting transaction:", error);
       throw error;
@@ -88,24 +73,20 @@ export class TransactionModel {
    */
   static async getByTransactionId(transactionId) {
     try {
-      const transaction = await prisma.transaction.findUnique({
-        where: { transactionId },
-        include: {
-          order: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                },
-              },
-            },
-          },
-        },
-      });
+      const { data, error } = await supabase
+        .from("Transaction")
+        .select(`
+          *,
+          order:Order(
+            *,
+            user:User(id, name, email)
+          )
+        `)
+        .eq("transactionId", transactionId)
+        .single();
 
-      return transaction;
+      if (error && error.code !== "PGRST116") throw error;
+      return data;
     } catch (error) {
       console.error("Error getting transaction by transactionId:", error);
       throw error;
@@ -117,14 +98,14 @@ export class TransactionModel {
    */
   static async getByOrderId(orderId) {
     try {
-      const transaction = await prisma.transaction.findUnique({
-        where: { orderId },
-        include: {
-          order: true,
-        },
-      });
+      const { data, error } = await supabase
+        .from("Transaction")
+        .select(`*, order:Order(*)`)
+        .eq("orderId", orderId)
+        .single();
 
-      return transaction;
+      if (error && error.code !== "PGRST116") throw error;
+      return data;
     } catch (error) {
       console.error("Error getting transaction by orderId:", error);
       throw error;
@@ -136,22 +117,25 @@ export class TransactionModel {
    */
   static async updateStatus(transactionId, statusData) {
     try {
-      const transaction = await prisma.transaction.update({
-        where: { transactionId },
-        data: {
-          transactionStatus: statusData.transactionStatus,
-          fraudStatus: statusData.fraudStatus || null,
-          paymentType: statusData.paymentType || undefined,
-          vaNumber: statusData.vaNumber || undefined,
-          bank: statusData.bank || undefined,
-          settlementTime: statusData.settlementTime || undefined,
-        },
-        include: {
-          order: true,
-        },
-      });
+      const updateData = {
+        transactionStatus: statusData.transactionStatus,
+        fraudStatus: statusData.fraudStatus || null,
+      };
 
-      return transaction;
+      if (statusData.paymentType) updateData.paymentType = statusData.paymentType;
+      if (statusData.vaNumber) updateData.vaNumber = statusData.vaNumber;
+      if (statusData.bank) updateData.bank = statusData.bank;
+      if (statusData.settlementTime) updateData.settlementTime = statusData.settlementTime;
+
+      const { data, error } = await supabase
+        .from("Transaction")
+        .update(updateData)
+        .eq("transactionId", transactionId)
+        .select(`*, order:Order(*)`)
+        .single();
+
+      if (error) throw error;
+      return data;
     } catch (error) {
       console.error("Error updating transaction status:", error);
       throw error;
@@ -163,14 +147,15 @@ export class TransactionModel {
    */
   static async markExpired(transactionId) {
     try {
-      const transaction = await prisma.transaction.update({
-        where: { transactionId },
-        data: {
-          transactionStatus: "expire",
-        },
-      });
+      const { data, error } = await supabase
+        .from("Transaction")
+        .update({ transactionStatus: "expire" })
+        .eq("transactionId", transactionId)
+        .select()
+        .single();
 
-      return transaction;
+      if (error) throw error;
+      return data;
     } catch (error) {
       console.error("Error marking transaction as expired:", error);
       throw error;
@@ -182,24 +167,18 @@ export class TransactionModel {
    */
   static async getPending(olderThan = null) {
     try {
-      const where = {
-        transactionStatus: "pending",
-      };
+      let query = supabase
+        .from("Transaction")
+        .select(`*, order:Order(*)`)
+        .eq("transactionStatus", "pending");
 
       if (olderThan) {
-        where.createdAt = {
-          lt: olderThan,
-        };
+        query = query.lt("createdAt", olderThan.toISOString());
       }
 
-      const transactions = await prisma.transaction.findMany({
-        where,
-        include: {
-          order: true,
-        },
-      });
-
-      return transactions;
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
     } catch (error) {
       console.error("Error getting pending transactions:", error);
       throw error;

@@ -6,76 +6,13 @@
 import { NextResponse } from "next/server";
 
 /**
- * Handle Prisma-specific errors
+ * Handle Supabase/PostgreSQL-specific errors
  */
 export function handlePrismaError(error) {
-  console.error("Prisma Error:", error);
+  console.error("Database Error:", error);
 
-  // Database connection errors
-  if (error.code === "P1001") {
-    return NextResponse.json(
-      {
-        error: "Database connection failed",
-        details:
-          "Cannot reach database server. Please check your DATABASE_URL environment variable.",
-        code: error.code,
-      },
-      { status: 503 }
-    );
-  }
-
-  // Database timeout
-  if (error.code === "P1002") {
-    return NextResponse.json(
-      {
-        error: "Database timeout",
-        details: "The database server timed out. Please try again.",
-        code: error.code,
-      },
-      { status: 504 }
-    );
-  }
-
-  // Authentication failed
-  if (error.code === "P1003") {
-    return NextResponse.json(
-      {
-        error: "Database authentication failed",
-        details: "Invalid database credentials.",
-        code: error.code,
-      },
-      { status: 503 }
-    );
-  }
-
-  // Unique constraint violation
-  if (error.code === "P2002") {
-    return NextResponse.json(
-      {
-        error: "Duplicate entry",
-        details: `A record with this ${
-          error.meta?.target?.join(", ") || "value"
-        } already exists.`,
-        code: error.code,
-      },
-      { status: 409 }
-    );
-  }
-
-  // Foreign key constraint
-  if (error.code === "P2003") {
-    return NextResponse.json(
-      {
-        error: "Invalid reference",
-        details: "Referenced record does not exist.",
-        code: error.code,
-      },
-      { status: 400 }
-    );
-  }
-
-  // Record not found
-  if (error.code === "P2025") {
+  // Supabase error codes
+  if (error.code === "PGRST116") {
     return NextResponse.json(
       {
         error: "Record not found",
@@ -86,7 +23,31 @@ export function handlePrismaError(error) {
     );
   }
 
-  // Generic Prisma error
+  // Unique constraint violation
+  if (error.code === "23505") {
+    return NextResponse.json(
+      {
+        error: "Duplicate entry",
+        details: "A record with this value already exists.",
+        code: error.code,
+      },
+      { status: 409 }
+    );
+  }
+
+  // Foreign key constraint
+  if (error.code === "23503") {
+    return NextResponse.json(
+      {
+        error: "Invalid reference",
+        details: "Referenced record does not exist.",
+        code: error.code,
+      },
+      { status: 400 }
+    );
+  }
+
+  // Generic database error
   return NextResponse.json(
     {
       error: "Database error",
@@ -99,6 +60,9 @@ export function handlePrismaError(error) {
     { status: 500 }
   );
 }
+
+// Alias for Supabase
+export const handleSupabaseError = handlePrismaError;
 
 /**
  * Handle general API errors
@@ -150,17 +114,20 @@ export function withErrorHandler(handler) {
 }
 
 /**
- * Get Prisma client with error handling
+ * Get Supabase client with error handling
  */
 export async function getPrismaClient() {
   try {
-    const { prisma } = await import("@/lib/prisma");
-    return prisma;
+    const { default: supabase } = await import("@/lib/prisma");
+    return supabase;
   } catch (error) {
-    console.error("Failed to import Prisma client:", error);
+    console.error("Failed to import Supabase client:", error);
     throw new Error("Database connection not available");
   }
 }
+
+// Alias for backward compatibility
+export const getSupabaseClient = getPrismaClient;
 
 /**
  * Check if user is authenticated

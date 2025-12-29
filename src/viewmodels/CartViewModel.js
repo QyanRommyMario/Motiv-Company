@@ -5,7 +5,7 @@
 
 import { CartModel } from "@/models/CartModel";
 import { ProductVariantModel } from "@/models/ProductVariantModel";
-import prisma from "@/lib/prisma";
+import supabase from "@/lib/prisma";
 
 export class CartViewModel {
   /**
@@ -82,12 +82,13 @@ export class CartViewModel {
       if (!quantity || quantity <= 0)
         return { valid: false, message: "Jumlah harus > 0" };
 
-      const variant = await prisma.productVariant.findUnique({
-        where: { id: variantId },
-        include: { product: true },
-      });
+      const { data: variant, error } = await supabase
+        .from("ProductVariant")
+        .select(`*, product:Product(*)`)
+        .eq("id", variantId)
+        .single();
 
-      if (!variant) return { valid: false, message: "Varian tidak ditemukan" };
+      if (error || !variant) return { valid: false, message: "Varian tidak ditemukan" };
       if (variant.stock < quantity)
         return { valid: false, message: `Stok kurang. Sisa: ${variant.stock}` };
 
@@ -98,51 +99,71 @@ export class CartViewModel {
   }
 
   static async getCartItemById(cartItemId) {
-    return await prisma.cartItem.findUnique({
-      where: { id: cartItemId },
-      include: { variant: { include: { product: true } } },
-    });
+    const { data, error } = await supabase
+      .from("CartItem")
+      .select(`*, variant:ProductVariant(*, product:Product(*))`)
+      .eq("id", cartItemId)
+      .single();
+
+    if (error && error.code !== "PGRST116") throw error;
+    return data;
   }
 
   static async updateCartItem(cartItemId, quantity) {
-    return await prisma.cartItem.update({
-      where: { id: cartItemId },
-      data: { quantity },
-      include: { variant: { include: { product: true } } },
-    });
+    const { data, error } = await supabase
+      .from("CartItem")
+      .update({ quantity })
+      .eq("id", cartItemId)
+      .select(`*, variant:ProductVariant(*, product:Product(*))`)
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 
   static async addToCart(userId, variantId, quantity) {
     try {
-      const variant = await prisma.productVariant.findUnique({
-        where: { id: variantId },
-        include: { product: true },
-      });
+      const { data: variant, error: variantError } = await supabase
+        .from("ProductVariant")
+        .select(`*, product:Product(*)`)
+        .eq("id", variantId)
+        .single();
 
-      if (!variant) throw new Error("Varian produk tidak ditemukan");
+      if (variantError || !variant) throw new Error("Varian produk tidak ditemukan");
 
-      const existingItem = await prisma.cartItem.findUnique({
-        where: { userId_variantId: { userId, variantId } },
-      });
+      const { data: existingItem } = await supabase
+        .from("CartItem")
+        .select("*")
+        .eq("userId", userId)
+        .eq("variantId", variantId)
+        .single();
 
       if (existingItem) {
         const newQuantity = existingItem.quantity + quantity;
         if (variant.stock < newQuantity)
           throw new Error(`Stok tidak cukup. Tersedia: ${variant.stock}`);
 
-        return await prisma.cartItem.update({
-          where: { id: existingItem.id },
-          data: { quantity: newQuantity },
-          include: { variant: { include: { product: true } } },
-        });
+        const { data, error } = await supabase
+          .from("CartItem")
+          .update({ quantity: newQuantity })
+          .eq("id", existingItem.id)
+          .select(`*, variant:ProductVariant(*, product:Product(*))`)
+          .single();
+
+        if (error) throw error;
+        return data;
       } else {
         if (variant.stock < quantity)
           throw new Error(`Stok tidak cukup. Tersedia: ${variant.stock}`);
 
-        return await prisma.cartItem.create({
-          data: { userId, productId: variant.productId, variantId, quantity },
-          include: { variant: { include: { product: true } } },
-        });
+        const { data, error } = await supabase
+          .from("CartItem")
+          .insert({ userId, productId: variant.productId, variantId, quantity })
+          .select(`*, variant:ProductVariant(*, product:Product(*))`)
+          .single();
+
+        if (error) throw error;
+        return data;
       }
     } catch (error) {
       throw new Error(error.message);
@@ -152,11 +173,14 @@ export class CartViewModel {
   static async updateQuantity(cartItemId, quantity) {
     try {
       if (quantity <= 0) throw new Error("Jumlah harus lebih dari 0");
-      const cartItem = await prisma.cartItem.findUnique({
-        where: { id: cartItemId },
-        include: { variant: true },
-      });
-      if (!cartItem) throw new Error("Item tidak ditemukan");
+
+      const { data: cartItem, error } = await supabase
+        .from("CartItem")
+        .select(`*, variant:ProductVariant(*)`)
+        .eq("id", cartItemId)
+        .single();
+
+      if (error || !cartItem) throw new Error("Item tidak ditemukan");
       if (cartItem.variant.stock < quantity)
         throw new Error("Stok tidak cukup");
 
