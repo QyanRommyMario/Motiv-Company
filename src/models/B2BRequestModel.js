@@ -4,6 +4,7 @@
  */
 
 import supabase from "@/lib/prisma";
+import { generateId } from "@/lib/utils";
 
 export class B2BRequestModel {
   /**
@@ -12,11 +13,13 @@ export class B2BRequestModel {
   static async create(data) {
     const { data: request, error } = await supabase
       .from("B2BRequest")
-      .insert(data)
-      .select(`
+      .insert({ id: generateId(), ...data })
+      .select(
+        `
         *,
         user:User(id, name, email)
-      `)
+      `
+      )
       .single();
 
     if (error) throw error;
@@ -31,10 +34,12 @@ export class B2BRequestModel {
 
     let query = supabase
       .from("B2BRequest")
-      .select(`
+      .select(
+        `
         *,
         user:User(id, name, email)
-      `)
+      `
+      )
       .order("createdAt", { ascending: false })
       .range(skip, skip + take - 1);
 

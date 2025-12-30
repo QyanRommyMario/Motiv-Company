@@ -4,6 +4,7 @@
  */
 
 import supabase from "@/lib/prisma";
+import { generateId } from "@/lib/utils";
 
 export class TransactionModel {
   /**
@@ -14,6 +15,7 @@ export class TransactionModel {
       const { data: transaction, error } = await supabase
         .from("Transaction")
         .insert({
+          id: generateId(),
           orderId: transactionData.orderId,
           transactionId: transactionData.transactionId,
           orderNumber: transactionData.orderNumber,
@@ -49,14 +51,16 @@ export class TransactionModel {
     try {
       const { data, error } = await supabase
         .from("Transaction")
-        .select(`
+        .select(
+          `
           *,
           order:Order(
             *,
             items:OrderItem(*, product:Product(*), variant:ProductVariant(*)),
             user:User(id, name, email)
           )
-        `)
+        `
+        )
         .eq("id", transactionId)
         .single();
 
@@ -75,13 +79,15 @@ export class TransactionModel {
     try {
       const { data, error } = await supabase
         .from("Transaction")
-        .select(`
+        .select(
+          `
           *,
           order:Order(
             *,
             user:User(id, name, email)
           )
-        `)
+        `
+        )
         .eq("transactionId", transactionId)
         .single();
 
@@ -122,10 +128,12 @@ export class TransactionModel {
         fraudStatus: statusData.fraudStatus || null,
       };
 
-      if (statusData.paymentType) updateData.paymentType = statusData.paymentType;
+      if (statusData.paymentType)
+        updateData.paymentType = statusData.paymentType;
       if (statusData.vaNumber) updateData.vaNumber = statusData.vaNumber;
       if (statusData.bank) updateData.bank = statusData.bank;
-      if (statusData.settlementTime) updateData.settlementTime = statusData.settlementTime;
+      if (statusData.settlementTime)
+        updateData.settlementTime = statusData.settlementTime;
 
       const { data, error } = await supabase
         .from("Transaction")

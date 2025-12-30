@@ -1,4 +1,5 @@
 import supabase from "@/lib/prisma";
+import { generateId } from "@/lib/utils";
 
 /**
  * ShippingAddress Model
@@ -11,7 +12,7 @@ class ShippingAddressModel {
   static async create(data) {
     const { data: address, error } = await supabase
       .from("ShippingAddress")
-      .insert(data)
+      .insert({ id: generateId(), ...data })
       .select()
       .single();
 

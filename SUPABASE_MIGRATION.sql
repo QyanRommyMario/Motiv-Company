@@ -64,7 +64,7 @@ CREATE INDEX "Product_name_idx" ON "Product"(name);
 CREATE TABLE "ProductVariant" (
     id TEXT PRIMARY KEY,
     "productId" TEXT NOT NULL,
-    size TEXT NOT NULL,
+    name TEXT NOT NULL,
     price DOUBLE PRECISION NOT NULL,
     stock INTEGER NOT NULL,
     sku TEXT,
@@ -120,6 +120,9 @@ CREATE TABLE "ShippingAddress" (
     "postalCode" TEXT NOT NULL,
     country TEXT NOT NULL DEFAULT 'Indonesia',
     "isDefault" BOOLEAN NOT NULL DEFAULT false,
+    label TEXT NOT NULL DEFAULT 'Home',
+    "cityId" TEXT,
+    "provinceId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
@@ -139,20 +142,32 @@ CREATE TABLE "Order" (
     "userId" TEXT NOT NULL,
     "orderNumber" TEXT UNIQUE NOT NULL,
     status TEXT NOT NULL DEFAULT 'PENDING',
-    "paymentStatus" TEXT NOT NULL DEFAULT 'PENDING',
+    "paymentStatus" TEXT NOT NULL DEFAULT 'UNPAID',
     "paymentMethod" TEXT,
-    "shippingMethod" TEXT,
     "shippingCost" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "shippingAddress" JSONB NOT NULL,
     subtotal DOUBLE PRECISION NOT NULL,
     discount DOUBLE PRECISION NOT NULL DEFAULT 0,
     "voucherCode" TEXT,
     total DOUBLE PRECISION NOT NULL,
     notes TEXT,
+    "shippingName" TEXT,
+    "shippingPhone" TEXT,
+    "shippingAddress" TEXT,
+    "shippingCity" TEXT,
+    "shippingProvince" TEXT,
+    "shippingCountry" TEXT DEFAULT 'Indonesia',
+    "shippingPostalCode" TEXT,
+    "courierName" TEXT,
+    "courierService" TEXT,
+    "trackingNumber" TEXT,
+    "isCustomShipping" BOOLEAN DEFAULT false,
+    "customShippingNote" TEXT,
+    "shippedAt" TIMESTAMP(3),
+    "deliveredAt" TIMESTAMP(3),
+    "cancelledAt" TIMESTAMP(3),
+    "cancellationReason" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "paidAt" TIMESTAMP(3),
-    "completedAt" TIMESTAMP(3),
     
     CONSTRAINT "Order_userId_fkey" 
         FOREIGN KEY ("userId") REFERENCES "User"(id) 
@@ -175,7 +190,6 @@ CREATE TABLE "OrderItem" (
     "variantId" TEXT NOT NULL,
     quantity INTEGER NOT NULL,
     price DOUBLE PRECISION NOT NULL,
-    "productSnapshot" JSONB NOT NULL,
     
     CONSTRAINT "OrderItem_orderId_fkey" 
         FOREIGN KEY ("orderId") REFERENCES "Order"(id) 
@@ -198,12 +212,21 @@ CREATE TABLE "Transaction" (
     id TEXT PRIMARY KEY,
     "orderId" TEXT UNIQUE NOT NULL,
     "transactionId" TEXT UNIQUE NOT NULL,
+    "orderNumber" TEXT,
     "paymentType" TEXT,
     "grossAmount" DOUBLE PRECISION NOT NULL,
-    status TEXT NOT NULL DEFAULT 'PENDING',
+    "transactionStatus" TEXT NOT NULL DEFAULT 'pending',
     "fraudStatus" TEXT,
+    "vaNumber" TEXT,
+    "bank" TEXT,
+    "paymentCode" TEXT,
+    "billKey" TEXT,
+    "billerCode" TEXT,
+    "snapToken" TEXT,
+    "snapRedirectUrl" TEXT,
     "transactionTime" TIMESTAMP(3),
     "settlementTime" TIMESTAMP(3),
+    "expiryTime" TIMESTAMP(3),
     metadata JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -224,16 +247,11 @@ CREATE TABLE "B2BRequest" (
     id TEXT PRIMARY KEY,
     "userId" TEXT UNIQUE NOT NULL,
     "businessName" TEXT NOT NULL,
-    "businessAddress" TEXT NOT NULL,
     phone TEXT NOT NULL,
-    email TEXT NOT NULL,
-    "taxId" TEXT,
-    description TEXT,
+    address TEXT,
     status TEXT NOT NULL DEFAULT 'PENDING',
-    "rejectionReason" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "processedAt" TIMESTAMP(3),
     
     CONSTRAINT "B2BRequest_userId_fkey" 
         FOREIGN KEY ("userId") REFERENCES "User"(id) 
@@ -250,18 +268,16 @@ CREATE INDEX "B2BRequest_status_idx" ON "B2BRequest"(status);
 CREATE TABLE "Voucher" (
     id TEXT PRIMARY KEY,
     code TEXT UNIQUE NOT NULL,
-    description TEXT NOT NULL,
     type TEXT NOT NULL,
     value DOUBLE PRECISION NOT NULL,
     "minPurchase" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "maxDiscount" DOUBLE PRECISION,
-    "usageLimit" INTEGER,
-    "usageCount" INTEGER NOT NULL DEFAULT 0,
-    "startDate" TIMESTAMP(3) NOT NULL,
-    "endDate" TIMESTAMP(3) NOT NULL,
+    quota INTEGER NOT NULL DEFAULT 100,
+    used INTEGER NOT NULL DEFAULT 0,
+    "validFrom" TIMESTAMP(3) NOT NULL,
+    "validUntil" TIMESTAMP(3) NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indexes for vouchers
@@ -275,10 +291,9 @@ CREATE TABLE "Story" (
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
-    excerpt TEXT NOT NULL,
     "featuredImage" TEXT,
     "isPublished" BOOLEAN NOT NULL DEFAULT false,
-    "publishedAt" TIMESTAMP(3),
+    "order" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -286,6 +301,7 @@ CREATE TABLE "Story" (
 -- Index for published stories
 CREATE INDEX "Story_isPublished_idx" ON "Story"("isPublished");
 CREATE INDEX "Story_publishedAt_idx" ON "Story"("publishedAt");
+CREATE INDEX "Story_order_idx" ON "Story"("order");
 
 -- ========================================
 -- SEED DATA: Insert Admin User
@@ -353,7 +369,7 @@ VALUES (
 ) ON CONFLICT (id) DO NOTHING;
 
 -- Sample Product Variant
-INSERT INTO "ProductVariant" (id, "productId", size, price, stock, sku, "createdAt", "updatedAt")
+INSERT INTO "ProductVariant" (id, "productId", name, price, stock, sku, "createdAt", "updatedAt")
 VALUES 
     ('var-001', 'prod-001', '250g', 75000, 100, 'COFFEE-250G', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('var-002', 'prod-001', '500g', 140000, 50, 'COFFEE-500G', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -363,35 +379,33 @@ ON CONFLICT (id) DO NOTHING;
 -- ========================================
 -- SEED DATA: Sample Voucher
 -- ========================================
-INSERT INTO "Voucher" (id, code, description, type, value, "minPurchase", "maxDiscount", "usageLimit", "startDate", "endDate", "isActive", "createdAt", "updatedAt")
+INSERT INTO "Voucher" (id, code, type, value, "minPurchase", "maxDiscount", quota, used, "validFrom", "validUntil", "isActive", "createdAt")
 VALUES (
     'vouch-001',
     'WELCOME10',
-    'Welcome discount 10% for new customers',
     'PERCENTAGE',
     10,
     100000,
     50000,
     100,
+    0,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP + INTERVAL '30 days',
     true,
-    CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 ) ON CONFLICT (code) DO NOTHING;
 
 -- ========================================
 -- SEED DATA: Sample Story
 -- ========================================
-INSERT INTO "Story" (id, title, content, excerpt, "featuredImage", "isPublished", "publishedAt", "createdAt", "updatedAt")
+INSERT INTO "Story" (id, title, content, "featuredImage", "isPublished", "order", "createdAt", "updatedAt")
 VALUES (
     'story-001',
     'Welcome to Motiv Coffee',
     'Discover the journey of our premium coffee beans from farm to cup. We source only the finest arabica beans from Indonesian highlands...',
-    'Discover the journey of our premium coffee beans from farm to cup.',
     '/images/story-1.jpg',
     true,
-    CURRENT_TIMESTAMP,
+    0,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 ) ON CONFLICT (id) DO NOTHING;

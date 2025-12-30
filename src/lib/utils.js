@@ -1,3 +1,22 @@
+import { randomUUID } from "crypto";
+
+/**
+ * Generate a unique ID (UUID v4)
+ * Used for database records since Supabase doesn't auto-generate IDs
+ */
+export const generateId = () => {
+  // Use crypto.randomUUID if available, fallback to custom implementation
+  if (typeof randomUUID === "function") {
+    return randomUUID();
+  }
+  // Fallback for older environments
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
 // Format currency to IDR
 export const formatCurrency = (amount) => {
   return new Intl.NumberFormat("id-ID", {

@@ -33,11 +33,13 @@ export async function GET(request, { params }) {
     // [PERBAIKAN 2] Ambil data Order + Item + Transaksi (Token)
     const { data: order, error } = await supabase
       .from("Order")
-      .select(`
+      .select(
+        `
         *,
         items:OrderItem(*, product:Product(*), variant:ProductVariant(*)),
         transaction:Transaction(*)
-      `)
+      `
+      )
       .eq("id", id)
       .single();
 

@@ -4,6 +4,7 @@
  */
 
 import supabase from "@/lib/prisma";
+import { generateId } from "@/lib/utils";
 
 export class ProductModel {
   /**
@@ -14,6 +15,7 @@ export class ProductModel {
     const { data: product, error: productError } = await supabase
       .from("Product")
       .insert({
+        id: generateId(),
         name: data.name,
         description: data.description,
         images: data.images,
@@ -28,6 +30,7 @@ export class ProductModel {
     // Create variants
     if (data.variants && data.variants.length > 0) {
       const variantsWithProductId = data.variants.map((v) => ({
+        id: generateId(),
         ...v,
         productId: product.id,
       }));

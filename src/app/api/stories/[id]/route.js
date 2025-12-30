@@ -92,10 +92,7 @@ export async function DELETE(request, { params }) {
 
     const { id } = await params;
 
-    const { error } = await supabase
-      .from("Story")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("Story").delete().eq("id", id);
 
     if (error) throw error;
 

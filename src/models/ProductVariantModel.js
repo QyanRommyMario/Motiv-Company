@@ -4,6 +4,7 @@
  */
 
 import supabase from "@/lib/prisma";
+import { generateId } from "@/lib/utils";
 
 export class ProductVariantModel {
   /**
@@ -12,7 +13,7 @@ export class ProductVariantModel {
   static async create(data) {
     const { data: variant, error } = await supabase
       .from("ProductVariant")
-      .insert(data)
+      .insert({ id: generateId(), ...data })
       .select()
       .single();
 

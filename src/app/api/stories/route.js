@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import supabase from "@/lib/prisma";
+import { generateId } from "@/lib/utils";
 import {
   handleApiError,
   requireAuth,
@@ -51,6 +52,7 @@ export async function POST(request) {
     const { data: story, error } = await supabase
       .from("Story")
       .insert({
+        id: generateId(),
         title,
         content,
         featuredImage: featuredImage || imageUrl || null,

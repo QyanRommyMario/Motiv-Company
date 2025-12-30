@@ -27,12 +27,14 @@ export async function GET(request, { params }) {
 
     const { data: order, error } = await supabase
       .from("Order")
-      .select(`
+      .select(
+        `
         *,
         items:OrderItem(*, product:Product(*), variant:ProductVariant(*)),
         user:User(id, name, email, phone, role),
         transaction:Transaction(*)
-      `)
+      `
+      )
       .eq("id", id)
       .single();
 
@@ -97,11 +99,13 @@ export async function PATCH(request, { params }) {
       .from("Order")
       .update(updateData)
       .eq("id", id)
-      .select(`
+      .select(
+        `
         *,
         items:OrderItem(*, product:Product(*), variant:ProductVariant(*)),
         user:User(id, name, email)
-      `)
+      `
+      )
       .single();
 
     if (error) throw error;

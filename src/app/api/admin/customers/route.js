@@ -20,22 +20,29 @@ export async function GET(request) {
     const skip = (page - 1) * limit;
 
     // Fetch customers with pagination
-    const { data: customers, count: totalCount, error } = await supabase
+    const {
+      data: customers,
+      count: totalCount,
+      error,
+    } = await supabase
       .from("User")
-      .select(`
+      .select(
+        `
         id, name, email, role, createdAt,
         b2bRequest:B2BRequest(businessName, phone, address, status)
-      `, { count: "exact" })
+      `,
+        { count: "exact" }
+      )
       .order("createdAt", { ascending: false })
       .range(skip, skip + limit - 1);
 
     if (error) throw error;
 
     // Get order counts for each customer
-    const customerIds = customers?.map(c => c.id) || [];
-    
+    const customerIds = customers?.map((c) => c.id) || [];
+
     let customersWithStats = customers || [];
-    
+
     if (customerIds.length > 0) {
       // Get order data for all customers at once
       const { data: orderData } = await supabase
@@ -44,10 +51,17 @@ export async function GET(request) {
         .in("userId", customerIds);
 
       // Calculate stats per customer
-      customersWithStats = (customers || []).map(customer => {
-        const customerOrders = (orderData || []).filter(o => o.userId === customer.id);
-        const activeOrders = customerOrders.filter(o => o.status !== "CANCELLED");
-        const totalSpent = activeOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+      customersWithStats = (customers || []).map((customer) => {
+        const customerOrders = (orderData || []).filter(
+          (o) => o.userId === customer.id
+        );
+        const activeOrders = customerOrders.filter(
+          (o) => o.status !== "CANCELLED"
+        );
+        const totalSpent = activeOrders.reduce(
+          (sum, o) => sum + (o.total || 0),
+          0
+        );
 
         return {
           id: customer.id,

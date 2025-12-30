@@ -314,7 +314,7 @@ export default function AdminDashboard() {
                         {variant.product?.name || "Unknown"}
                       </p>
                       <p className="text-xs text-[#6B7280] mt-1">
-                        {variant.size || "Default"}
+                        {variant.name || "Default"}
                       </p>
                       <p className="text-sm font-bold text-red-600 mt-2">
                         {t("stock")}: {variant.stock}

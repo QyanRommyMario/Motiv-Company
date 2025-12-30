@@ -84,7 +84,7 @@ export async function PUT(request, { params }) {
       features,
       variants: variants?.map((v) => ({
         id: v.id, // Include ID if updating existing variant
-        size: v.size,
+        name: v.name || v.size, // Support both 'name' and 'size'
         price: parseFloat(v.price),
         stock: parseInt(v.stock),
       })),

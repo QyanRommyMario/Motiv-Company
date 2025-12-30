@@ -6,6 +6,7 @@
 import { CartModel } from "@/models/CartModel";
 import { ProductVariantModel } from "@/models/ProductVariantModel";
 import supabase from "@/lib/prisma";
+import { generateId } from "@/lib/utils";
 
 export class CartViewModel {
   /**
@@ -88,7 +89,8 @@ export class CartViewModel {
         .eq("id", variantId)
         .single();
 
-      if (error || !variant) return { valid: false, message: "Varian tidak ditemukan" };
+      if (error || !variant)
+        return { valid: false, message: "Varian tidak ditemukan" };
       if (variant.stock < quantity)
         return { valid: false, message: `Stok kurang. Sisa: ${variant.stock}` };
 
@@ -129,7 +131,8 @@ export class CartViewModel {
         .eq("id", variantId)
         .single();
 
-      if (variantError || !variant) throw new Error("Varian produk tidak ditemukan");
+      if (variantError || !variant)
+        throw new Error("Varian produk tidak ditemukan");
 
       const { data: existingItem } = await supabase
         .from("CartItem")
@@ -158,7 +161,7 @@ export class CartViewModel {
 
         const { data, error } = await supabase
           .from("CartItem")
-          .insert({ userId, productId: variant.productId, variantId, quantity })
+          .insert({ id: generateId(), userId, productId: variant.productId, variantId, quantity })
           .select(`*, variant:ProductVariant(*, product:Product(*))`)
           .single();
 

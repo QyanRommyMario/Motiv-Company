@@ -5,6 +5,7 @@
 
 import supabase from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { generateId } from "@/lib/utils";
 
 export class UserModel {
   /**
@@ -16,6 +17,7 @@ export class UserModel {
     const { data: user, error } = await supabase
       .from("User")
       .insert({
+        id: generateId(),
         name: data.name,
         email: data.email,
         password: hashedPassword,
@@ -50,7 +52,9 @@ export class UserModel {
   static async findById(id) {
     const { data, error } = await supabase
       .from("User")
-      .select("id, name, email, role, status, businessName, phone, address, discount, createdAt")
+      .select(
+        "id, name, email, role, status, businessName, phone, address, discount, createdAt"
+      )
       .eq("id", id)
       .single();
 

@@ -62,10 +62,10 @@ export async function POST(request) {
       images: images || [],
       features: features || [],
       variants: variants.map((v) => ({
-        name: v.size, // Map 'size' from frontend to 'name' in database
+        name: v.name || v.size, // Support both 'name' and 'size' from frontend
         price: parseFloat(v.price),
         stock: parseInt(v.stock),
-        sku: `${name.substring(0, 3).toUpperCase()}-${v.size}-${Date.now()}`, // Generate SKU
+        sku: v.sku || `${name.substring(0, 3).toUpperCase()}-${v.name || v.size}-${Date.now()}`, // Generate SKU if not provided
       })),
     });
 

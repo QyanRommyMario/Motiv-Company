@@ -1,7 +1,7 @@
 /**
  * Test Database Connection API
  * GET /api/test-db
- * 
+ *
  * Use this to verify:
  * 1. Database connection works from Vercel
  * 2. Admin user exists in database
@@ -13,7 +13,7 @@ import bcrypt from "bcryptjs";
 
 export async function GET() {
   let supabase = null;
-  
+
   try {
     // Test 1: Import Supabase
     let supabaseImportError = null;
@@ -28,12 +28,15 @@ export async function GET() {
     }
 
     if (!supabase) {
-      return NextResponse.json({
-        success: false,
-        error: "Failed to import Supabase Client",
-        supabaseImportError,
-        timestamp: new Date().toISOString(),
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to import Supabase Client",
+          supabaseImportError,
+          timestamp: new Date().toISOString(),
+        },
+        { status: 500 }
+      );
     }
 
     // Test 2: Simple database query
@@ -48,7 +51,12 @@ export async function GET() {
           .select("id")
           .limit(1);
         if (testError) throw testError;
-        dbTest = [{ current_time: new Date().toISOString(), db_version: "Supabase PostgreSQL" }];
+        dbTest = [
+          {
+            current_time: new Date().toISOString(),
+            db_version: "Supabase PostgreSQL",
+          },
+        ];
       } else {
         dbTest = data;
       }
@@ -58,7 +66,7 @@ export async function GET() {
         code: err.code,
       };
     }
-    
+
     // Test 3: Find admin user
     let adminUser = null;
     let userError = null;
@@ -68,7 +76,7 @@ export async function GET() {
         .select("id, name, email, role, password, status, createdAt")
         .eq("email", "admin@motiv.com")
         .single();
-      
+
       if (error && error.code !== "PGRST116") throw error;
       adminUser = data;
     } catch (err) {
@@ -81,7 +89,7 @@ export async function GET() {
     // Test 4: Verify password hash (if user exists)
     let passwordTest = null;
     if (adminUser) {
-      passwordTest = await bcrypt.compare('Motiv@Admin123', adminUser.password);
+      passwordTest = await bcrypt.compare("Motiv@Admin123", adminUser.password);
     }
 
     // Test 5: Count total users
@@ -91,7 +99,7 @@ export async function GET() {
       const { count, error } = await supabase
         .from("User")
         .select("id", { count: "exact", head: true });
-      
+
       if (error) throw error;
       totalUsers = count;
     } catch (err) {
@@ -107,59 +115,76 @@ export async function GET() {
       tests: {
         supabaseClient: {
           status: supabase ? "✅ Imported" : "❌ Failed",
-          error: supabaseImportError
+          error: supabaseImportError,
         },
         databaseConnection: {
           status: dbError ? "❌ Failed" : "✅ Connected",
           time: dbTest?.[0]?.current_time || new Date().toISOString(),
           version: dbTest?.[0]?.db_version || "Supabase PostgreSQL",
-          error: dbError
+          error: dbError,
         },
         adminUserQuery: {
-          status: userError ? "❌ Query Failed" : (adminUser ? "✅ User Found" : "⚠️ User Not Found"),
-          data: adminUser ? {
-            id: adminUser.id,
-            name: adminUser.name,
-            email: adminUser.email,
-            role: adminUser.role,
-            status: adminUser.status,
-            createdAt: adminUser.createdAt,
-            passwordHashPrefix: adminUser.password.substring(0, 30) + "...",
-            passwordHashSuffix: "..." + adminUser.password.substring(adminUser.password.length - 10),
-          } : null,
-          error: userError
+          status: userError
+            ? "❌ Query Failed"
+            : adminUser
+            ? "✅ User Found"
+            : "⚠️ User Not Found",
+          data: adminUser
+            ? {
+                id: adminUser.id,
+                name: adminUser.name,
+                email: adminUser.email,
+                role: adminUser.role,
+                status: adminUser.status,
+                createdAt: adminUser.createdAt,
+                passwordHashPrefix: adminUser.password.substring(0, 30) + "...",
+                passwordHashSuffix:
+                  "..." +
+                  adminUser.password.substring(adminUser.password.length - 10),
+              }
+            : null,
+          error: userError,
         },
         passwordVerification: {
-          status: passwordTest === true ? "✅ Password Match" : passwordTest === false ? "❌ Password Mismatch" : "⚠️ Not Tested",
+          status:
+            passwordTest === true
+              ? "✅ Password Match"
+              : passwordTest === false
+              ? "❌ Password Mismatch"
+              : "⚠️ Not Tested",
           tested: "Motiv@Admin123",
-          result: passwordTest
+          result: passwordTest,
         },
         userCount: {
           status: countError ? "❌ Failed" : "✅ Success",
           count: totalUsers,
-          error: countError
-        }
+          error: countError,
+        },
       },
       environment: {
         nodeEnv: process.env.NODE_ENV,
         hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
         hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
         hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-        hasSupabaseKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY || !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        hasSupabaseKey:
+          !!process.env.SUPABASE_SERVICE_ROLE_KEY ||
+          !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
         nextAuthUrl: process.env.NEXTAUTH_URL,
-      }
-    });
-
-  } catch (error) {
-    return NextResponse.json({
-      success: false,
-      error: {
-        message: error.message,
-        name: error.name,
-        code: error.code,
-        stack: error.stack,
       },
-      timestamp: new Date().toISOString(),
-    }, { status: 500 });
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          message: error.message,
+          name: error.name,
+          code: error.code,
+          stack: error.stack,
+        },
+        timestamp: new Date().toISOString(),
+      },
+      { status: 500 }
+    );
   }
 }

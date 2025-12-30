@@ -36,7 +36,8 @@ export async function GET(request) {
     // Build query
     let query = supabase
       .from("Order")
-      .select(`
+      .select(
+        `
         *,
         items:OrderItem(
           *,
@@ -44,7 +45,9 @@ export async function GET(request) {
           variant:ProductVariant(id, name, price)
         ),
         user:User(id, name, email, role, phone)
-      `, { count: "exact" })
+      `,
+        { count: "exact" }
+      )
       .order("createdAt", { ascending: false })
       .range(skip, skip + limit - 1);
 

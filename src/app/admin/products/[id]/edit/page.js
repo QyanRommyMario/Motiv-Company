@@ -159,7 +159,7 @@ export default function EditProductPage() {
   };
 
   const addVariant = () => {
-    setVariants([...variants, { size: "", price: "", stock: "" }]);
+    setVariants([...variants, { name: "", price: "", stock: "" }]);
   };
 
   const removeVariant = (index) => {
@@ -205,7 +205,7 @@ export default function EditProductPage() {
 
     // Validate variants
     const validVariants = variants.filter(
-      (v) => v.size && v.price !== "" && v.stock !== ""
+      (v) => v.name && v.price !== "" && v.stock !== ""
     );
     if (validVariants.length === 0) {
       alert("Minimal 1 varian harus diisi lengkap");
@@ -234,7 +234,7 @@ export default function EditProductPage() {
           features: validFeatures,
           variants: validVariants.map((v) => ({
             id: v.id, // Keep existing ID if available
-            size: v.size,
+            name: v.name,
             price: parseFloat(v.price),
             stock: parseInt(v.stock),
           })),
@@ -591,16 +591,16 @@ export default function EditProductPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Size */}
+                    {/* Size/Name */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-900 mb-2">
                         Ukuran/Tipe
                       </label>
                       <input
                         type="text"
-                        value={variant.size}
+                        value={variant.name}
                         onChange={(e) =>
-                          handleVariantChange(index, "size", e.target.value)
+                          handleVariantChange(index, "name", e.target.value)
                         }
                         placeholder="100g, 250g, 1kg"
                         className="w-full px-4 py-3 border-2 border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-400"

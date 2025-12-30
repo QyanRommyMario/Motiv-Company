@@ -247,7 +247,7 @@ export default function AdminProductsPage() {
                           className="flex justify-between text-sm bg-[#F9FAFB] border border-[#E5E7EB] px-3 py-2"
                         >
                           <span className="font-semibold text-[#1A1A1A]">
-                            {variant.size}
+                            {variant.name}
                           </span>
                           <span className="font-bold text-[#1A1A1A]">
                             {formatCurrency(variant.price)}

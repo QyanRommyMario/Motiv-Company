@@ -4,6 +4,7 @@
  */
 
 import supabase from "@/lib/prisma";
+import { generateId } from "@/lib/utils";
 
 export class OrderModel {
   /**
@@ -47,7 +48,7 @@ export class OrderModel {
     const { items, ...orderData } = data;
     const { data: order, error: orderError } = await supabase
       .from("Order")
-      .insert({ orderNumber, ...orderData })
+      .insert({ id: generateId(), orderNumber, ...orderData })
       .select()
       .single();
 
@@ -55,14 +56,14 @@ export class OrderModel {
 
     // Create order items
     const orderItems = items.map((item) => ({
+      id: generateId(),
       ...item,
       orderId: order.id,
     }));
 
     const { data: createdItems, error: itemsError } = await supabase
       .from("OrderItem")
-      .insert(orderItems)
-      .select(`
+      .insert(orderItems).select(`
         *,
         product:Product(*),
         variant:ProductVariant(*)
@@ -79,7 +80,8 @@ export class OrderModel {
   static async findById(id) {
     const { data, error } = await supabase
       .from("Order")
-      .select(`
+      .select(
+        `
         *,
         items:OrderItem(
           *,
@@ -88,7 +90,8 @@ export class OrderModel {
         ),
         user:User(id, name, email, role),
         transaction:Transaction(id, transactionId, snapToken, transactionStatus, paymentType, vaNumber, bank, settlementTime)
-      `)
+      `
+      )
       .eq("id", id)
       .single();
 
@@ -104,14 +107,16 @@ export class OrderModel {
 
     const { data, error } = await supabase
       .from("Order")
-      .select(`
+      .select(
+        `
         *,
         items:OrderItem(
           *,
           product:Product(name, images),
           variant:ProductVariant(name)
         )
-      `)
+      `
+      )
       .eq("userId", userId)
       .order("createdAt", { ascending: false })
       .range(skip, skip + take - 1);
@@ -128,21 +133,28 @@ export class OrderModel {
 
     let query = supabase
       .from("Order")
-      .select(`
+      .select(
+        `
         *,
         items:OrderItem(
           *,
           product:Product(id, name, images),
           variant:ProductVariant(id, name, price)
         )
-      `, { count: "exact" })
+      `,
+        { count: "exact" }
+      )
       .eq("userId", userId);
 
     if (status) {
       query = query.eq("status", status);
     }
 
-    const { data: orders, count, error } = await query
+    const {
+      data: orders,
+      count,
+      error,
+    } = await query
       .order("createdAt", { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -158,14 +170,16 @@ export class OrderModel {
 
     let query = supabase
       .from("Order")
-      .select(`
+      .select(
+        `
         *,
         user:User(name, email),
         items:OrderItem(
           *,
           product:Product(name)
         )
-      `)
+      `
+      )
       .order("createdAt", { ascending: false })
       .range(skip, skip + take - 1);
 
@@ -205,7 +219,9 @@ export class OrderModel {
     const allowedNextStatuses = validTransitions[currentOrder.status];
     if (!allowedNextStatuses.includes(status)) {
       throw new Error(
-        `Transisi status tidak valid: ${currentOrder.status} → ${status}. Status yang diizinkan: ${
+        `Transisi status tidak valid: ${
+          currentOrder.status
+        } → ${status}. Status yang diizinkan: ${
           allowedNextStatuses.join(", ") || "Tidak ada (status final)"
         }`
       );
@@ -262,12 +278,14 @@ export class OrderModel {
       .from("Order")
       .update(updateData)
       .eq("id", id)
-      .select(`
+      .select(
+        `
         *,
         items:OrderItem(*, product:Product(*), variant:ProductVariant(*)),
         user:User(id, name, email),
         transaction:Transaction(*)
-      `)
+      `
+      )
       .single();
 
     if (error) throw error;
@@ -300,9 +318,18 @@ export class OrderModel {
       { count: completedOrders },
     ] = await Promise.all([
       supabase.from("Order").select("id", { count: "exact", head: true }),
-      supabase.from("Order").select("id", { count: "exact", head: true }).eq("status", "PENDING"),
-      supabase.from("Order").select("id", { count: "exact", head: true }).eq("status", "PROCESSING"),
-      supabase.from("Order").select("id", { count: "exact", head: true }).eq("status", "DELIVERED"),
+      supabase
+        .from("Order")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "PENDING"),
+      supabase
+        .from("Order")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "PROCESSING"),
+      supabase
+        .from("Order")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "DELIVERED"),
     ]);
 
     // Get total revenue from paid orders
@@ -311,7 +338,8 @@ export class OrderModel {
       .select("total")
       .eq("paymentStatus", "PAID");
 
-    const totalRevenue = paidOrders?.reduce((sum, o) => sum + (o.total || 0), 0) || 0;
+    const totalRevenue =
+      paidOrders?.reduce((sum, o) => sum + (o.total || 0), 0) || 0;
 
     return {
       totalOrders: totalOrders || 0,

@@ -4,6 +4,7 @@
  */
 
 import supabase from "@/lib/prisma";
+import { generateId } from "@/lib/utils";
 
 export class CartModel {
   /**
@@ -12,11 +13,13 @@ export class CartModel {
   static async getByUserId(userId) {
     const { data, error } = await supabase
       .from("CartItem")
-      .select(`
+      .select(
+        `
         *,
         product:Product(id, name, images),
         variant:ProductVariant(id, name, price, stock)
-      `)
+      `
+      )
       .eq("userId", userId);
 
     if (error) throw error;
@@ -51,7 +54,7 @@ export class CartModel {
     // Create new cart item
     const { data, error } = await supabase
       .from("CartItem")
-      .insert({ userId, productId, variantId, quantity })
+      .insert({ id: generateId(), userId, productId, variantId, quantity })
       .select()
       .single();
 

@@ -89,7 +89,7 @@ export default function CartItem({ item, onUpdateQuantity, onRemove }) {
         {/* Variant Info */}
         {item.variant && (
           <p className="text-sm text-gray-500 mt-1">
-            {item.variant.size}
+            {item.variant.name}
             {item.variant.grindType && ` • ${item.variant.grindType}`}
           </p>
         )}

@@ -144,10 +144,7 @@ export async function POST(request) {
       });
 
       // Bersihkan Keranjang
-      await supabase
-        .from("CartItem")
-        .delete()
-        .eq("userId", session.user.id);
+      await supabase.from("CartItem").delete().eq("userId", session.user.id);
 
       return NextResponse.json({
         success: true,
@@ -162,11 +159,13 @@ export async function POST(request) {
       // --- LOGIKA OTOMATIS (MIDTRANS) ---
       const { data: fullOrder, error: orderError } = await supabase
         .from("Order")
-        .select(`
+        .select(
+          `
           *,
           user:User(*),
           items:OrderItem(*, product:Product(*), variant:ProductVariant(*))
-        `)
+        `
+        )
         .eq("id", order.id)
         .single();
 
@@ -201,10 +200,7 @@ export async function POST(request) {
       });
 
       // Bersihkan Keranjang
-      await supabase
-        .from("CartItem")
-        .delete()
-        .eq("userId", session.user.id);
+      await supabase.from("CartItem").delete().eq("userId", session.user.id);
 
       return NextResponse.json({
         success: true,

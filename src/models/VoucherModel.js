@@ -4,6 +4,7 @@
  */
 
 import supabase from "@/lib/prisma";
+import { generateId } from "@/lib/utils";
 
 export class VoucherModel {
   /**
@@ -12,7 +13,7 @@ export class VoucherModel {
   static async create(data) {
     const { data: voucher, error } = await supabase
       .from("Voucher")
-      .insert(data)
+      .insert({ id: generateId(), ...data })
       .select()
       .single();
 
@@ -81,10 +82,7 @@ export class VoucherModel {
    * Delete voucher
    */
   static async delete(id) {
-    const { error } = await supabase
-      .from("Voucher")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("Voucher").delete().eq("id", id);
 
     if (error) throw error;
     return { id };
@@ -177,7 +175,10 @@ export class VoucherModel {
     }
 
     const now = new Date();
-    if (now < new Date(voucher.validFrom) || now > new Date(voucher.validUntil)) {
+    if (
+      now < new Date(voucher.validFrom) ||
+      now > new Date(voucher.validUntil)
+    ) {
       throw new Error("Voucher sudah tidak berlaku");
     }
 
