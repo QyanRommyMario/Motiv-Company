@@ -33,7 +33,6 @@ export async function GET(request, context) {
       data: address,
     });
   } catch (error) {
-    console.error("Error fetching address:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }
@@ -81,7 +80,6 @@ export async function PATCH(request, context) {
       data: updatedAddress,
     });
   } catch (error) {
-    console.error("Error updating address:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }
@@ -122,7 +120,6 @@ export async function DELETE(request, context) {
       message: "Alamat berhasil dihapus",
     });
   } catch (error) {
-    console.error("Error deleting address:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }

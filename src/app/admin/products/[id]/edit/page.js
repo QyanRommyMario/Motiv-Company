@@ -61,7 +61,6 @@ export default function EditProductPage() {
         router.push("/admin/products");
       }
     } catch (error) {
-      console.error("Error fetching product:", error);
       alert("Gagal memuat produk");
     } finally {
       setLoading(false);
@@ -128,7 +127,6 @@ export default function EditProductPage() {
         alert(data.message || "Failed to upload image");
       }
     } catch (error) {
-      console.error("Error uploading file:", error);
       alert("Failed to upload image");
     } finally {
       setUploading(false);
@@ -250,7 +248,6 @@ export default function EditProductPage() {
         alert(data.message || "Gagal mengupdate produk");
       }
     } catch (error) {
-      console.error("Error updating product:", error);
       alert("Terjadi kesalahan");
     } finally {
       setSaving(false);
@@ -658,10 +655,15 @@ export default function EditProductPage() {
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-coffee-600 text-white rounded-lg hover:bg-coffee-700 transition-colors font-medium disabled:opacity-50"
+              className="flex-1 px-6 py-3 bg-coffee-600 text-white rounded-lg hover:bg-coffee-700 transition-colors font-medium disabled:opacity-50 relative min-h-12"
               disabled={saving}
             >
-              {saving ? "Menyimpan..." : "Simpan Perubahan"}
+              <span className={saving ? "invisible" : "visible"}>Simpan Perubahan</span>
+              {saving && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                </span>
+              )}
             </button>
           </div>
         </form>

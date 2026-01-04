@@ -28,7 +28,6 @@ export async function GET(request) {
       data: users,
     });
   } catch (error) {
-    console.error("Error fetching B2B users:", error);
     return NextResponse.json(
       { error: "Failed to fetch B2B users" },
       { status: 500 }

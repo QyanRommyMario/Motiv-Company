@@ -61,7 +61,6 @@ export default function AdminB2BPage() {
         });
       }
     } catch (error) {
-      console.error("Error fetching B2B requests:", error);
       setAlert({ type: "error", message: "Failed to fetch B2B requests" });
     } finally {
       setLoading(false);
@@ -86,7 +85,6 @@ export default function AdminB2BPage() {
         });
       }
     } catch (error) {
-      console.error("Error fetching B2B users:", error);
       setAlert({ type: "error", message: "Failed to fetch B2B users" });
     } finally {
       setLoading(false);
@@ -130,7 +128,6 @@ export default function AdminB2BPage() {
         });
       }
     } catch (error) {
-      console.error("Error approving request:", error);
       setAlert({ type: "error", message: "Failed to approve request" });
     }
   };
@@ -159,7 +156,6 @@ export default function AdminB2BPage() {
         });
       }
     } catch (error) {
-      console.error("Error rejecting request:", error);
       setAlert({ type: "error", message: "Failed to reject request" });
     }
   };
@@ -198,7 +194,6 @@ export default function AdminB2BPage() {
         });
       }
     } catch (error) {
-      console.error("Error updating discount:", error);
       setAlert({ type: "error", message: "Failed to update discount" });
     }
   };

@@ -58,7 +58,6 @@ export async function POST(request) {
       message: result.message,
     });
   } catch (error) {
-    console.error("Error validating voucher:", error);
     return NextResponse.json(
       { error: "Failed to validate voucher" },
       { status: 500 }

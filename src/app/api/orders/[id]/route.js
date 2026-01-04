@@ -72,7 +72,6 @@ export async function GET(request, { params }) {
       data: formattedOrder, // Frontend mengharapkan properti 'data'
     });
   } catch (error) {
-    console.error("❌ Get order error:", error);
     return NextResponse.json(
       {
         success: false,
@@ -148,7 +147,6 @@ export async function PATCH(request, { params }) {
     } catch (error) {
       // Handle validation errors
       if (error.message.includes("Transisi status tidak valid")) {
-        console.log("❌ Invalid status transition:", error.message);
         return NextResponse.json(
           { success: false, message: error.message },
           { status: 400 }
@@ -164,7 +162,6 @@ export async function PATCH(request, { params }) {
       order: updatedOrder,
     });
   } catch (error) {
-    console.error("Update order error:", error);
     return NextResponse.json(
       { success: false, message: "Gagal mengupdate status order" },
       { status: 500 }

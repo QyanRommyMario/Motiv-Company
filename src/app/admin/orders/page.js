@@ -36,19 +36,14 @@ export default function AdminOrdersPage() {
       if (filter) params.append("status", filter);
       params.append("limit", "100");
 
-      console.log("🔍 Fetching admin orders with params:", params.toString());
-
       const response = await fetch(`/api/admin/orders?${params.toString()}`);
       const result = await response.json();
-      console.log("📦 Received orders:", result);
 
       if (response.ok && result.success) {
         setOrders(result.orders || []);
-      } else {
-        console.error("❌ Failed to fetch orders:", response.status, result);
       }
     } catch (error) {
-      console.error("❌ Error fetching orders:", error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
@@ -65,11 +60,6 @@ export default function AdminOrdersPage() {
   ) => {
     try {
       setUpdatingStatus(true);
-      console.log("🔄 Updating order status:", {
-        orderId,
-        newStatus,
-        additionalData,
-      });
 
       const response = await fetch(`/api/admin/orders/${orderId}`, {
         method: "PATCH",
@@ -81,19 +71,15 @@ export default function AdminOrdersPage() {
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log("✅ Order updated:", result);
         alert(t("statusUpdated"));
         fetchOrders();
         setShowModal(false);
         setSelectedOrder(null);
       } else {
         const data = await response.json();
-        console.error("❌ Update failed:", data);
         alert(data.message || t("updateFailed"));
       }
     } catch (error) {
-      console.error("❌ Error updating status:", error);
       alert(t("errorOccurred"));
     } finally {
       setUpdatingStatus(false);
@@ -358,10 +344,15 @@ export default function AdminOrdersPage() {
                       shippingCourier: courier || undefined,
                     });
                   }}
-                  className="flex-1 px-4 py-2 bg-[#1A1A1A] text-white hover:bg-black transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-[#1A1A1A] text-white hover:bg-black transition-colors disabled:opacity-50 relative min-h-10"
                   disabled={updatingStatus}
                 >
-                  {updatingStatus ? t("updating") : t("update")}
+                  <span className={updatingStatus ? "invisible" : "visible"}>{t("update")}</span>
+                  {updatingStatus && (
+                    <span className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    </span>
+                  )}
                 </button>
               </div>
             </div>

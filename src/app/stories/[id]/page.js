@@ -7,12 +7,15 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
 import Navbar from "@/components/layout/Navbar";
 import Loading from "@/components/ui/Loading";
 
 export default function StoryDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const t = useTranslations("storiesPage");
+  const locale = useLocale();
   const [story, setStory] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -30,11 +33,9 @@ export default function StoryDetailPage() {
       if (data.success) {
         setStory(data.story);
       } else {
-        console.error("Story not found");
         router.push("/stories");
       }
     } catch (error) {
-      console.error("Error fetching story:", error);
       router.push("/stories");
     } finally {
       setLoading(false);
@@ -43,7 +44,7 @@ export default function StoryDetailPage() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("id-ID", {
+    return date.toLocaleDateString(locale === "id" ? "id-ID" : "en-US", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -74,6 +75,7 @@ export default function StoryDetailPage() {
         <button
           onClick={() => router.push("/stories")}
           className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+          suppressHydrationWarning
         >
           <svg
             className="w-5 h-5 mr-2"
@@ -88,7 +90,7 @@ export default function StoryDetailPage() {
               d="M15 19l-7-7 7-7"
             />
           </svg>
-          Kembali ke Stories
+          {t("backToStories")}
         </button>
 
         {/* Story Content */}
@@ -107,7 +109,7 @@ export default function StoryDetailPage() {
           {/* Content */}
           <div className="p-6 sm:p-8 lg:p-12">
             {/* Date */}
-            <time className="text-sm text-gray-500">
+            <time className="text-sm text-gray-500" suppressHydrationWarning>
               {formatDate(story.createdAt)}
             </time>
 
@@ -125,7 +127,7 @@ export default function StoryDetailPage() {
 
             {/* Metadata */}
             <div className="mt-8 pt-6 border-t border-gray-200">
-              <div className="flex items-center text-sm text-gray-500">
+              <div className="flex items-center text-sm text-gray-500" suppressHydrationWarning>
                 <svg
                   className="w-5 h-5 mr-2"
                   fill="none"
@@ -139,7 +141,7 @@ export default function StoryDetailPage() {
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                Dipublikasikan pada {formatDate(story.createdAt)}
+                {t("publishedAt")} {formatDate(story.createdAt)}
               </div>
             </div>
           </div>
@@ -147,21 +149,23 @@ export default function StoryDetailPage() {
 
         {/* Related Stories / Call to Action */}
         <div className="mt-12 text-center">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Tertarik dengan cerita kami?
+          <h3 className="text-lg font-semibold text-gray-900 mb-4" suppressHydrationWarning>
+            {t("interested")}
           </h3>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => router.push("/stories")}
               className="px-6 py-3 bg-white text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              suppressHydrationWarning
             >
-              Baca Stories Lainnya
+              {t("readOtherStories")}
             </button>
             <button
               onClick={() => router.push("/products")}
               className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              suppressHydrationWarning
             >
-              Lihat Produk Kami
+              {t("viewOurProducts")}
             </button>
           </div>
         </div>

@@ -64,7 +64,6 @@ export class CartViewModel {
         },
       };
     } catch (error) {
-      console.error("❌ getCart error:", error);
       return {
         success: false,
         message: error.message,

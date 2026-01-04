@@ -147,8 +147,6 @@ export async function GET(request) {
       lastMonthRevenueData.data?.reduce((sum, o) => sum + (o.total || 0), 0) ||
       0;
 
-    console.log("📊 Dashboard stats calculated successfully");
-
     return NextResponse.json({
       success: true,
       stats: {
@@ -169,7 +167,6 @@ export async function GET(request) {
       },
     });
   } catch (error) {
-    console.error("❌ Admin stats error:", error);
     return NextResponse.json(
       {
         success: false,

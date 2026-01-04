@@ -32,7 +32,7 @@ export default function CartPage() {
       const data = await response.json();
       if (data.success) setCartItems(data.data.items || []);
     } catch (error) {
-      console.error(error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
@@ -48,7 +48,7 @@ export default function CartPage() {
       });
       await fetchCart();
     } catch (error) {
-      console.error(error);
+      // Error handled silently
     } finally {
       setUpdating(false);
     }
@@ -60,7 +60,7 @@ export default function CartPage() {
       await fetch(`/api/cart/${itemId}`, { method: "DELETE" });
       await fetchCart();
     } catch (error) {
-      console.error(error);
+      // Error handled silently
     } finally {
       setUpdating(false);
     }
@@ -74,7 +74,7 @@ export default function CartPage() {
       const data = await response.json();
       if (data.success) setCartItems([]);
     } catch (error) {
-      console.error(error);
+      // Error handled silently
     } finally {
       setUpdating(false);
     }

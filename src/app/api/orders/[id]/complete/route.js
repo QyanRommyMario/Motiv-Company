@@ -53,18 +53,12 @@ export async function PATCH(request, { params }) {
     // Update order status to DELIVERED
     const updatedOrder = await OrderModel.updateStatus(id, "DELIVERED", {});
 
-    console.log(
-      `✅ Order ${order.orderNumber} completed by customer ${session.user.email}`
-    );
-
     return NextResponse.json({
       success: true,
       message: "Pesanan berhasil diselesaikan",
       order: updatedOrder,
     });
   } catch (error) {
-    console.error("❌ Complete order error:", error);
-
     // Handle validation errors from OrderModel
     if (error.message.includes("Transisi status tidak valid")) {
       return NextResponse.json(

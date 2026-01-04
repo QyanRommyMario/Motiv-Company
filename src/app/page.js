@@ -19,7 +19,7 @@ export default function Home() {
         const data = await response.json();
         setManualSession(data);
       } catch (error) {
-        console.error("Error fetching session:", error);
+        // Error handled silently
       } finally {
         setIsLoadingSession(false);
       }

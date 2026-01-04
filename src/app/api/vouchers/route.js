@@ -31,7 +31,6 @@ export async function GET(request) {
       data: availableVouchers,
     });
   } catch (error) {
-    console.error("Error fetching vouchers:", error);
     return NextResponse.json(
       { error: "Failed to fetch vouchers" },
       { status: 500 }

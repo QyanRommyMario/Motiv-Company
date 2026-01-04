@@ -92,6 +92,19 @@
       "copyright": "© 2025 MOTIV COFFEE. HAK CIPTA DILINDUNGI."
     }
   },
+  "storiesPage": {
+    "title": "Stories & Inspirasi",
+    "subtitle": "Temukan cerita menarik, tips, dan inspirasi seputar kopi dari kami",
+    "readMore": "Baca Selengkapnya",
+    "backToStories": "Kembali ke Stories",
+    "noStories": "Belum ada cerita",
+    "noStoriesDesc": "Nantikan cerita terbaru dari kami",
+    "browseProducts": "Lihat Produk",
+    "interested": "Tertarik dengan cerita kami?",
+    "readOtherStories": "Baca Stories Lainnya",
+    "viewOurProducts": "Lihat Produk Kami",
+    "publishedAt": "Dipublikasikan pada"
+  },
   "cart": {
     "title": "Keranjang Belanja",
     "summaryTitle": "Ringkasan Belanja",

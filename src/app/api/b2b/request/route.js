@@ -78,8 +78,6 @@ export async function POST(request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating B2B request:", error);
-
     if (error.message.includes("already exists")) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
@@ -117,7 +115,6 @@ export async function GET(request) {
       data: b2bRequest,
     });
   } catch (error) {
-    console.error("Error fetching B2B request:", error);
     return NextResponse.json(
       { error: "Failed to fetch B2B request" },
       { status: 500 }

@@ -12,14 +12,11 @@ export async function GET() {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      console.log("❌ GET cart: Unauthorized");
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
-
-    console.log("📦 Fetching cart for user:", session.user.id);
 
     // Get user discount for B2B users
     const userDiscount =
@@ -31,8 +28,6 @@ export async function GET() {
       session.user.id,
       userDiscount
     );
-
-    console.log("📦 Cart result:", result);
 
     // getUserCart returns { success, data: { items, subtotal, ... } }
     if (result.success) {
@@ -47,7 +42,6 @@ export async function GET() {
       });
     }
   } catch (error) {
-    console.error("❌ Error fetching cart:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }
@@ -103,7 +97,6 @@ export async function POST(request) {
       data: cartItem,
     });
   } catch (error) {
-    console.error("Error adding to cart:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }
@@ -133,7 +126,6 @@ export async function DELETE() {
       message: "Keranjang berhasil dikosongkan",
     });
   } catch (error) {
-    console.error("Error clearing cart:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }

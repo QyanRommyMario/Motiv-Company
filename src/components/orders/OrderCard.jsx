@@ -240,11 +240,18 @@ export default function OrderCard({ order }) {
               <button
                 onClick={openConfirmModal}
                 disabled={isCompleting}
-                className={`flex-1 sm:flex-none px-5 py-3 bg-[#1A1A1A] text-white hover:bg-black transition-all duration-300 text-sm font-bold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 ${
+                className={`flex-1 sm:flex-none px-5 py-3 bg-[#1A1A1A] text-white hover:bg-black transition-all duration-300 text-sm font-bold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 relative min-w-[140px] ${
                   isCompleting ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
-                {isCompleting ? t("processing") : t("completeOrder")}
+                <span className={isCompleting ? "invisible" : "visible"}>
+                  {t("completeOrder")}
+                </span>
+                {isCompleting && (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  </span>
+                )}
               </button>
             )}
             <button

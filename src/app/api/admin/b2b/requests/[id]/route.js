@@ -31,7 +31,6 @@ export async function GET(request, { params }) {
       data: b2bRequest,
     });
   } catch (error) {
-    console.error("Error fetching B2B request:", error);
     return NextResponse.json(
       { error: "Failed to fetch B2B request" },
       { status: 500 }
@@ -70,7 +69,6 @@ export async function DELETE(request, { params }) {
       message: "B2B request deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting B2B request:", error);
     return NextResponse.json(
       { error: "Failed to delete B2B request" },
       { status: 500 }

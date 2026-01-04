@@ -44,14 +44,9 @@ export default function CheckoutPage() {
 
   const initializeCheckout = async () => {
     try {
-      console.log("🔄 Initializing checkout, current items:", items.length);
       await syncWithServer();
-      setTimeout(() => {
-        console.log("✅ Cart synced, items after sync:", items.length, items);
-      }, 100);
       setLoading(false);
     } catch (err) {
-      console.error("❌ Error loading checkout:", err);
       setError(t("loadCheckoutError"));
       setLoading(false);
     }
@@ -110,14 +105,11 @@ export default function CheckoutPage() {
         notes: notes,
       };
 
-      console.log("💾 Saving checkout data:", orderData);
-
       // Store order data in sessionStorage for payment page
       sessionStorage.setItem("checkoutData", JSON.stringify(orderData));
 
       router.push("/checkout/payment");
     } catch (err) {
-      console.error("Error creating order:", err);
       setError(t("createOrderError"));
       setProcessing(false);
     }
@@ -271,7 +263,7 @@ export default function CheckoutPage() {
                   fullWidth
                   loading={processing}
                 >
-                  {processing ? t("processing") : t("proceedPayment")}
+                  {t("proceedPayment")}
                 </Button>
 
                 <button

@@ -41,7 +41,7 @@ export default function B2BRegistrationPage() {
         setExistingRequest(data.data);
       }
     } catch (error) {
-      console.error("Error checking B2B request:", error);
+      // Error handled silently
     } finally {
       setCheckingStatus(false);
     }
@@ -93,7 +93,6 @@ export default function B2BRegistrationPage() {
         });
       }
     } catch (error) {
-      console.error("Error submitting B2B request:", error);
       setAlert({
         type: "error",
         message: "Terjadi kesalahan saat mengirim pengajuan",
@@ -346,9 +345,16 @@ export default function B2BRegistrationPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#1A1A1A] text-white py-3 px-6 font-medium hover:bg-black transition-colors disabled:bg-[#9CA3AF] disabled:cursor-not-allowed"
+                className="w-full bg-[#1A1A1A] text-white py-3 px-6 font-medium hover:bg-black transition-colors disabled:bg-[#9CA3AF] disabled:cursor-not-allowed relative min-h-12"
               >
-                {loading ? "Mengirim..." : "Kirim Pengajuan"}
+                <span className={loading ? "invisible" : "visible"}>
+                  Kirim Pengajuan
+                </span>
+                {loading && (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  </span>
+                )}
               </button>
             </div>
           </form>

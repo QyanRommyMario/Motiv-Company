@@ -93,7 +93,6 @@ export default function CreateProductPage() {
         alert(data.message || "Failed to upload image");
       }
     } catch (error) {
-      console.error("Error uploading file:", error);
       alert("Failed to upload image");
     } finally {
       setUploading(false);
@@ -193,8 +192,6 @@ export default function CreateProductPage() {
         variants: validVariants,
       };
 
-      console.log("📤 Sending product data:", payload);
-
       const response = await fetch("/api/admin/products", {
         method: "POST",
         headers: {
@@ -204,17 +201,14 @@ export default function CreateProductPage() {
       });
 
       const data = await response.json();
-      console.log("📥 Response:", data);
 
       if (response.ok) {
         alert(t("productCreated"));
         router.push("/admin/products");
       } else {
-        console.error("❌ Error response:", data);
         alert(data.message || t("createFailed"));
       }
     } catch (error) {
-      console.error("❌ Error creating product:", error);
       alert(t("errorOccurred") + ": " + error.message);
     } finally {
       setLoading(false);
@@ -603,10 +597,15 @@ export default function CreateProductPage() {
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed relative min-h-12"
               disabled={loading || uploading}
             >
-              {loading ? t("saving") : t("addProduct")}
+              <span className={loading ? "invisible" : "visible"}>{t("addProduct")}</span>
+              {loading && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                </span>
+              )}
             </button>
           </div>
         </form>

@@ -52,7 +52,7 @@ function AddressesContent() {
         setShowForm(true);
       }
     } catch (err) {
-      console.error("Error fetching address:", err);
+      // Error handled silently
     }
   };
 
@@ -111,7 +111,6 @@ function AddressesContent() {
         alert(data.message || t("saveError"));
       }
     } catch (err) {
-      console.error("Error saving address:", err);
       alert(t("saveError"));
     }
   };

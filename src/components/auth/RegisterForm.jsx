@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Alert from "@/components/ui/Alert";
-import Loading from "@/components/ui/Loading";
 
 export default function RegisterForm() {
   const t = useTranslations("auth");
@@ -138,15 +137,9 @@ export default function RegisterForm() {
         variant="primary"
         className="w-full mt-2"
         disabled={isLoading}
+        loading={isLoading}
       >
-        {isLoading ? (
-          <span className="flex items-center justify-center">
-            <Loading size="sm" />
-            <span className="ml-2">{t("registering")}</span>
-          </span>
-        ) : (
-          t("registerButton")
-        )}
+        {t("registerButton")}
       </Button>
     </form>
   );

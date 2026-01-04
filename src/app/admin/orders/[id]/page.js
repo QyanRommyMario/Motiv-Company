@@ -41,31 +41,24 @@ export default function AdminOrderDetailPage() {
   const fetchOrderDetail = async () => {
     try {
       setLoading(true);
-      console.log("🔍 Fetching order detail:", orderId);
 
       const response = await fetch(`/api/admin/orders/${orderId}`);
-      console.log("📡 Response status:", response.status);
 
       if (response.ok) {
         const result = await response.json();
-        console.log("📦 Order detail:", result);
         if (result.success) {
           setOrder(result.data);
           setNewStatus(result.data.status);
           setTrackingNumber(result.data.trackingNumber || "");
         } else {
-          console.error("❌ API returned success=false");
           alert("Gagal memuat detail order");
           router.push("/admin/orders");
         }
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("❌ Failed to fetch order:", response.status, errorData);
         alert("Gagal memuat detail order");
         router.push("/admin/orders");
       }
     } catch (error) {
-      console.error("❌ Error fetching order:", error);
       alert("Terjadi kesalahan: " + error.message);
       router.push("/admin/orders");
     } finally {
@@ -76,7 +69,6 @@ export default function AdminOrderDetailPage() {
   const handleUpdateStatus = async () => {
     try {
       setUpdatingStatus(true);
-      console.log("🔄 Updating order status:", { newStatus, trackingNumber });
 
       const response = await fetch(`/api/admin/orders/${orderId}`, {
         method: "PATCH",
@@ -88,17 +80,13 @@ export default function AdminOrderDetailPage() {
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log("✅ Order updated:", result);
         alert("Status berhasil diupdate!");
         fetchOrderDetail();
       } else {
         const data = await response.json();
-        console.error("❌ Update failed:", data);
         alert(data.message || "Gagal update status");
       }
     } catch (error) {
-      console.error("❌ Error updating status:", error);
       alert("Terjadi kesalahan");
     } finally {
       setUpdatingStatus(false);
@@ -450,9 +438,14 @@ export default function AdminOrderDetailPage() {
               <button
                 onClick={handleUpdateStatus}
                 disabled={updatingStatus || newStatus === order.status}
-                className="w-full px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
+                className="w-full px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider relative min-h-12"
               >
-                {updatingStatus ? "Mengupdate..." : "Update Status"}
+                <span className={updatingStatus ? "invisible" : "visible"}>Update Status</span>
+                {updatingStatus && (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  </span>
+                )}
               </button>
             </div>
           </div>

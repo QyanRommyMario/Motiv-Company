@@ -56,7 +56,7 @@ function OrderListContent() {
         setOrders([]);
       }
     } catch (error) {
-      console.error("Gagal memuat pesanan:", error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }

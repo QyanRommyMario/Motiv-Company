@@ -45,7 +45,6 @@ export default function AdminVouchersPage() {
         });
       }
     } catch (error) {
-      console.error("Error fetching vouchers:", error);
       setAlert({ type: "error", message: "Failed to fetch vouchers" });
     } finally {
       setLoading(false);
@@ -70,7 +69,6 @@ export default function AdminVouchersPage() {
         });
       }
     } catch (error) {
-      console.error("Error toggling voucher:", error);
       setAlert({ type: "error", message: "Failed to toggle voucher status" });
     }
   };
@@ -94,7 +92,6 @@ export default function AdminVouchersPage() {
         });
       }
     } catch (error) {
-      console.error("Error deleting voucher:", error);
       setAlert({ type: "error", message: "Failed to delete voucher" });
     }
   };
@@ -177,7 +174,7 @@ export default function AdminVouchersPage() {
         <div className="bg-[#EFF6FF] border-l-4 border-[#3B82F6] p-6">
           <div className="flex items-start gap-3">
             <svg
-              className="w-6 h-6 text-[#1E40AF] flex-shrink-0 mt-0.5"
+              className="w-6 h-6 text-[#1E40AF] shrink-0 mt-0.5"
               fill="currentColor"
               viewBox="0 0 20 20"
             >

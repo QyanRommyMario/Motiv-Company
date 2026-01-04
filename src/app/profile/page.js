@@ -30,7 +30,7 @@ export default function ProfilePage() {
           : 0,
       });
     } catch (error) {
-      console.error("Profile stats error:", error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }

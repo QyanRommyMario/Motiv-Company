@@ -35,7 +35,6 @@ export async function GET(request, { params }) {
 
     return NextResponse.json({ success: true, story });
   } catch (error) {
-    console.error("Error fetching story:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch story" },
       { status: 500 }
@@ -73,7 +72,6 @@ export async function PUT(request, { params }) {
 
     return NextResponse.json({ story });
   } catch (error) {
-    console.error("Error updating story:", error);
     return NextResponse.json(
       { error: "Failed to update story" },
       { status: 500 }
@@ -98,7 +96,6 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json({ message: "Story deleted successfully" });
   } catch (error) {
-    console.error("Error deleting story:", error);
     return NextResponse.json(
       { error: "Failed to delete story" },
       { status: 500 }

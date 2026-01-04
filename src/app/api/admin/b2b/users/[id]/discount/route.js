@@ -44,7 +44,6 @@ export async function PATCH(request, { params }) {
       message: "B2B user discount updated successfully",
     });
   } catch (error) {
-    console.error("Error updating B2B user discount:", error);
     return NextResponse.json(
       { error: "Failed to update B2B user discount" },
       { status: 500 }

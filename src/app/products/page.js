@@ -41,7 +41,6 @@ function ProductsContent() {
         setError(data.message || "Failed to load products");
       }
     } catch (err) {
-      console.error("Error fetching products:", err);
       setError("Failed to load products. Please try again.");
     } finally {
       setLoading(false);
@@ -59,7 +58,7 @@ function ProductsContent() {
       {/* Skip to main content link */}
       <a
         href="#products-section"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[200] focus:bg-white focus:px-4 focus:py-2 focus:text-[#1A1A1A] focus:font-medium focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-200 focus:bg-white focus:px-4 focus:py-2 focus:text-[#1A1A1A] focus:font-medium focus:shadow-lg"
       >
         Skip to products
       </a>

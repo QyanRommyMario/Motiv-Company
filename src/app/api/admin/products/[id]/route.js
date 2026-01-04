@@ -36,7 +36,6 @@ export async function GET(request, { params }) {
       product,
     });
   } catch (error) {
-    console.error("Get product error:", error);
     return NextResponse.json(
       { success: false, message: "Gagal mengambil data produk" },
       { status: 500 }
@@ -96,7 +95,6 @@ export async function PUT(request, { params }) {
       product,
     });
   } catch (error) {
-    console.error("Update product error:", error);
     return NextResponse.json(
       { success: false, message: "Gagal mengupdate produk" },
       { status: 500 }
@@ -134,7 +132,6 @@ export async function DELETE(request, { params }) {
       message: "Produk berhasil dihapus",
     });
   } catch (error) {
-    console.error("Delete product error:", error);
     return NextResponse.json(
       { success: false, message: "Gagal menghapus produk" },
       { status: 500 }

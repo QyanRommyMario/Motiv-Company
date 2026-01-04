@@ -18,7 +18,6 @@ export async function GET() {
     // Return NextAuth standard format
     return NextResponse.json(session);
   } catch (error) {
-    console.error("Session error:", error);
     return NextResponse.json({});
   }
 }

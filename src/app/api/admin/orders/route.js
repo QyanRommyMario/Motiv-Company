@@ -27,12 +27,6 @@ export async function GET(request) {
 
     const skip = (page - 1) * limit;
 
-    console.log("🔍 Admin fetching orders with filters:", {
-      status,
-      page,
-      limit,
-    });
-
     // Build query
     let query = supabase
       .from("Order")
@@ -59,8 +53,6 @@ export async function GET(request) {
 
     if (error) throw error;
 
-    console.log(`✅ Found ${orders?.length || 0} orders (total: ${total})`);
-
     return NextResponse.json({
       success: true,
       orders: orders || [],
@@ -72,7 +64,6 @@ export async function GET(request) {
       },
     });
   } catch (error) {
-    console.error("❌ Admin orders fetch error:", error);
     return NextResponse.json(
       { success: false, message: "Gagal mengambil data orders" },
       { status: 500 }

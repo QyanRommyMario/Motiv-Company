@@ -23,7 +23,6 @@ export async function GET(request) {
       data: stats,
     });
   } catch (error) {
-    console.error("Error fetching B2B stats:", error);
     return NextResponse.json(
       { error: "Failed to fetch B2B statistics" },
       { status: 500 }

@@ -26,7 +26,6 @@ export async function GET() {
       data: addresses,
     });
   } catch (error) {
-    console.error("Error fetching addresses:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }
@@ -135,7 +134,6 @@ export async function POST(request) {
       data: newAddress,
     });
   } catch (error) {
-    console.error("Error creating address:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }

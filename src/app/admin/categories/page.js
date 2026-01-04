@@ -43,7 +43,7 @@ export default function AdminCategoriesPage() {
         calculateStatistics(allProducts);
       }
     } catch (error) {
-      console.error("Error fetching products:", error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
@@ -179,7 +179,7 @@ export default function AdminCategoriesPage() {
         <div className="bg-[#FEF3C7] border-l-4 border-[#F59E0B] p-6">
           <div className="flex items-start gap-3">
             <svg
-              className="w-6 h-6 text-[#92400E] flex-shrink-0 mt-0.5"
+              className="w-6 h-6 text-[#92400E] shrink-0 mt-0.5"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -317,7 +317,7 @@ export default function AdminCategoriesPage() {
                           className="border border-[#E5E7EB] hover:border-[#1A1A1A] transition-all p-4"
                         >
                           <div className="flex items-start gap-3">
-                            <div className="w-16 h-16 bg-[#F3F4F6] flex-shrink-0 flex items-center justify-center">
+                            <div className="w-16 h-16 bg-[#F3F4F6] shrink-0 flex items-center justify-center">
                               {product.images && product.images[0] ? (
                                 <img
                                   src={product.images[0]}

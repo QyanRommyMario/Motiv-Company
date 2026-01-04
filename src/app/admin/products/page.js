@@ -37,7 +37,7 @@ export default function AdminProductsPage() {
         setProducts(data.products || []);
       }
     } catch (error) {
-      console.error("Error fetching products:", error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
@@ -68,7 +68,7 @@ export default function AdminProductsPage() {
         alert(data.message || "Error");
       }
     } catch (error) {
-      console.error("Error deleting product:", error);
+      // Error handled silently
     } finally {
       setDeleting(false);
     }
@@ -376,10 +376,15 @@ export default function AdminProductsPage() {
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="flex-1 px-6 py-3 bg-[#DC2626] text-white hover:bg-[#B91C1C] transition-colors disabled:opacity-50 font-semibold"
+                  className="flex-1 px-6 py-3 bg-[#DC2626] text-white hover:bg-[#B91C1C] transition-colors disabled:opacity-50 font-semibold relative min-h-12"
                   disabled={deleting}
                 >
-                  {deleting ? t("deleting") : t("confirmDelete")}
+                  <span className={deleting ? "invisible" : "visible"}>{t("confirmDelete")}</span>
+                  {deleting && (
+                    <span className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    </span>
+                  )}
                 </button>
               </div>
             </div>

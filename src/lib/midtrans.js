@@ -76,7 +76,6 @@ export class MidtransService {
         redirect_url: transaction.redirect_url,
       };
     } catch (error) {
-      console.error("❌ Midtrans API Error:", error.message);
       throw error;
     }
   }
@@ -85,7 +84,6 @@ export class MidtransService {
     try {
       return await core.transaction.status(orderId);
     } catch (error) {
-      console.error("Midtrans Status Error:", error);
       throw error;
     }
   }

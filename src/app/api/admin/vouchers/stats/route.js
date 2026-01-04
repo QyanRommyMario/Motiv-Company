@@ -24,7 +24,6 @@ export async function GET(request) {
       data: stats,
     });
   } catch (error) {
-    console.error("Error fetching voucher stats:", error);
     return NextResponse.json(
       { error: "Failed to fetch voucher statistics" },
       { status: 500 }

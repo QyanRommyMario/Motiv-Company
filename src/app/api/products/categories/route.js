@@ -16,7 +16,6 @@ export async function GET() {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Categories API error:", error);
     return NextResponse.json(
       { success: false, message: "Terjadi kesalahan pada server" },
       { status: 500 }

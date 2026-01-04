@@ -1,17 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import Navbar from "@/components/layout/Navbar";
 import Loading from "@/components/ui/Loading";
 import Link from "next/link";
 
 export default function StoriesPage() {
+  const t = useTranslations("storiesPage");
+  const locale = useLocale();
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStories();
-  }, []);
+  }, [locale]);
 
   const fetchStories = async () => {
     try {
@@ -19,7 +22,7 @@ export default function StoriesPage() {
       const data = await response.json();
       setStories(data.stories || []);
     } catch (error) {
-      console.error("Error fetching stories:", error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
@@ -27,7 +30,7 @@ export default function StoriesPage() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("id-ID", {
+    return date.toLocaleDateString(locale === "id" ? "id-ID" : "en-US", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -41,11 +44,11 @@ export default function StoriesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-32 pb-12">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            Stories & Inspirasi
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4" suppressHydrationWarning>
+            {t("title")}
           </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Temukan cerita menarik, tips, dan inspirasi seputar kopi dari kami
+          <p className="text-gray-600 max-w-2xl mx-auto" suppressHydrationWarning>
+            {t("subtitle")}
           </p>
         </div>
 
@@ -75,7 +78,7 @@ export default function StoriesPage() {
 
                   {/* Content */}
                   <div className="p-6">
-                    <time className="text-xs sm:text-sm text-gray-500">
+                    <time className="text-xs sm:text-sm text-gray-500" suppressHydrationWarning>
                       {formatDate(story.createdAt)}
                     </time>
                     <h2 className="text-lg sm:text-xl font-bold text-gray-900 mt-2 mb-3 line-clamp-2 group-hover:text-gray-700 transition-colors">
@@ -84,8 +87,8 @@ export default function StoriesPage() {
                     <p className="text-sm sm:text-base text-gray-600 line-clamp-3 mb-4">
                       {story.content}
                     </p>
-                    <div className="flex items-center text-gray-900 group-hover:text-gray-700 font-medium text-sm sm:text-base transition-colors">
-                      Baca Selengkapnya
+                    <div className="flex items-center text-gray-900 group-hover:text-gray-700 font-medium text-sm sm:text-base transition-colors" suppressHydrationWarning>
+                      {t("readMore")}
                       <svg
                         className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"
                         fill="none"
@@ -111,15 +114,15 @@ export default function StoriesPage() {
         {!loading && stories.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📖</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No stories available yet
+            <h3 className="text-xl font-semibold text-gray-900 mb-2" suppressHydrationWarning>
+              {t("noStories")}
             </h3>
-            <p className="text-gray-600 mb-6">
-              Check back soon for our latest coffee stories
+            <p className="text-gray-600 mb-6" suppressHydrationWarning>
+              {t("noStoriesDesc")}
             </p>
             <Link href="/products">
-              <button className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
-                Browse Products
+              <button className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors" suppressHydrationWarning>
+                {t("browseProducts")}
               </button>
             </Link>
           </div>

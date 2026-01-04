@@ -175,7 +175,6 @@ export async function POST(request) {
       try {
         midtransData = await MidtransService.createTransaction(fullOrder);
       } catch (midtransError) {
-        console.error("❌ Midtrans Error:", midtransError.message);
         // Hapus order agar stok kembali jika gagal connect
         await supabase.from("Order").delete().eq("id", order.id);
 
@@ -212,7 +211,6 @@ export async function POST(request) {
       });
     }
   } catch (error) {
-    console.error("Order Error:", error);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }

@@ -13,8 +13,6 @@ export async function POST(request) {
   try {
     const notification = await request.json();
 
-    console.log("Midtrans notification received:", notification);
-
     // 1. Verifikasi Signature
     const serverKey = process.env.MIDTRANS_SERVER_KEY;
     const orderId = notification.order_id;
@@ -27,7 +25,6 @@ export async function POST(request) {
       .digest("hex");
 
     if (signatureKey !== notification.signature_key) {
-      console.error("Invalid signature");
       return NextResponse.json(
         { success: false, message: "Invalid signature" },
         { status: 403 }
@@ -40,7 +37,6 @@ export async function POST(request) {
     );
 
     if (!transaction) {
-      console.error("Transaction not found:", notification.order_id);
       return NextResponse.json(
         { success: false, message: "Transaction not found" },
         { status: 404 }
@@ -65,39 +61,26 @@ export async function POST(request) {
         : null,
     });
 
-    // 5. Update Status Order (PENTING: Handle Restock)
+    // 5. Update Status Order
     if (paymentStatus === "PAID") {
-      // Jika bayar sukses -> PROCESSING
       await OrderModel.updatePaymentStatus(transaction.orderId, "PAID");
 
-      // Cek agar tidak mendowngrade status jika sudah SHIPPED dll
       const currentOrder = await OrderModel.findById(transaction.orderId);
       if (currentOrder.status === "PENDING") {
         await OrderModel.updateStatus(transaction.orderId, "PROCESSING");
       }
     } else if (paymentStatus === "FAILED" || paymentStatus === "EXPIRED") {
-      // Jika gagal/expired -> CANCELLED
-      // OrderModel.updateStatus("CANCELLED") akan otomatis mengembalikan stok (increment)
-      // sesuai logika di file OrderModel.js yang sudah Anda miliki.
-
       await OrderModel.updatePaymentStatus(transaction.orderId, paymentStatus);
       await OrderModel.updateStatus(transaction.orderId, "CANCELLED", {
         cancellationReason: `Payment ${paymentStatus} by System (Midtrans)`,
       });
-
-      console.log(
-        `Order ${transaction.orderNumber} dibatalkan & stok dikembalikan.`
-      );
     }
-
-    // Status 'PENDING' dibiarkan saja (menunggu user bayar)
 
     return NextResponse.json({
       success: true,
       message: "Notification processed",
     });
   } catch (error) {
-    console.error("Payment notification error:", error);
     return NextResponse.json(
       {
         success: false,

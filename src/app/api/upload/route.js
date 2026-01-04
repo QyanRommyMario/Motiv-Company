@@ -84,7 +84,6 @@ export async function POST(request) {
       });
 
     if (error) {
-      console.error("Supabase upload error:", error);
       return NextResponse.json(
         {
           success: false,
@@ -107,7 +106,6 @@ export async function POST(request) {
       path: data.path,
     });
   } catch (error) {
-    console.error("Upload error:", error);
     return NextResponse.json(
       {
         success: false,

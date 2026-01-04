@@ -82,7 +82,6 @@ const useCartStore = create(
             set({ error: data.message, isLoading: false });
           }
         } catch (error) {
-          console.error("Error syncing cart:", error);
           set({ error: "Gagal sinkronisasi keranjang", isLoading: false });
         }
       },
@@ -108,7 +107,6 @@ const useCartStore = create(
             set({ isLoading: false });
           }
         } catch (error) {
-          console.error("Error saving cart:", error);
           set({ error: "Gagal menyimpan keranjang", isLoading: false });
         }
       },

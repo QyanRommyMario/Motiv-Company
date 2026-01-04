@@ -42,7 +42,6 @@ export default function ProductDetailPage() {
         setError(data.message || t("productNotFound"));
       }
     } catch (error) {
-      console.error("Error fetching product:", error);
       setError(t("errorLoadingProduct"));
     } finally {
       setLoading(false);
@@ -88,7 +87,7 @@ export default function ProductDetailPage() {
       const final = filtered.slice(0, 3);
       setRelatedProducts(final);
     } catch (error) {
-      console.error("Error fetching related products:", error);
+      // Error handled silently
     }
   };
 
@@ -166,7 +165,7 @@ export default function ProductDetailPage() {
                     href={`/products/${relatedProduct.id}`}
                     className="group bg-white border border-[#E5E7EB] overflow-hidden hover:border-[#1A1A1A] hover:shadow-lg transition-all"
                   >
-                    <div className="aspect-[4/3] relative bg-[#F9FAFB] overflow-hidden">
+                    <div className="aspect-4/3 relative bg-[#F9FAFB] overflow-hidden">
                       {relatedProduct.images &&
                       relatedProduct.images.length > 0 ? (
                         <img

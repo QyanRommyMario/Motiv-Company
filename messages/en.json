@@ -92,6 +92,19 @@
       "copyright": "© 2025 MOTIV COFFEE. ALL RIGHTS RESERVED."
     }
   },
+  "storiesPage": {
+    "title": "Stories & Inspiration",
+    "subtitle": "Discover interesting stories, tips, and inspiration about coffee from us",
+    "readMore": "Read More",
+    "backToStories": "Back to Stories",
+    "noStories": "No stories available yet",
+    "noStoriesDesc": "Check back soon for our latest coffee stories",
+    "browseProducts": "Browse Products",
+    "interested": "Interested in our stories?",
+    "readOtherStories": "Read Other Stories",
+    "viewOurProducts": "View Our Products",
+    "publishedAt": "Published on"
+  },
   "cart": {
     "title": "Shopping Cart",
     "summaryTitle": "Order Summary",

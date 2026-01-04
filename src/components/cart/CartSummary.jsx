@@ -48,7 +48,7 @@ export default function CartSummary({ items, isB2B = false }) {
       </div>
 
       {isB2B && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-3 mt-4">
+        <div className="bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-100 p-3 mt-4">
           <p className="text-sm text-blue-700 font-medium">{t("b2bMessage")}</p>
         </div>
       )}
@@ -61,30 +61,31 @@ export default function CartSummary({ items, isB2B = false }) {
       <button
         onClick={handleCheckout}
         disabled={items.length === 0 || isProcessing}
-        className="w-full mt-5 py-4 bg-[#1A1A1A] text-white text-sm uppercase tracking-widest font-medium hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+        className="w-full mt-5 py-4 bg-[#1A1A1A] text-white text-sm uppercase tracking-widest font-medium hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-all relative min-h-14"
       >
-        {isProcessing ? (
-          <>
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            {t("processing")}
-          </>
-        ) : (
-          <>
-            {t("checkout")}
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M14 5l7 7m0 0l-7 7m7-7H3"
-              />
-            </svg>
-          </>
+        {/* Invisible content to maintain width */}
+        <span className={isProcessing ? "invisible" : "visible flex items-center justify-center gap-2"}>
+          {t("checkout")}
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M14 5l7 7m0 0l-7 7m7-7H3"
+            />
+          </svg>
+        </span>
+        
+        {/* Loading spinner overlay */}
+        {isProcessing && (
+          <span className="absolute inset-0 flex items-center justify-center">
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          </span>
         )}
       </button>
 

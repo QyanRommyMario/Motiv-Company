@@ -38,7 +38,7 @@ export default function AdminStoriesPage() {
       const data = await response.json();
       setStories(data.stories || []);
     } catch (error) {
-      console.error("Error fetching stories:", error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
@@ -78,7 +78,6 @@ export default function AdminStoriesPage() {
         alert(data.message || "Failed to upload image");
       }
     } catch (error) {
-      console.error("Error uploading file:", error);
       alert("Failed to upload image");
     } finally {
       setUploading(false);
@@ -114,7 +113,7 @@ export default function AdminStoriesPage() {
         });
       }
     } catch (error) {
-      console.error("Error saving story:", error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
@@ -140,7 +139,7 @@ export default function AdminStoriesPage() {
       await fetch(`/api/stories/${id}`, { method: "DELETE" });
       fetchStories();
     } catch (error) {
-      console.error("Error deleting story:", error);
+      // Error handled silently
     }
   };
 
@@ -393,13 +392,16 @@ export default function AdminStoriesPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 bg-[#1A1A1A] text-white py-3 hover:bg-black transition-colors font-medium disabled:opacity-50"
+                    className="flex-1 bg-[#1A1A1A] text-white py-3 hover:bg-black transition-colors font-medium disabled:opacity-50 relative min-h-12"
                   >
-                    {loading
-                      ? "Saving..."
-                      : editingStory
-                      ? "Update Story"
-                      : "Create Story"}
+                    <span className={loading ? "invisible" : "visible"}>
+                      {editingStory ? "Update Story" : "Create Story"}
+                    </span>
+                    {loading && (
+                      <span className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      </span>
+                    )}
                   </button>
                   <button
                     type="button"

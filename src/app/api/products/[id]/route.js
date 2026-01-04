@@ -29,7 +29,6 @@ export async function GET(request, { params }) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Product detail API error:", error);
     return NextResponse.json(
       { success: false, message: "Terjadi kesalahan pada server" },
       { status: 500 }

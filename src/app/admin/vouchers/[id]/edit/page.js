@@ -53,7 +53,6 @@ export default function EditVoucherPage({ params }) {
         setTimeout(() => router.push("/admin/vouchers"), 2000);
       }
     } catch (error) {
-      console.error("Error fetching voucher:", error);
       setAlert({ type: "error", message: "Gagal memuat data voucher" });
     } finally {
       setLoading(false);
@@ -150,7 +149,6 @@ export default function EditVoucherPage({ params }) {
         });
       }
     } catch (error) {
-      console.error("Error updating voucher:", error);
       setAlert({
         type: "error",
         message: "Terjadi kesalahan saat memperbarui voucher",
@@ -383,9 +381,14 @@ export default function EditVoucherPage({ params }) {
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-2 bg-coffee-600 text-white rounded-lg hover:bg-coffee-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-coffee-600 text-white rounded-lg hover:bg-coffee-700 disabled:bg-gray-400 disabled:cursor-not-allowed relative min-h-10 min-w-[150px]"
             >
-              {saving ? "Menyimpan..." : "Simpan Perubahan"}
+              <span className={saving ? "invisible" : "visible"}>Simpan Perubahan</span>
+              {saving && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                </span>
+              )}
             </button>
           </div>
         </form>

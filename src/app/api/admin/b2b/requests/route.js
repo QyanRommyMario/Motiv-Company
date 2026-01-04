@@ -30,7 +30,6 @@ export async function GET(request) {
       data: requests,
     });
   } catch (error) {
-    console.error("Error fetching B2B requests:", error);
     return NextResponse.json(
       { error: "Failed to fetch B2B requests" },
       { status: 500 }

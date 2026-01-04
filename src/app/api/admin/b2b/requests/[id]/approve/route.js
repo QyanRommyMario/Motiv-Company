@@ -36,8 +36,6 @@ export async function POST(request, { params }) {
       message: "B2B request approved successfully",
     });
   } catch (error) {
-    console.error("Error approving B2B request:", error);
-
     if (
       error.message.includes("not found") ||
       error.message.includes("already processed")

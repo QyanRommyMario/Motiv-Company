@@ -21,10 +21,6 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    console.log(
-      "📦 Creating product with data:",
-      JSON.stringify(body, null, 2)
-    );
 
     const {
       name,
@@ -37,7 +33,6 @@ export async function POST(request) {
 
     // Validation
     if (!name || !description || !category) {
-      console.log("❌ Validation failed: Missing required fields");
       return NextResponse.json(
         { success: false, message: "Data tidak lengkap" },
         { status: 400 }
@@ -45,14 +40,11 @@ export async function POST(request) {
     }
 
     if (!variants || variants.length === 0) {
-      console.log("❌ Validation failed: No variants provided");
       return NextResponse.json(
         { success: false, message: "Minimal 1 varian diperlukan" },
         { status: 400 }
       );
     }
-
-    console.log("✅ Validation passed, creating product...");
 
     // Create product
     const product = await ProductModel.create({
@@ -62,14 +54,12 @@ export async function POST(request) {
       images: images || [],
       features: features || [],
       variants: variants.map((v) => ({
-        name: v.name || v.size, // Support both 'name' and 'size' from frontend
+        name: v.name || v.size,
         price: parseFloat(v.price),
         stock: parseInt(v.stock),
-        sku: v.sku || `${name.substring(0, 3).toUpperCase()}-${v.name || v.size}-${Date.now()}`, // Generate SKU if not provided
+        sku: v.sku || `${name.substring(0, 3).toUpperCase()}-${v.name || v.size}-${Date.now()}`,
       })),
     });
-
-    console.log("✅ Product created successfully:", product.id);
 
     return NextResponse.json(
       {
@@ -80,9 +70,6 @@ export async function POST(request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("❌ Create product error:", error);
-    console.error("Error details:", error.message);
-    console.error("Error stack:", error.stack);
     return NextResponse.json(
       { success: false, message: error.message || "Gagal membuat produk" },
       { status: 500 }
@@ -133,7 +120,6 @@ export async function GET(request) {
       },
     });
   } catch (error) {
-    console.error("Get products error:", error);
     return NextResponse.json(
       { success: false, message: "Gagal mengambil data produk" },
       { status: 500 }

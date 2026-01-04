@@ -12,7 +12,6 @@ import { useTranslations } from "next-intl";
 import ProductVariantSelector from "./ProductVariantSelector";
 import Button from "@/components/ui/Button";
 import Alert from "@/components/ui/Alert";
-import Loading from "@/components/ui/Loading";
 
 export default function ProductDetail({ product }) {
   const t = useTranslations("productDetail");
@@ -56,12 +55,6 @@ export default function ProductDetail({ product }) {
     setAlert(null);
 
     try {
-      console.log("🛒 Attempting to add to cart:", {
-        variantId: selectedVariant.id,
-        quantity,
-        productName: product.name,
-      });
-
       const response = await fetch("/api/cart/add", {
         method: "POST",
         headers: {
@@ -73,10 +66,7 @@ export default function ProductDetail({ product }) {
         }),
       });
 
-      console.log("📡 Response status:", response.status);
-
       const data = await response.json();
-      console.log("📦 Response data:", data);
 
       if (data.success) {
         setAlert({
@@ -90,7 +80,6 @@ export default function ProductDetail({ product }) {
         setAlert({ type: "error", message: data.message });
       }
     } catch (error) {
-      console.error("❌ Add to cart error:", error);
       setAlert({
         type: "error",
         message: t("addToCartError"),
@@ -248,13 +237,9 @@ export default function ProductDetail({ product }) {
           variant="primary"
           className="w-full text-base sm:text-lg py-3 sm:py-4"
           disabled={!selectedVariant || selectedVariant.stock === 0 || isAdding}
+          loading={isAdding}
         >
-          {isAdding ? (
-            <span className="flex items-center justify-center">
-              <Loading size="sm" />
-              <span className="ml-2">{t("addingToCart")}</span>
-            </span>
-          ) : selectedVariant && selectedVariant.stock > 0 ? (
+          {selectedVariant && selectedVariant.stock > 0 ? (
             hasB2BDiscount ? (
               `${t("addToCart")} - Rp ${(b2bPrice * quantity).toLocaleString(
                 "id-ID"

@@ -26,7 +26,6 @@ export async function POST(request) {
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
-    console.error("Register error:", error);
     return NextResponse.json(
       { success: false, message: "Terjadi kesalahan pada server" },
       { status: 500 }

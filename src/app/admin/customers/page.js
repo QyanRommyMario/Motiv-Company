@@ -26,7 +26,7 @@ export default function AdminCustomersPage() {
         setCustomers(data.customers || []);
       }
     } catch (error) {
-      console.error("Error fetching customers:", error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }

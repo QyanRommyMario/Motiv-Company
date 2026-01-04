@@ -42,23 +42,40 @@ export default function VouchersPage() {
         });
       }
     } catch (error) {
-      console.error("Error fetching vouchers:", error);
       setAlert({ type: "error", message: "Failed to fetch vouchers" });
     } finally {
       setLoading(false);
     }
   };
 
-  const copyVoucherCode = (code) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCode(code);
-    setAlert({
-      type: "success",
-      message: t("codeCopied", { code }),
-    });
-    setTimeout(() => {
-      setCopiedCode(null);
-    }, 2000);
+  const copyVoucherCode = async (code) => {
+    if (!code) return;
+
+    try {
+      // Check if clipboard API is available
+      if (!navigator?.clipboard?.writeText) {
+        setAlert({
+          type: "error",
+          message: "Clipboard tidak tersedia. Silakan copy manual: " + code,
+        });
+        return;
+      }
+
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(code);
+      setAlert({
+        type: "success",
+        message: t("codeCopied", { code }),
+      });
+      setTimeout(() => {
+        setCopiedCode(null);
+      }, 2000);
+    } catch (error) {
+      setAlert({
+        type: "error",
+        message: "Gagal menyalin kode. Silakan copy manual: " + code,
+      });
+    }
   };
 
   const formatDate = (dateString) => {

@@ -72,10 +72,11 @@ export default function LoginForm() {
       <Button
         type="submit"
         disabled={isLoading}
+        loading={isLoading}
         className="w-full"
         variant="primary"
       >
-        {isLoading ? tCommon("loading") : t("loginButton")}
+        {t("loginButton")}
       </Button>
     </form>
   );

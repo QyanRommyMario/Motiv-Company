@@ -87,7 +87,6 @@ export async function GET(request) {
       },
     });
   } catch (error) {
-    console.error("Error fetching customers:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch customers" },
       { status: 500 }

@@ -10,16 +10,6 @@ export async function POST(request) {
     const body = await request.json();
     const { destination, weight, courier } = body;
 
-    // --- LOGGING ---
-    console.log("-----------------------------------------");
-    console.log("📡 Hitung Ongkir (Komerce)");
-    console.log("   API Key:", API_KEY ? "✅ Loaded" : "❌ Missing");
-    console.log("   Asal:", ORIGIN_CITY);
-    console.log("   Tujuan:", destination);
-    console.log("   Berat:", weight);
-    console.log("   Kurir:", courier);
-    console.log("-----------------------------------------");
-
     if (!API_KEY) {
       return NextResponse.json(
         { success: false, message: "API Key Server Hilang" },
@@ -61,7 +51,6 @@ export async function POST(request) {
     // 3. Cek Error Komerce
     // Komerce mengembalikan { meta: { code: 200 }, data: [...] }
     if (json.meta?.code !== 200) {
-      console.error("❌ Komerce Error:", JSON.stringify(json, null, 2));
       throw new Error(json.meta?.message || "Gagal hitung ongkir (API Error)");
     }
 
@@ -83,7 +72,6 @@ export async function POST(request) {
       data: { costs: results },
     });
   } catch (error) {
-    console.error("💥 Fatal Cost Error:", error.message);
     return NextResponse.json(
       { success: false, message: error.message },
       { status: 500 }

@@ -28,49 +28,30 @@ export const authOptions = {
 
           return null;
         } catch (error) {
-          console.error("Auth error:", error);
           return null;
         }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account, trigger }) {
-      // On initial sign in
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
         token.role = user.role;
         token.discount = user.discount || 0;
-
-        console.log("[JWT] Adding user to token:", {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        });
       }
-
       return token;
     },
-    async session({ session, token, user }) {
-      // Send properties to the client
+    async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
         session.user.email = token.email;
         session.user.name = token.name;
         session.user.role = token.role;
         session.user.discount = token.discount || 0;
-
-        console.log("[SESSION] Sending to client:", {
-          id: session.user.id,
-          email: session.user.email,
-          name: session.user.name,
-          role: session.user.role,
-        });
       }
-
       return session;
     },
   },
