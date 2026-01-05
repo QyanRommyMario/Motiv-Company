@@ -125,7 +125,15 @@ export class ProductModel {
    */
   static async delete(id) {
     const { error } = await supabase.from("Product").delete().eq("id", id);
-    if (error) throw error;
+    if (error) {
+      console.error("🔴 Supabase delete error:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      });
+      throw error;
+    }
     return { id };
   }
 

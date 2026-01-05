@@ -63,12 +63,16 @@ export default function AdminProductsPage() {
         fetchProducts();
         setShowDeleteModal(false);
         setSelectedProduct(null);
+        alert("✅ Produk berhasil dihapus!");
       } else {
         const data = await response.json();
-        alert(data.message || "Error");
+        // Show the detailed error message from backend
+        alert(data.message || "❌ Gagal menghapus produk");
+        console.error("Delete error details:", data);
       }
     } catch (error) {
-      // Error handled silently
+      console.error("❌ Network error during delete:", error);
+      alert("❌ Gagal menghapus produk. Cek koneksi internet Anda.");
     } finally {
       setDeleting(false);
     }
@@ -379,7 +383,9 @@ export default function AdminProductsPage() {
                   className="flex-1 px-6 py-3 bg-[#DC2626] text-white hover:bg-[#B91C1C] transition-colors disabled:opacity-50 font-semibold relative min-h-12"
                   disabled={deleting}
                 >
-                  <span className={deleting ? "invisible" : "visible"}>{t("confirmDelete")}</span>
+                  <span className={deleting ? "invisible" : "visible"}>
+                    {t("confirmDelete")}
+                  </span>
                   {deleting && (
                     <span className="absolute inset-0 flex items-center justify-center">
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -658,7 +658,9 @@ export default function EditProductPage() {
               className="flex-1 px-6 py-3 bg-coffee-600 text-white rounded-lg hover:bg-coffee-700 transition-colors font-medium disabled:opacity-50 relative min-h-12"
               disabled={saving}
             >
-              <span className={saving ? "invisible" : "visible"}>Simpan Perubahan</span>
+              <span className={saving ? "invisible" : "visible"}>
+                Simpan Perubahan
+              </span>
               {saving && (
                 <span className="absolute inset-0 flex items-center justify-center">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

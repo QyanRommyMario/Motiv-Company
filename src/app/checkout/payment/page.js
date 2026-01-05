@@ -357,7 +357,7 @@ export default function PaymentPage() {
                 <span className={processing ? "invisible" : "visible"}>
                   {t("payNow")}
                 </span>
-                
+
                 {/* Loading spinner overlay */}
                 {processing && (
                   <span className="absolute inset-0 flex items-center justify-center">

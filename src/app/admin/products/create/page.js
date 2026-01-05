@@ -600,7 +600,9 @@ export default function CreateProductPage() {
               className="flex-1 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed relative min-h-12"
               disabled={loading || uploading}
             >
-              <span className={loading ? "invisible" : "visible"}>{t("addProduct")}</span>
+              <span className={loading ? "invisible" : "visible"}>
+                {t("addProduct")}
+              </span>
               {loading && (
                 <span className="absolute inset-0 flex items-center justify-center">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

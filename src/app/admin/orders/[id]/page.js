@@ -440,7 +440,9 @@ export default function AdminOrderDetailPage() {
                 disabled={updatingStatus || newStatus === order.status}
                 className="w-full px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider relative min-h-12"
               >
-                <span className={updatingStatus ? "invisible" : "visible"}>Update Status</span>
+                <span className={updatingStatus ? "invisible" : "visible"}>
+                  Update Status
+                </span>
                 {updatingStatus && (
                   <span className="absolute inset-0 flex items-center justify-center">
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

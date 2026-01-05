@@ -64,7 +64,13 @@ export default function CartSummary({ items, isB2B = false }) {
         className="w-full mt-5 py-4 bg-[#1A1A1A] text-white text-sm uppercase tracking-widest font-medium hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-all relative min-h-14"
       >
         {/* Invisible content to maintain width */}
-        <span className={isProcessing ? "invisible" : "visible flex items-center justify-center gap-2"}>
+        <span
+          className={
+            isProcessing
+              ? "invisible"
+              : "visible flex items-center justify-center gap-2"
+          }
+        >
           {t("checkout")}
           <svg
             className="w-4 h-4"
@@ -80,7 +86,7 @@ export default function CartSummary({ items, isB2B = false }) {
             />
           </svg>
         </span>
-        
+
         {/* Loading spinner overlay */}
         {isProcessing && (
           <span className="absolute inset-0 flex items-center justify-center">

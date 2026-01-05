@@ -132,8 +132,30 @@ export async function DELETE(request, { params }) {
       message: "Produk berhasil dihapus",
     });
   } catch (error) {
+    console.error("❌ Delete product error:", error);
+    
+    // Extract detailed error message from Supabase
+    let errorMessage = "Gagal menghapus produk";
+    
+    if (error.message) {
+      // Check for foreign key constraint violation
+      if (error.message.includes("violates foreign key constraint") || 
+          error.message.includes("still referenced")) {
+        errorMessage = "Produk tidak dapat dihapus karena masih terdapat pesanan yang menggunakan produk ini. Hubungi developer untuk solusi.";
+      } else if (error.code === "23503") {
+        // PostgreSQL foreign key violation code
+        errorMessage = "Produk tidak dapat dihapus karena terhubung dengan data lain (pesanan/keranjang).";
+      } else {
+        errorMessage = `Gagal menghapus produk: ${error.message}`;
+      }
+    }
+    
     return NextResponse.json(
-      { success: false, message: "Gagal menghapus produk" },
+      { 
+        success: false, 
+        message: errorMessage,
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     );
   }

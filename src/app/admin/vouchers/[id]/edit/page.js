@@ -383,7 +383,9 @@ export default function EditVoucherPage({ params }) {
               disabled={saving}
               className="px-6 py-2 bg-coffee-600 text-white rounded-lg hover:bg-coffee-700 disabled:bg-gray-400 disabled:cursor-not-allowed relative min-h-10 min-w-[150px]"
             >
-              <span className={saving ? "invisible" : "visible"}>Simpan Perubahan</span>
+              <span className={saving ? "invisible" : "visible"}>
+                Simpan Perubahan
+              </span>
               {saving && (
                 <span className="absolute inset-0 flex items-center justify-center">
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

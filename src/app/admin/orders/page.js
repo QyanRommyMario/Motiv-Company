@@ -347,7 +347,9 @@ export default function AdminOrdersPage() {
                   className="flex-1 px-4 py-2 bg-[#1A1A1A] text-white hover:bg-black transition-colors disabled:opacity-50 relative min-h-10"
                   disabled={updatingStatus}
                 >
-                  <span className={updatingStatus ? "invisible" : "visible"}>{t("update")}</span>
+                  <span className={updatingStatus ? "invisible" : "visible"}>
+                    {t("update")}
+                  </span>
                   {updatingStatus && (
                     <span className="absolute inset-0 flex items-center justify-center">
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
