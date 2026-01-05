@@ -18,7 +18,7 @@ export async function GET() {
     // Test 1: Import Supabase
     let supabaseImportError = null;
     try {
-      const { default: supabaseClient } = await import("@/lib/prisma");
+      const { default: supabaseClient } = await import("@/lib/supabase");
       supabase = supabaseClient;
     } catch (err) {
       supabaseImportError = {

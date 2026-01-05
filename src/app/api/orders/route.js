@@ -10,7 +10,7 @@ import { OrderModel } from "@/models/OrderModel";
 import { TransactionModel } from "@/models/TransactionModel";
 import { VoucherModel } from "@/models/VoucherModel";
 import { MidtransService } from "@/lib/midtrans";
-import supabase from "@/lib/prisma";
+import supabase from "@/lib/supabase";
 
 export async function POST(request) {
   try {

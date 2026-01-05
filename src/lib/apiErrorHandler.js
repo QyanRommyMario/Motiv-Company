@@ -118,7 +118,7 @@ export function withErrorHandler(handler) {
  */
 export async function getPrismaClient() {
   try {
-    const { default: supabase } = await import("@/lib/prisma");
+    const { default: supabase } = await import("@/lib/supabase");
     return supabase;
   } catch (error) {
     console.error("Failed to import Supabase client:", error);

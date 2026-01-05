@@ -3,7 +3,7 @@
  * Handles B2B request operations
  */
 
-import supabase from "@/lib/prisma";
+import supabase from "@/lib/supabase";
 import { generateId } from "@/lib/utils";
 
 export class B2BRequestModel {

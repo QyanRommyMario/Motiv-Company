@@ -3,7 +3,7 @@
  * Handles all user-related data operations
  */
 
-import supabase from "@/lib/prisma";
+import supabase from "@/lib/supabase";
 import bcrypt from "bcryptjs";
 import { generateId } from "@/lib/utils";
 

@@ -3,7 +3,7 @@
  * Handles all product-related data operations
  */
 
-import supabase from "@/lib/prisma";
+import supabase from "@/lib/supabase";
 import { generateId } from "@/lib/utils";
 
 export class ProductModel {

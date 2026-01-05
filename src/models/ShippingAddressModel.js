@@ -1,4 +1,4 @@
-import supabase from "@/lib/prisma";
+import supabase from "@/lib/supabase";
 import { generateId } from "@/lib/utils";
 
 /**

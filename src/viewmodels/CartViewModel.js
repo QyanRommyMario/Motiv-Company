@@ -5,7 +5,7 @@
 
 import { CartModel } from "@/models/CartModel";
 import { ProductVariantModel } from "@/models/ProductVariantModel";
-import supabase from "@/lib/prisma";
+import supabase from "@/lib/supabase";
 import { generateId } from "@/lib/utils";
 
 export class CartViewModel {
@@ -160,7 +160,13 @@ export class CartViewModel {
 
         const { data, error } = await supabase
           .from("CartItem")
-          .insert({ id: generateId(), userId, productId: variant.productId, variantId, quantity })
+          .insert({
+            id: generateId(),
+            userId,
+            productId: variant.productId,
+            variantId,
+            quantity,
+          })
           .select(`*, variant:ProductVariant(*, product:Product(*))`)
           .single();
 

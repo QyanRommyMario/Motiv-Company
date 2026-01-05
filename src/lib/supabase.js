@@ -1,9 +1,3 @@
-/**
- * Supabase Client
- * Database client for Supabase PostgreSQL
- * Replaces Prisma for direct Supabase access
- */
-
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

@@ -7,7 +7,7 @@ import { OrderModel } from "@/models/OrderModel";
 import { CartModel } from "@/models/CartModel";
 import { VoucherModel } from "@/models/VoucherModel";
 import { ProductVariantModel } from "@/models/ProductVariantModel";
-import supabase from "@/lib/prisma";
+import supabase from "@/lib/supabase";
 
 export class OrderViewModel {
   /**

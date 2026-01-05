@@ -3,7 +3,7 @@
  * Handles Midtrans payment transactions
  */
 
-import supabase from "@/lib/prisma";
+import supabase from "@/lib/supabase";
 import { generateId } from "@/lib/utils";
 
 export class TransactionModel {
@@ -110,7 +110,8 @@ export class TransactionModel {
     if (statusData.paymentType) updateData.paymentType = statusData.paymentType;
     if (statusData.vaNumber) updateData.vaNumber = statusData.vaNumber;
     if (statusData.bank) updateData.bank = statusData.bank;
-    if (statusData.settlementTime) updateData.settlementTime = statusData.settlementTime;
+    if (statusData.settlementTime)
+      updateData.settlementTime = statusData.settlementTime;
 
     const { data, error } = await supabase
       .from("Transaction")
