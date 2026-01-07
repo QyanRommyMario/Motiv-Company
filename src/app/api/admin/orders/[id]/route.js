@@ -87,35 +87,34 @@ export async function PATCH(request, { params }) {
     // Only admin can update payment status (prevent self-claim abuse)
     if (body.paymentStatus) {
       const allowedStatuses = ["PAID", "UNPAID", "FAILED", "EXPIRED"];
-      
+
       if (!allowedStatuses.includes(body.paymentStatus)) {
         return NextResponse.json(
           { success: false, message: "Invalid payment status" },
           { status: 400 }
         );
       }
-      
+
       updateData.paymentStatus = body.paymentStatus;
-      
+
       // [SECURITY] Audit log for payment status changes
-      console.log(
-        "✅ [ADMIN ACTION] Payment status updated:",
-        {
-          orderId: id,
-          adminId: session.user.id,
-          adminEmail: session.user.email,
-          oldStatus: "(to be queried)",
-          newStatus: body.paymentStatus,
-          timestamp: new Date().toISOString()
-        }
-      );
-      
+      console.log("✅ [ADMIN ACTION] Payment status updated:", {
+        orderId: id,
+        adminId: session.user.id,
+        adminEmail: session.user.email,
+        oldStatus: "(to be queried)",
+        newStatus: body.paymentStatus,
+        timestamp: new Date().toISOString(),
+      });
+
       // If marking as PAID, deduct stock now
       if (body.paymentStatus === "PAID") {
         try {
           const { OrderModel } = await import("@/models/OrderModel");
           await OrderModel.deductStock(id);
-          console.log("✅ [STOCK] Stock deducted after payment confirmation", { orderId: id });
+          console.log("✅ [STOCK] Stock deducted after payment confirmation", {
+            orderId: id,
+          });
         } catch (stockError) {
           console.error("❌ [STOCK ERROR] Failed to deduct stock:", stockError);
           // Continue anyway - payment confirmation is critical

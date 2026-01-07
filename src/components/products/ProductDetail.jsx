@@ -25,13 +25,16 @@ export default function ProductDetail({ product }) {
   const [alert, setAlert] = useState(null);
 
   // Calculate B2B price
+  // IMPORTANT: API already applies B2B discount to variant.price
+  // originalPrice = harga retail, price = harga setelah diskon B2B (jika ada)
   const hasB2BDiscount =
     session?.user?.role === "B2B" && session.user.discount > 0;
   const discount = session?.user?.discount || 0;
-  const originalPrice = selectedVariant?.price || 0;
-  const b2bPrice = hasB2BDiscount
-    ? originalPrice - (originalPrice * discount) / 100
-    : originalPrice;
+  
+  // Jika B2B: originalPrice = harga retail, price = harga diskon
+  // Jika non-B2B: originalPrice tidak ada, gunakan price sebagai harga normal
+  const originalPrice = selectedVariant?.originalPrice || selectedVariant?.price || 0;
+  const b2bPrice = hasB2BDiscount ? (selectedVariant?.price || 0) : originalPrice;
 
   const handleVariantSelect = (variant) => {
     setSelectedVariant(variant);

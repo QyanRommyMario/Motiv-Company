@@ -35,7 +35,7 @@ export class OrderModel {
           `Stok tidak mencukupi untuk ${variant.name}. Tersedia: ${variant.stock}, Diminta: ${item.quantity}`
         );
       }
-      
+
       // ✅ Stock validation OK, but NOT deducted yet
       // Will be deducted when payment status = PAID
     }

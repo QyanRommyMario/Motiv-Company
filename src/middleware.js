@@ -4,17 +4,19 @@ import { NextResponse } from "next/server";
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
-    
+
     // [SECURITY FIX] Middleware-level Admin Role Check
     // Proteksi admin routes di level middleware (defense in depth)
-    if (req.nextUrl.pathname.startsWith("/admin") || 
-        req.nextUrl.pathname.startsWith("/api/admin")) {
+    if (
+      req.nextUrl.pathname.startsWith("/admin") ||
+      req.nextUrl.pathname.startsWith("/api/admin")
+    ) {
       if (token?.role !== "ADMIN") {
         // Redirect non-admin users away from admin area
         return NextResponse.redirect(new URL("/", req.url));
       }
     }
-    
+
     // 1. Lanjutkan request seperti biasa
     const response = NextResponse.next();
 

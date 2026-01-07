@@ -29,7 +29,7 @@ export async function POST(request) {
         {
           userId: session.user.id,
           userRole: session.user.role,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }
       );
     }
@@ -60,14 +60,14 @@ export async function POST(request) {
     // Mencegah stale session data attack
     let userDiscount = 0;
     let isB2B = false;
-    
+
     if (session.user.role === "B2B") {
       const { data: userData, error: userError } = await supabase
         .from("User")
         .select("discount, role")
         .eq("id", session.user.id)
         .single();
-      
+
       if (userError) {
         console.error("Failed to validate user B2B status:", userError);
         return NextResponse.json(
@@ -75,7 +75,7 @@ export async function POST(request) {
           { status: 500 }
         );
       }
-      
+
       if (userData && userData.role === "B2B") {
         userDiscount = userData.discount || 0;
         isB2B = userDiscount > 0;
@@ -118,20 +118,23 @@ export async function POST(request) {
         body.voucherCode,
         subtotal
       );
-      
+
       if (voucherCheck.valid) {
         voucherDiscount = Math.round(voucherCheck.discount);
-        
+
         // [AUDIT LOG] Track B2B voucher usage for business intelligence
         if (isB2B) {
-          console.log("📊 [B2B VOUCHER] User with B2B discount using voucher:", {
-            userId: session.user.id,
-            b2bDiscount: userDiscount,
-            voucherCode: body.voucherCode,
-            voucherDiscount: voucherDiscount,
-            totalDiscount: userDiscount + voucherDiscount,
-            timestamp: new Date().toISOString()
-          });
+          console.log(
+            "📊 [B2B VOUCHER] User with B2B discount using voucher:",
+            {
+              userId: session.user.id,
+              b2bDiscount: userDiscount,
+              voucherCode: body.voucherCode,
+              voucherDiscount: voucherDiscount,
+              totalDiscount: userDiscount + voucherDiscount,
+              timestamp: new Date().toISOString(),
+            }
+          );
         }
       }
     }

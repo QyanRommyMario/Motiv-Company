@@ -20,7 +20,7 @@ export async function GET() {
 
     // [SECURITY FIX] Real-time B2B discount validation from database
     let userDiscount = 0;
-    
+
     if (session.user.role === "B2B") {
       const supabase = (await import("@/lib/supabase")).default;
       const { data: userData } = await supabase
@@ -28,7 +28,7 @@ export async function GET() {
         .select("discount, role")
         .eq("id", session.user.id)
         .single();
-      
+
       if (userData && userData.role === "B2B") {
         userDiscount = userData.discount || 0;
       }

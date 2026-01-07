@@ -87,7 +87,6 @@ export default function Navbar() {
   const navLinks = isB2B
     ? [
         { href: "/products", label: t("products") },
-        { href: "/b2b", label: t("b2bDashboard") || "B2B Dashboard" },
         { href: "/vouchers", label: t("vouchers") },
       ]
     : [
@@ -229,6 +228,15 @@ export default function Navbar() {
                         >
                           {t("addresses")}
                         </Link>
+                        {/* B2B Registration Link for B2C users */}
+                        {session.user.role === "B2C" && (
+                          <Link
+                            href="/b2b/register"
+                            className="block px-4 py-2.5 text-sm text-[#1A1A1A] hover:bg-yellow-50 font-medium border-t border-gray-100"
+                          >
+                            {t("becomeB2B")}
+                          </Link>
+                        )}
                       </>
                     )}
                     <div className="h-px bg-gray-100 my-2"></div>
@@ -390,6 +398,15 @@ export default function Navbar() {
                     >
                       {t("addresses")}
                     </Link>
+                    {/* B2B Registration Link for B2C users in mobile menu */}
+                    {session.user.role === "B2C" && (
+                      <Link
+                        href="/b2b/register"
+                        className="block px-6 py-3 text-base text-[#1A1A1A] hover:bg-yellow-50 font-medium border-t border-gray-100"
+                      >
+                        {t("becomeB2B")}
+                      </Link>
+                    )}
                   </>
                 )}
               </>
