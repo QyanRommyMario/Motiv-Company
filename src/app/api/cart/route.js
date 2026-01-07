@@ -18,11 +18,21 @@ export async function GET() {
       );
     }
 
-    // Get user discount for B2B users
-    const userDiscount =
-      session.user.role === "B2B" && session.user.discount
-        ? session.user.discount
-        : 0;
+    // [SECURITY FIX] Real-time B2B discount validation from database
+    let userDiscount = 0;
+    
+    if (session.user.role === "B2B") {
+      const supabase = (await import("@/lib/supabase")).default;
+      const { data: userData } = await supabase
+        .from("User")
+        .select("discount, role")
+        .eq("id", session.user.id)
+        .single();
+      
+      if (userData && userData.role === "B2B") {
+        userDiscount = userData.discount || 0;
+      }
+    }
 
     const result = await CartViewModel.getUserCart(
       session.user.id,

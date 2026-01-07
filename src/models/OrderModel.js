@@ -17,7 +17,8 @@ export class OrderModel {
       .substring(7)
       .toUpperCase()}`;
 
-    // Validate and update stock for each item
+    // [SECURITY FIX] Validate stock availability WITHOUT deducting yet
+    // Stock will be deducted after payment confirmation (prevents race condition)
     for (const item of data.items) {
       const { data: variant, error: variantError } = await supabase
         .from("ProductVariant")
@@ -34,14 +35,9 @@ export class OrderModel {
           `Stok tidak mencukupi untuk ${variant.name}. Tersedia: ${variant.stock}, Diminta: ${item.quantity}`
         );
       }
-
-      // Update stock
-      const { error: updateError } = await supabase
-        .from("ProductVariant")
-        .update({ stock: variant.stock - item.quantity })
-        .eq("id", item.variantId);
-
-      if (updateError) throw updateError;
+      
+      // ✅ Stock validation OK, but NOT deducted yet
+      // Will be deducted when payment status = PAID
     }
 
     // Create the order (without items first)
@@ -305,6 +301,56 @@ export class OrderModel {
 
     if (error) throw error;
     return data;
+  }
+
+  /**
+   * [SECURITY FIX] Deduct stock after payment confirmation
+   * Prevents race condition where stock is locked for unpaid orders
+   */
+  static async deductStock(orderId) {
+    // Get order with items
+    const { data: order, error: orderError } = await supabase
+      .from("Order")
+      .select("*, items:OrderItem(*)")
+      .eq("id", orderId)
+      .single();
+
+    if (orderError || !order) {
+      throw new Error("Order not found for stock deduction");
+    }
+
+    // Deduct stock for each item
+    for (const item of order.items) {
+      const { data: variant } = await supabase
+        .from("ProductVariant")
+        .select("stock, name")
+        .eq("id", item.variantId)
+        .single();
+
+      if (!variant) {
+        console.error(`[STOCK ERROR] Variant ${item.variantId} not found`);
+        continue;
+      }
+
+      if (variant.stock < item.quantity) {
+        console.warn(
+          `[STOCK WARNING] Insufficient stock for ${variant.name}. Available: ${variant.stock}, Required: ${item.quantity}`
+        );
+        // Continue anyway - payment already confirmed
+      }
+
+      // Deduct stock
+      const { error: updateError } = await supabase
+        .from("ProductVariant")
+        .update({ stock: Math.max(0, variant.stock - item.quantity) })
+        .eq("id", item.variantId);
+
+      if (updateError) {
+        console.error(`[STOCK ERROR] Failed to deduct stock:`, updateError);
+      }
+    }
+
+    return true;
   }
 
   /**

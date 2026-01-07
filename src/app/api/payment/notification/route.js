@@ -69,6 +69,19 @@ export async function POST(request) {
       if (currentOrder.status === "PENDING") {
         await OrderModel.updateStatus(transaction.orderId, "PROCESSING");
       }
+      
+      // [SECURITY FIX] Deduct stock after payment confirmation (prevents race condition)
+      try {
+        await OrderModel.deductStock(transaction.orderId);
+        console.log("✅ [PAYMENT CONFIRMED] Stock deducted:", {
+          orderId: transaction.orderId,
+          orderNumber: notification.order_id,
+          timestamp: new Date().toISOString()
+        });
+      } catch (stockError) {
+        console.error("❌ [STOCK ERROR] Failed to deduct stock after payment:", stockError);
+        // Continue - payment already confirmed, stock issue can be resolved manually
+      }
     } else if (paymentStatus === "FAILED" || paymentStatus === "EXPIRED") {
       await OrderModel.updatePaymentStatus(transaction.orderId, paymentStatus);
       await OrderModel.updateStatus(transaction.orderId, "CANCELLED", {

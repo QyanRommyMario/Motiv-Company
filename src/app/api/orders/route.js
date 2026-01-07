@@ -10,6 +10,7 @@ import { OrderModel } from "@/models/OrderModel";
 import { TransactionModel } from "@/models/TransactionModel";
 import { VoucherModel } from "@/models/VoucherModel";
 import { MidtransService } from "@/lib/midtrans";
+import { BusinessConfig } from "@/lib/config";
 import supabase from "@/lib/supabase";
 
 export async function POST(request) {
@@ -20,6 +21,18 @@ export async function POST(request) {
 
     const body = await request.json();
     const { paymentMethod } = body;
+
+    // [SECURITY] Log incoming request for audit trail
+    if (body.items && body.items.length > 0) {
+      console.warn(
+        "⚠️ [SECURITY] Client sent items data but will be ignored (recalculated from DB).",
+        {
+          userId: session.user.id,
+          userRole: session.user.role,
+          timestamp: new Date().toISOString()
+        }
+      );
+    }
 
     // 1. Validasi Dasar
     if (!body.shippingAddressId || !body.shipping || !body.items?.length) {
@@ -43,9 +56,35 @@ export async function POST(request) {
         { status: 400 }
       );
 
-    // Cek Status B2B
-    const isB2B = session.user.role === "B2B" && session.user.discount > 0;
-    const userDiscount = isB2B ? session.user.discount : 0;
+    // [SECURITY FIX] Real-time B2B Discount Validation dari Database
+    // Mencegah stale session data attack
+    let userDiscount = 0;
+    let isB2B = false;
+    
+    if (session.user.role === "B2B") {
+      const { data: userData, error: userError } = await supabase
+        .from("User")
+        .select("discount, role")
+        .eq("id", session.user.id)
+        .single();
+      
+      if (userError) {
+        console.error("Failed to validate user B2B status:", userError);
+        return NextResponse.json(
+          { message: "Gagal memvalidasi status pengguna" },
+          { status: 500 }
+        );
+      }
+      
+      if (userData && userData.role === "B2B") {
+        userDiscount = userData.discount || 0;
+        isB2B = userDiscount > 0;
+      }
+    }
+
+    // [BUSINESS LOGIC UPDATED] MOQ Validation REMOVED per business requirement
+    // B2B users can now purchase any quantity (including 1 unit)
+    // Previous restriction removed to allow flexibility for large item purchases
 
     let subtotal = 0;
 
@@ -71,15 +110,29 @@ export async function POST(request) {
 
     const shippingCost = Math.round(body.shipping.cost || 0);
 
-    // Validasi Voucher
+    // [BUSINESS LOGIC UPDATED] Voucher validation - B2B users CAN use vouchers
+    // Discount stacking IS ALLOWED per business requirement
     let voucherDiscount = 0;
     if (body.voucherCode) {
       const voucherCheck = await VoucherModel.validate(
         body.voucherCode,
         subtotal
       );
+      
       if (voucherCheck.valid) {
         voucherDiscount = Math.round(voucherCheck.discount);
+        
+        // [AUDIT LOG] Track B2B voucher usage for business intelligence
+        if (isB2B) {
+          console.log("📊 [B2B VOUCHER] User with B2B discount using voucher:", {
+            userId: session.user.id,
+            b2bDiscount: userDiscount,
+            voucherCode: body.voucherCode,
+            voucherDiscount: voucherDiscount,
+            totalDiscount: userDiscount + voucherDiscount,
+            timestamp: new Date().toISOString()
+          });
+        }
       }
     }
 
