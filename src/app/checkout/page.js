@@ -79,7 +79,8 @@ export default function CheckoutPage() {
     try {
       // Calculate subtotal
       const subtotal = items.reduce((sum, item) => {
-        const price = item.price || item.variant?.price || 0;
+        // [FIX] Gunakan harga B2B jika ada untuk user B2B
+        const price = item.discountedPrice || item.b2bPrice || item.price || item.variant?.price || 0;
         return sum + price * item.quantity;
       }, 0);
 
@@ -98,7 +99,8 @@ export default function CheckoutPage() {
           productId: item.product.id,
           variantId: item.variant.id,
           quantity: item.quantity,
-          price: item.price || item.variant.price,
+          // [FIX] Simpan harga yang sudah didiskon untuk B2B
+          price: item.discountedPrice || item.b2bPrice || item.price || item.variant.price,
         })),
         subtotal: subtotal,
         total: total,

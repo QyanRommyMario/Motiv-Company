@@ -19,7 +19,8 @@ export default function OrderSummary({
   console.log("📊 OrderSummary received items:", items);
 
   const subtotal = items.reduce((sum, item) => {
-    const price = item.price || item.variant?.price || item.product?.price || 0;
+    // [FIX] Gunakan harga B2B jika ada (discountedPrice atau b2bPrice)
+    const price = item.discountedPrice || item.b2bPrice || item.price || item.variant?.price || item.product?.price || 0;
     return sum + price * item.quantity;
   }, 0);
 
@@ -39,7 +40,8 @@ export default function OrderSummary({
         {items.map((item) => {
           const product = item.product;
           const variant = item.variant;
-          const price = item.price || variant?.price || product?.price || 0;
+          // [FIX] Prioritaskan harga B2B yang sudah didiskon
+          const price = item.discountedPrice || item.b2bPrice || item.price || variant?.price || product?.price || 0;
 
           return (
             <div

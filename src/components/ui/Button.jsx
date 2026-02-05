@@ -16,15 +16,15 @@ export default function Button({
   ...props
 }) {
   const baseStyles =
-    "px-6 py-3 uppercase tracking-widest text-sm font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed relative min-h-[48px]";
+    "px-6 py-3 uppercase tracking-widest text-sm font-medium transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed relative min-h-[48px] active:scale-95";
 
   const variants = {
-    primary: "bg-[#1A1A1A] text-white hover:opacity-90",
+    primary: "bg-[#1A1A1A] text-white hover:opacity-90 active:opacity-80",
     secondary:
-      "bg-white text-[#1A1A1A] border border-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white",
+      "bg-white text-[#1A1A1A] border border-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white active:bg-[#0A0A0A]",
     outline:
-      "border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white",
-    danger: "bg-[#EF4444] text-white hover:bg-[#DC2626]",
+      "border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white active:bg-[#0A0A0A]",
+    danger: "bg-[#EF4444] text-white hover:bg-[#DC2626] active:bg-[#B91C1C]",
   };
 
   const widthClass = fullWidth ? "w-full" : "";
