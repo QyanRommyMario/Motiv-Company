@@ -63,25 +63,44 @@ export async function POST(request) {
 
     // 5. Update Status Order
     if (paymentStatus === "PAID") {
+      // Update payment status to PAID
       await OrderModel.updatePaymentStatus(transaction.orderId, "PAID");
 
+      // Update order status based on mapping (should be PROCESSING)
       const currentOrder = await OrderModel.findById(transaction.orderId);
       if (currentOrder.status === "PENDING") {
-        await OrderModel.updateStatus(transaction.orderId, "PROCESSING");
+        await OrderModel.updateStatus(transaction.orderId, orderStatus); // Use mapped status
       }
 
       // [SECURITY FIX] Deduct stock after payment confirmation (prevents race condition)
       try {
-        await OrderModel.deductStock(transaction.orderId);
-        console.log("✅ [PAYMENT CONFIRMED] Stock deducted:", {
-          orderId: transaction.orderId,
-          orderNumber: notification.order_id,
-          timestamp: new Date().toISOString(),
-        });
+        const stockResult = await OrderModel.deductStock(transaction.orderId);
+        
+        if (stockResult.success) {
+          console.log("✅ [PAYMENT CONFIRMED] Stock deducted successfully:", {
+            orderId: transaction.orderId,
+            orderNumber: notification.order_id,
+            results: stockResult.results,
+            timestamp: new Date().toISOString(),
+          });
+        } else {
+          console.warn("⚠️ [PARTIAL SUCCESS] Some items failed stock deduction:", {
+            orderId: transaction.orderId,
+            orderNumber: notification.order_id,
+            results: stockResult.results,
+            timestamp: new Date().toISOString(),
+          });
+        }
       } catch (stockError) {
         console.error(
           "❌ [STOCK ERROR] Failed to deduct stock after payment:",
-          stockError
+          {
+            orderId: transaction.orderId,
+            orderNumber: notification.order_id,
+            error: stockError.message,
+            stack: stockError.stack,
+            timestamp: new Date().toISOString(),
+          }
         );
         // Continue - payment already confirmed, stock issue can be resolved manually
       }
@@ -90,6 +109,16 @@ export async function POST(request) {
       await OrderModel.updateStatus(transaction.orderId, "CANCELLED", {
         cancellationReason: `Payment ${paymentStatus} by System (Midtrans)`,
       });
+    } else if (paymentStatus === "PENDING_REVIEW") {
+      // Handle fraud challenge case
+      console.warn("⚠️ [FRAUD REVIEW] Transaction requires manual review:", {
+        orderId: transaction.orderId,
+        orderNumber: notification.order_id,
+        fraudStatus: notification.fraud_status,
+        transactionStatus: notification.transaction_status,
+        timestamp: new Date().toISOString(),
+      });
+      // Keep order as PENDING, admin needs to review
     }
 
     return NextResponse.json({

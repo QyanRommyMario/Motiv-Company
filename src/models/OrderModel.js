@@ -304,8 +304,9 @@ export class OrderModel {
   }
 
   /**
-   * [SECURITY FIX] Deduct stock after payment confirmation
+   * [SECURITY FIX] Deduct stock after payment confirmation (ATOMIC)
    * Prevents race condition where stock is locked for unpaid orders
+   * Uses database-level atomic operations with row locking
    */
   static async deductStock(orderId) {
     // Get order with items
@@ -319,38 +320,80 @@ export class OrderModel {
       throw new Error("Order not found for stock deduction");
     }
 
-    // Deduct stock for each item
+    const results = [];
+
+    // Deduct stock for each item using ATOMIC operation
     for (const item of order.items) {
-      const { data: variant } = await supabase
-        .from("ProductVariant")
-        .select("stock, name")
-        .eq("id", item.variantId)
-        .single();
+      try {
+        // ✅ Use Supabase RPC for atomic stock decrement (prevents race condition)
+        const { data, error } = await supabase.rpc("atomic_decrement_stock", {
+          variant_id_param: item.variantId,
+          quantity_param: item.quantity,
+        });
 
-      if (!variant) {
-        console.error(`[STOCK ERROR] Variant ${item.variantId} not found`);
-        continue;
-      }
+        if (error) {
+          console.error(
+            `❌ [STOCK ERROR] RPC failed for variant ${item.variantId}:`,
+            error
+          );
+          results.push({
+            variantId: item.variantId,
+            success: false,
+            error: error.message,
+          });
+          continue;
+        }
 
-      if (variant.stock < item.quantity) {
-        console.warn(
-          `[STOCK WARNING] Insufficient stock for ${variant.name}. Available: ${variant.stock}, Required: ${item.quantity}`
+        const result = data[0]; // RPC returns array with single result
+
+        if (result.success) {
+          console.log(
+            `✅ [STOCK DEDUCTED] Variant ${item.variantId}: ${result.old_stock} → ${result.new_stock}`
+          );
+          results.push({
+            variantId: item.variantId,
+            success: true,
+            oldStock: result.old_stock,
+            newStock: result.new_stock,
+          });
+        } else {
+          console.warn(
+            `⚠️ [STOCK WARNING] ${result.message} for variant ${item.variantId}`
+          );
+          results.push({
+            variantId: item.variantId,
+            success: false,
+            message: result.message,
+          });
+          // Payment already confirmed, continue anyway
+        }
+      } catch (rpcError) {
+        console.error(
+          `❌ [CRITICAL ERROR] Failed to call atomic_decrement_stock:`,
+          rpcError
         );
-        // Continue anyway - payment already confirmed
-      }
-
-      // Deduct stock
-      const { error: updateError } = await supabase
-        .from("ProductVariant")
-        .update({ stock: Math.max(0, variant.stock - item.quantity) })
-        .eq("id", item.variantId);
-
-      if (updateError) {
-        console.error(`[STOCK ERROR] Failed to deduct stock:`, updateError);
+        results.push({
+          variantId: item.variantId,
+          success: false,
+          error: rpcError.message,
+        });
       }
     }
 
-    return true;
+    // Check if all items were processed successfully
+    const allSuccess = results.every((r) => r.success);
+    if (!allSuccess) {
+      console.error(
+        `⚠️ [PARTIAL STOCK DEDUCTION] Order ${orderId}: ${
+          results.filter((r) => r.success).length
+        }/${results.length} items processed`
+      );
+    }
+
+    return {
+      success: allSuccess,
+      results,
+    };
   }
 
   /**

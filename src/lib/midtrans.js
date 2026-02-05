@@ -88,18 +88,45 @@ export class MidtransService {
     }
   }
 
+  /**
+   * Map Midtrans transaction status to Order & Payment status
+   * Handles fraud_status properly (accept, challenge, deny)
+   */
   static mapTransactionStatus(transactionStatus, fraudStatus) {
     let orderStatus = "PENDING";
     let paymentStatus = "UNPAID";
 
-    if (transactionStatus === "capture" || transactionStatus === "settlement") {
-      if (fraudStatus === "accept" || transactionStatus === "settlement") {
-        orderStatus = "PAID";
+    // SETTLEMENT: Always safe, fraud check already passed
+    if (transactionStatus === "settlement") {
+      orderStatus = "PROCESSING"; // ✅ FIX: Gunakan status Order yang valid
+      paymentStatus = "PAID";
+    }
+    // CAPTURE: Depends on fraud_status
+    else if (transactionStatus === "capture") {
+      if (fraudStatus === "accept") {
+        orderStatus = "PROCESSING";
         paymentStatus = "PAID";
+      } else if (fraudStatus === "challenge") {
+        orderStatus = "PENDING"; // Tunggu review manual
+        paymentStatus = "PENDING_REVIEW";
+        console.warn(
+          `⚠️ [FRAUD ALERT] Transaction requires manual review - fraud_status: challenge`
+        );
+      } else if (fraudStatus === "deny") {
+        orderStatus = "CANCELLED";
+        paymentStatus = "FAILED";
       }
-    } else if (["deny", "cancel", "expire"].includes(transactionStatus)) {
+    }
+    // PENDING: Customer belum bayar
+    else if (transactionStatus === "pending") {
+      orderStatus = "PENDING";
+      paymentStatus = "UNPAID";
+    }
+    // FAILURE STATES
+    else if (["deny", "cancel", "expire"].includes(transactionStatus)) {
       orderStatus = "CANCELLED";
-      paymentStatus = "FAILED";
+      paymentStatus =
+        transactionStatus === "expire" ? "EXPIRED" : "FAILED";
     }
 
     return { orderStatus, paymentStatus };
