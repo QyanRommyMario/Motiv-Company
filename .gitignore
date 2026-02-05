@@ -47,3 +47,6 @@ next-env.d.ts
 # uploads
 /public/uploads
 
+
+# Midtrans Keys (Private Keys - DO NOT COMMIT)
+.keys/
