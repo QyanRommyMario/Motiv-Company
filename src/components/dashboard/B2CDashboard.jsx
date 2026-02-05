@@ -51,8 +51,8 @@ export default function B2CDashboard({ session }) {
           </div>
         </div>
 
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 !text-white/50 text-xs uppercase tracking-[0.2em] flex flex-col items-center gap-2">
-          <span>{t("scroll")}</span>
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 !text-white/50 text-xs uppercase tracking-[0.2em] flex flex-col items-center gap-2 text-center max-w-[200px]">
+          <span className="whitespace-nowrap">{t("scroll")}</span>
           <svg
             className="w-6 h-6 animate-bounce"
             fill="none"
@@ -105,16 +105,16 @@ export default function B2CDashboard({ session }) {
                       </p>
                     </div>
 
-                    <div className="relative h-[400px] shadow-xl">
+                    <div className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden shadow-2xl">
                       {story.imageUrl ? (
                         <img
                           src={story.imageUrl}
                           alt={story.title}
-                          className="absolute inset-0 w-full h-full object-cover"
+                          className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-                          <span className="text-6xl font-['Playfair_Display'] opacity-10 font-bold">
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                          <span className="text-4xl md:text-6xl font-['Playfair_Display'] opacity-10 font-bold">
                             M
                           </span>
                         </div>
