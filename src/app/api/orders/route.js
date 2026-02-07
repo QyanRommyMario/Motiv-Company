@@ -12,37 +12,61 @@ import { VoucherModel } from "@/models/VoucherModel";
 import { MidtransService } from "@/lib/midtrans";
 import { BusinessConfig } from "@/lib/config";
 import supabase from "@/lib/supabase";
+import { createOrderSchema } from "@/lib/validations";
+import { orderLimiter } from "@/lib/rateLimiter";
+import logger from "@/lib/logger";
+import { z } from "zod";
 
 export async function POST(request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session)
+    if (!session) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    // Apply rate limiting
+    const limitResponse = await orderLimiter(request);
+    if (limitResponse) return limitResponse;
 
     const body = await request.json();
-    const { paymentMethod } = body;
 
     // [SECURITY] Log incoming request for audit trail
     if (body.items && body.items.length > 0) {
-      console.warn(
-        "⚠️ [SECURITY] Client sent items data but will be ignored (recalculated from DB).",
-        {
+      logger.security("Client sent items data but will be ignored (recalculated from DB)", {
+        userId: session.user.id,
+        userRole: session.user.role,
+      });
+    }
+
+    // Validate input
+    let validated;
+    try {
+      validated = createOrderSchema.parse(body);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        logger.warn("Order validation failed", {
           userId: session.user.id,
-          userRole: session.user.role,
-          timestamp: new Date().toISOString(),
-        }
-      );
+          errors: error.errors,
+        });
+
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Data order tidak valid",
+            errors: error.errors.map((e) => ({
+              field: e.path.join("."),
+              message: e.message,
+            })),
+          },
+          { status: 400 }
+        );
+      }
+      throw error;
     }
 
-    // 1. Validasi Dasar
-    if (!body.shippingAddressId || !body.shipping || !body.items?.length) {
-      return NextResponse.json(
-        { message: "Data tidak lengkap" },
-        { status: 400 }
-      );
-    }
+    const { paymentMethod, shippingAddressId, shipping, voucherCode } = validated;
 
-    // 2. Ambil Data Keranjang & Hitung Ulang Harga (Security)
+    // 1. Ambil Data Keranjang & Hitung Ulang Harga (Security)
     const { data: cartItems, error: cartError } = await supabase
       .from("CartItem")
       .select(`*, product:Product(*), variant:ProductVariant(*)`)
@@ -69,7 +93,9 @@ export async function POST(request) {
         .single();
 
       if (userError) {
-        console.error("Failed to validate user B2B status:", userError);
+        logger.error("Failed to validate user B2B status", userError, {
+          userId: session.user.id,
+        });
         return NextResponse.json(
           { message: "Gagal memvalidasi status pengguna" },
           { status: 500 }
@@ -124,17 +150,13 @@ export async function POST(request) {
 
         // [AUDIT LOG] Track B2B voucher usage for business intelligence
         if (isB2B) {
-          console.log(
-            "📊 [B2B VOUCHER] User with B2B discount using voucher:",
-            {
-              userId: session.user.id,
-              b2bDiscount: userDiscount,
-              voucherCode: body.voucherCode,
-              voucherDiscount: voucherDiscount,
-              totalDiscount: userDiscount + voucherDiscount,
-              timestamp: new Date().toISOString(),
-            }
-          );
+          logger.business("B2B user using voucher", {
+            userId: session.user.id,
+            b2bDiscount: userDiscount,
+            voucherCode: body.voucherCode,
+            voucherDiscount: voucherDiscount,
+            totalDiscount: userDiscount + voucherDiscount,
+          });
         }
       }
     }

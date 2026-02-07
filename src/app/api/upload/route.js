@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
+import { uploadFileSchema } from "@/lib/validations";
+import { uploadLimiter } from "@/lib/rateLimiter";
+import logger from "@/lib/logger";
+import { z } from "zod";
 
 // Initialize Supabase client
 const supabaseUrl =
@@ -18,11 +22,20 @@ export async function POST(request) {
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
+      logger.security("Unauthorized file upload attempt", {
+        userId: session?.user?.id,
+        ip: request.headers.get("x-forwarded-for"),
+      });
+
       return NextResponse.json(
         { success: false, message: "Unauthorized - Admin only" },
         { status: 401 }
       );
     }
+
+    // Apply rate limiting (10 uploads per 5 minutes)
+    const limitResponse = await uploadLimiter(request);
+    if (limitResponse) return limitResponse;
 
     const formData = await request.formData();
     const file = formData.get("file");
@@ -34,34 +47,43 @@ export async function POST(request) {
       );
     }
 
-    // Validate file type (images only)
-    const validTypes = [
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
-      "image/webp",
-      "image/gif",
-    ];
-    if (!validTypes.includes(file.type)) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Invalid file type. Only images are allowed.",
-        },
-        { status: 400 }
-      );
-    }
+    // Validate file with schema
+    try {
+      uploadFileSchema.parse({
+        type: file.type,
+        size: file.size,
+        name: file.name,
+      });
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "File size too large. Maximum 5MB allowed.",
-        },
-        { status: 400 }
-      );
+      logger.info("File upload initiated", {
+        adminId: session.user.id,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        logger.warn("File upload validation failed", {
+          adminId: session.user.id,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+          errors: error.errors,
+        });
+
+        return NextResponse.json(
+          {
+            success: false,
+            message: "File validation failed",
+            errors: error.errors.map((e) => ({
+              field: e.path.join("."),
+              message: e.message,
+            })),
+          },
+          { status: 400 }
+        );
+      }
+      throw error;
     }
 
     // Create unique filename
@@ -84,6 +106,11 @@ export async function POST(request) {
       });
 
     if (error) {
+      logger.error("Supabase storage upload failed", error, {
+        adminId: session.user.id,
+        fileName: file.name,
+      });
+
       return NextResponse.json(
         {
           success: false,
@@ -99,6 +126,13 @@ export async function POST(request) {
       .from("motiv-uploads")
       .getPublicUrl(`images/${filename}`);
 
+    logger.business("File uploaded successfully", {
+      adminId: session.user.id,
+      fileName: filename,
+      originalName: file.name,
+      url: publicUrlData.publicUrl,
+    });
+
     return NextResponse.json({
       success: true,
       message: "File uploaded successfully to Supabase Storage",
@@ -106,6 +140,10 @@ export async function POST(request) {
       path: data.path,
     });
   } catch (error) {
+    logger.error("File upload failed", error, {
+      adminId: session?.user?.id,
+    });
+
     return NextResponse.json(
       {
         success: false,

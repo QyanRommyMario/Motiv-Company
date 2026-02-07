@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { VoucherModel } from "@/models/VoucherModel";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { validateVoucherSchema } from "@/lib/validations";
+import { apiLimiter } from "@/lib/rateLimiter";
+import logger from "@/lib/logger";
+import { z } from "zod";
 
 /**
  * POST /api/vouchers/validate
@@ -15,49 +19,89 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { code, subtotal } = await request.json();
+    // Apply rate limiting
+    const limitResponse = await apiLimiter(request);
+    if (limitResponse) return limitResponse;
 
-    // Validation
-    if (!code || subtotal === undefined) {
-      return NextResponse.json(
-        { error: "Voucher code and subtotal are required" },
-        { status: 400 }
+    const body = await request.json();
+
+    // Validate input
+    try {
+      const validated = validateVoucherSchema.parse(body);
+
+      logger.info("Voucher validation requested", {
+        userId: session.user.id,
+        code: validated.code,
+        subtotal: validated.subtotal,
+      });
+
+      // Validate voucher
+      const result = await VoucherModel.validate(
+        validated.code,
+        validated.subtotal
       );
-    }
 
-    if (subtotal < 0) {
-      return NextResponse.json(
-        { error: "Invalid subtotal amount" },
-        { status: 400 }
-      );
-    }
+      if (!result.valid) {
+        logger.warn("Voucher validation failed", {
+          userId: session.user.id,
+          code: validated.code,
+          reason: result.message,
+        });
 
-    // Validate voucher
-    const result = await VoucherModel.validate(code, subtotal);
+        return NextResponse.json(
+          {
+            success: false,
+            message: result.message,
+          },
+          { status: 400 }
+        );
+      }
 
-    if (!result.valid) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: result.message,
-        },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: {
+      logger.business("Voucher validated successfully", {
+        userId: session.user.id,
         code: result.voucher.code,
-        type: result.voucher.type,
-        value: result.voucher.value,
         discount: result.discount,
-        minPurchase: result.voucher.minPurchase,
-        maxDiscount: result.voucher.maxDiscount,
-      },
-      message: result.message,
-    });
+        subtotal: validated.subtotal,
+      });
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          code: result.voucher.code,
+          type: result.voucher.type,
+          value: result.voucher.value,
+          discount: result.discount,
+          minPurchase: result.voucher.minPurchase,
+          maxDiscount: result.voucher.maxDiscount,
+        },
+        message: result.message,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        logger.warn("Voucher validation input failed", {
+          userId: session.user.id,
+          errors: error.errors,
+        });
+
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Data tidak valid",
+            errors: error.errors.map((e) => ({
+              field: e.path.join("."),
+              message: e.message,
+            })),
+          },
+          { status: 400 }
+        );
+      }
+      throw error;
+    }
   } catch (error) {
+    logger.error("Voucher validation error", error, {
+      userId: session?.user?.id,
+    });
+
     return NextResponse.json(
       { error: "Failed to validate voucher" },
       { status: 500 }

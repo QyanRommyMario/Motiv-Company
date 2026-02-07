@@ -7,11 +7,17 @@ import { NextResponse } from "next/server";
 import { MidtransService } from "@/lib/midtrans";
 import { TransactionModel } from "@/models/TransactionModel";
 import { OrderModel } from "@/models/OrderModel";
+import { webhookLimiter } from "@/lib/rateLimiter";
+import logger from "@/lib/logger";
 import crypto from "crypto";
 
 export async function POST(request) {
   try {
     const notification = await request.json();
+
+    // Apply rate limiting (by order_id to prevent duplicate webhooks)
+    const limitResponse = await webhookLimiter(request, notification.order_id);
+    if (limitResponse) return limitResponse;
 
     // 1. Verifikasi Signature
     const serverKey = process.env.MIDTRANS_SERVER_KEY;
@@ -25,11 +31,24 @@ export async function POST(request) {
       .digest("hex");
 
     if (signatureKey !== notification.signature_key) {
+      logger.security("Invalid Midtrans signature", {
+        orderId,
+        ip: request.headers.get("x-forwarded-for"),
+        providedSignature: notification.signature_key?.substring(0, 10),
+      });
+
       return NextResponse.json(
         { success: false, message: "Invalid signature" },
         { status: 403 }
       );
     }
+
+    logger.payment("Midtrans notification received", {
+      orderId,
+      transactionStatus: notification.transaction_status,
+      fraudStatus: notification.fraud_status,
+      paymentType: notification.payment_type,
+    });
 
     // 2. Cari Transaksi
     const transaction = await TransactionModel.getByTransactionId(
@@ -37,6 +56,10 @@ export async function POST(request) {
     );
 
     if (!transaction) {
+      logger.warn("Transaction not found for webhook", {
+        orderId: notification.order_id,
+      });
+
       return NextResponse.json(
         { success: false, message: "Transaction not found" },
         { status: 404 }
@@ -77,31 +100,30 @@ export async function POST(request) {
         const stockResult = await OrderModel.deductStock(transaction.orderId);
         
         if (stockResult.success) {
-          console.log("✅ [PAYMENT CONFIRMED] Stock deducted successfully:", {
+          logger.stock("Stock deducted after payment", {
             orderId: transaction.orderId,
             orderNumber: notification.order_id,
             results: stockResult.results,
-            timestamp: new Date().toISOString(),
+          });
+
+          logger.payment("Payment confirmed and processed", {
+            orderId: transaction.orderId,
+            orderNumber: notification.order_id,
+            amount: grossAmount,
+            paymentType: notification.payment_type,
           });
         } else {
-          console.warn("⚠️ [PARTIAL SUCCESS] Some items failed stock deduction:", {
+          logger.warn("Partial stock deduction success", {
             orderId: transaction.orderId,
             orderNumber: notification.order_id,
             results: stockResult.results,
-            timestamp: new Date().toISOString(),
           });
         }
       } catch (stockError) {
-        console.error(
-          "❌ [STOCK ERROR] Failed to deduct stock after payment:",
-          {
-            orderId: transaction.orderId,
-            orderNumber: notification.order_id,
-            error: stockError.message,
-            stack: stockError.stack,
-            timestamp: new Date().toISOString(),
-          }
-        );
+        logger.error("Stock deduction failed after payment", stockError, {
+          orderId: transaction.orderId,
+          orderNumber: notification.order_id,
+        });
         // Continue - payment already confirmed, stock issue can be resolved manually
       }
     } else if (paymentStatus === "FAILED" || paymentStatus === "EXPIRED") {
@@ -109,14 +131,20 @@ export async function POST(request) {
       await OrderModel.updateStatus(transaction.orderId, "CANCELLED", {
         cancellationReason: `Payment ${paymentStatus} by System (Midtrans)`,
       });
+
+      logger.payment("Payment failed or expired", {
+        orderId: transaction.orderId,
+        orderNumber: notification.order_id,
+        paymentStatus,
+        transactionStatus: notification.transaction_status,
+      });
     } else if (paymentStatus === "PENDING_REVIEW") {
       // Handle fraud challenge case
-      console.warn("⚠️ [FRAUD REVIEW] Transaction requires manual review:", {
+      logger.security("Transaction requires fraud review", {
         orderId: transaction.orderId,
         orderNumber: notification.order_id,
         fraudStatus: notification.fraud_status,
         transactionStatus: notification.transaction_status,
-        timestamp: new Date().toISOString(),
       });
       // Keep order as PENDING, admin needs to review
     }
@@ -126,6 +154,10 @@ export async function POST(request) {
       message: "Notification processed",
     });
   } catch (error) {
+    logger.error("Payment notification processing failed", error, {
+      orderId: notification?.order_id,
+    });
+
     return NextResponse.json(
       {
         success: false,

@@ -20,12 +20,30 @@ export default withAuth(
     // 1. Lanjutkan request seperti biasa
     const response = NextResponse.next();
 
-    // 2. [FIX FINAL] Hapus paksa Header Keamanan yang memblokir Midtrans
-    // Ini mematikan aturan CORS browser yang rewel pada level server
-    response.headers.delete("Content-Security-Policy");
-    response.headers.delete("X-Frame-Options");
-    response.headers.delete("X-Content-Type-Options");
-    response.headers.delete("Permissions-Policy");
+    // 2. [SECURITY FIX] Set proper security headers for Midtrans compatibility
+    // Configure CSP to allow Midtrans while maintaining security
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' https://app.sandbox.midtrans.com https://app.midtrans.com 'unsafe-inline' 'unsafe-eval'",
+      "frame-src 'self' https://app.sandbox.midtrans.com https://app.midtrans.com",
+      "connect-src 'self' https://api.midtrans.com https://api.sandbox.midtrans.com https://*.supabase.co wss://*.supabase.co",
+      "img-src 'self' data: https: blob:",
+      "style-src 'self' 'unsafe-inline'",
+      "font-src 'self' data:",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; ");
+
+    response.headers.set("Content-Security-Policy", csp);
+    response.headers.set("X-Frame-Options", "SAMEORIGIN");
+    response.headers.set("X-Content-Type-Options", "nosniff");
+    response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    response.headers.set(
+      "Permissions-Policy",
+      "geolocation=(), microphone=(), camera=(), payment=(self)"
+    );
+    response.headers.set("X-XSS-Protection", "1; mode=block");
 
     return response;
   },

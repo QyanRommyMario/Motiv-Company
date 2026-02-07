@@ -5,6 +5,7 @@
 
 import supabase from "@/lib/supabase";
 import { generateId } from "@/lib/utils";
+import logger from "@/lib/logger";
 
 export class OrderModel {
   /**
@@ -332,10 +333,11 @@ export class OrderModel {
         });
 
         if (error) {
-          console.error(
-            `❌ [STOCK ERROR] RPC failed for variant ${item.variantId}:`,
-            error
-          );
+          logger.error("Stock deduction RPC failed", error, {
+            variantId: item.variantId,
+            quantity: item.quantity,
+          });
+
           results.push({
             variantId: item.variantId,
             success: false,
@@ -347,9 +349,13 @@ export class OrderModel {
         const result = data[0]; // RPC returns array with single result
 
         if (result.success) {
-          console.log(
-            `✅ [STOCK DEDUCTED] Variant ${item.variantId}: ${result.old_stock} → ${result.new_stock}`
-          );
+          logger.stock("Stock deducted atomically", {
+            variantId: item.variantId,
+            oldStock: result.old_stock,
+            newStock: result.new_stock,
+            quantity: item.quantity,
+          });
+
           results.push({
             variantId: item.variantId,
             success: true,
@@ -357,9 +363,11 @@ export class OrderModel {
             newStock: result.new_stock,
           });
         } else {
-          console.warn(
-            `⚠️ [STOCK WARNING] ${result.message} for variant ${item.variantId}`
-          );
+          logger.warn("Stock deduction failed (insufficient stock)", {
+            variantId: item.variantId,
+            message: result.message,
+          });
+
           results.push({
             variantId: item.variantId,
             success: false,
@@ -368,10 +376,10 @@ export class OrderModel {
           // Payment already confirmed, continue anyway
         }
       } catch (rpcError) {
-        console.error(
-          `❌ [CRITICAL ERROR] Failed to call atomic_decrement_stock:`,
-          rpcError
-        );
+        logger.error("Critical error in atomic stock deduction", rpcError, {
+          variantId: item.variantId,
+        });
+
         results.push({
           variantId: item.variantId,
           success: false,
