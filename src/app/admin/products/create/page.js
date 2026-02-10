@@ -168,7 +168,17 @@ export default function CreateProductPage() {
     }
 
     // Validate variants
-    const validVariants = variants.filter((v) => v.name && v.price && v.stock);
+    const validVariants = variants.filter(
+      (v) =>
+        v.name &&
+        v.name.trim() !== "" &&
+        v.price !== "" &&
+        v.price !== null &&
+        v.price !== undefined &&
+        v.stock !== "" &&
+        v.stock !== null &&
+        v.stock !== undefined
+    );
     if (validVariants.length === 0) {
       alert(t("minOneVariant"));
       return;
@@ -189,7 +199,11 @@ export default function CreateProductPage() {
         category: formData.category,
         images: validImages,
         features: validFeatures,
-        variants: validVariants,
+        variants: validVariants.map((v) => ({
+          name: v.name,
+          price: parseFloat(v.price),
+          stock: parseInt(v.stock),
+        })),
       };
 
       const response = await fetch("/api/admin/products", {

@@ -203,7 +203,15 @@ export default function EditProductPage() {
 
     // Validate variants
     const validVariants = variants.filter(
-      (v) => v.name && v.price !== "" && v.stock !== ""
+      (v) =>
+        v.name &&
+        v.name.trim() !== "" &&
+        v.price !== "" &&
+        v.price !== null &&
+        v.price !== undefined &&
+        v.stock !== "" &&
+        v.stock !== null &&
+        v.stock !== undefined
     );
     if (validVariants.length === 0) {
       alert("Minimal 1 varian harus diisi lengkap");
