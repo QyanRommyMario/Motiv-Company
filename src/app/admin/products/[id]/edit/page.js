@@ -53,7 +53,7 @@ export default function EditProductPage() {
             prod.features && prod.features.length > 0 ? prod.features : [""],
         });
         setImagePreviews(
-          prod.images && prod.images.length > 0 ? prod.images : [""]
+          prod.images && prod.images.length > 0 ? prod.images : [""],
         );
         setVariants(prod.variants || []);
       } else {
@@ -211,7 +211,7 @@ export default function EditProductPage() {
         v.price !== undefined &&
         v.stock !== "" &&
         v.stock !== null &&
-        v.stock !== undefined
+        v.stock !== undefined,
     );
     if (validVariants.length === 0) {
       alert("Minimal 1 varian harus diisi lengkap");

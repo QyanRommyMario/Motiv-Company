@@ -14,7 +14,7 @@ export async function POST(request) {
     if (!body.name || !body.email || !body.password) {
       return NextResponse.json(
         { success: false, message: "Semua field harus diisi" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -28,7 +28,7 @@ export async function POST(request) {
   } catch (error) {
     return NextResponse.json(
       { success: false, message: "Terjadi kesalahan pada server" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

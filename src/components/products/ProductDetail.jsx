@@ -18,7 +18,7 @@ export default function ProductDetail({ product }) {
   const router = useRouter();
   const { data: session } = useSession();
   const [selectedVariant, setSelectedVariant] = useState(
-    product.variants.find((v) => v.stock > 0) || product.variants[0]
+    product.variants.find((v) => v.stock > 0) || product.variants[0],
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
@@ -27,14 +27,14 @@ export default function ProductDetail({ product }) {
   // Update selectedVariant when product data changes (after admin edit)
   useEffect(() => {
     const updatedVariant = product.variants.find(
-      (v) => v.id === selectedVariant?.id
+      (v) => v.id === selectedVariant?.id,
     );
     if (updatedVariant) {
       setSelectedVariant(updatedVariant);
     } else {
       // If selected variant no longer exists, select first available
       setSelectedVariant(
-        product.variants.find((v) => v.stock > 0) || product.variants[0]
+        product.variants.find((v) => v.stock > 0) || product.variants[0],
       );
     }
   }, [product.variants]);
@@ -45,11 +45,12 @@ export default function ProductDetail({ product }) {
   const hasB2BDiscount =
     session?.user?.role === "B2B" && session.user.discount > 0;
   const discount = session?.user?.discount || 0;
-  
+
   // Jika B2B: originalPrice = harga retail, price = harga diskon
   // Jika non-B2B: originalPrice tidak ada, gunakan price sebagai harga normal
-  const originalPrice = selectedVariant?.originalPrice || selectedVariant?.price || 0;
-  const b2bPrice = hasB2BDiscount ? (selectedVariant?.price || 0) : originalPrice;
+  const originalPrice =
+    selectedVariant?.originalPrice || selectedVariant?.price || 0;
+  const b2bPrice = hasB2BDiscount ? selectedVariant?.price || 0 : originalPrice;
 
   const handleVariantSelect = (variant) => {
     setSelectedVariant(variant);
@@ -252,19 +253,15 @@ export default function ProductDetail({ product }) {
           disabled={!selectedVariant || selectedVariant.stock === 0 || isAdding}
           loading={isAdding}
         >
-          {selectedVariant && selectedVariant.stock > 0 ? (
-            hasB2BDiscount ? (
-              `${t("addToCart")} - Rp ${(b2bPrice * quantity).toLocaleString(
-                "id-ID"
-              )}`
-            ) : (
-              `${t("addToCart")} - Rp ${(
-                originalPrice * quantity
-              ).toLocaleString("id-ID")}`
-            )
-          ) : (
-            t("outOfStock")
-          )}
+          {selectedVariant && selectedVariant.stock > 0
+            ? hasB2BDiscount
+              ? `${t("addToCart")} - Rp ${(b2bPrice * quantity).toLocaleString(
+                  "id-ID",
+                )}`
+              : `${t("addToCart")} - Rp ${(
+                  originalPrice * quantity
+                ).toLocaleString("id-ID")}`
+            : t("outOfStock")}
         </Button>
 
         {/* Product Description */}

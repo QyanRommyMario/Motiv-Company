@@ -177,7 +177,7 @@ export default function CreateProductPage() {
         v.price !== undefined &&
         v.stock !== "" &&
         v.stock !== null &&
-        v.stock !== undefined
+        v.stock !== undefined,
     );
     if (validVariants.length === 0) {
       alert(t("minOneVariant"));
