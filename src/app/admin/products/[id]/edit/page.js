@@ -162,8 +162,14 @@ export default function EditProductPage() {
     } else {
       newVariants[index][field] = value;
     }
-    console.log(`🔄 Variant ${index + 1} ${field} changed to:`, newVariants[index][field]);
-    console.log(`   Variant ID: ${newVariants[index].id}`, `Type: ${typeof newVariants[index][field]}`);
+    console.log(
+      `🔄 Variant ${index + 1} ${field} changed to:`,
+      newVariants[index][field],
+    );
+    console.log(
+      `   Variant ID: ${newVariants[index].id}`,
+      `Type: ${typeof newVariants[index][field]}`,
+    );
     setVariants(newVariants);
   };
 
@@ -215,13 +221,24 @@ export default function EditProductPage() {
     // Validate variants
     const validVariants = variants.filter((v) => {
       const hasName = v.name && v.name.trim() !== "";
-      const hasPrice = v.price !== "" && v.price !== null && v.price !== undefined;
-      const hasStock = v.stock !== "" && v.stock !== null && v.stock !== undefined;
+      const hasPrice =
+        v.price !== "" && v.price !== null && v.price !== undefined;
+      const hasStock =
+        v.stock !== "" && v.stock !== null && v.stock !== undefined;
+      console.log(`🔍 Validating variant:`, {
+        name: v.name,
+        price: v.price,
+        stock: v.stock,
+        hasName,
+        hasPrice,
+        hasStock,
+        valid: hasName && hasPrice && hasStock,
+      });
       return hasName && hasPrice && hasStock;
     });
 
     console.log("✅ Valid variants:", validVariants);
-    
+
     if (validVariants.length === 0) {
       alert("Minimal 1 varian harus diisi lengkap");
       return;
@@ -242,12 +259,23 @@ export default function EditProductPage() {
         category: formData.category,
         images: validImages,
         features: validFeatures,
-        variants: validVariants.map((v) => ({
-          id: v.id, // Keep existing ID if available
-          name: v.name,
-          price: parseFloat(v.price),
-          stock: parseInt(v.stock),
-        })),
+        variants: validVariants.map((v) => {
+          const mappedVariant = {
+            id: v.id, // Keep existing ID if available
+            name: v.name,
+            price: parseFloat(v.price),
+            stock: parseInt(v.stock, 10),
+          };
+          
+          console.log(`📦 Mapping variant:`, {
+            original: { id: v.id, name: v.name, price: v.price, stock: v.stock },
+            mapped: mappedVariant,
+            priceIsNaN: isNaN(mappedVariant.price),
+            stockIsNaN: isNaN(mappedVariant.stock),
+          });
+          
+          return mappedVariant;
+        }),
       };
 
       console.log("📤 Sending update payload:", payload);

@@ -65,6 +65,20 @@ export async function PUT(request, { params }) {
       features = [],
     } = body;
 
+    // Log received data for debugging
+    console.log("📥 Received update request for product:", id);
+    console.log("📦 Received variants:", variants);
+    variants?.forEach((v, i) => {
+      console.log(`   Variant ${i + 1}:`, {
+        id: v.id,
+        name: v.name,
+        price: v.price,
+        priceType: typeof v.price,
+        stock: v.stock,
+        stockType: typeof v.stock,
+      });
+    });
+
     // Check if product exists
     const existingProduct = await ProductModel.findById(id);
     if (!existingProduct) {
