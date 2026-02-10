@@ -206,7 +206,7 @@ export default function ProductDetailPage() {
                             <span className="text-lg font-bold text-[#1A1A1A]">
                               Rp{" "}
                               {relatedProduct.variants[0].price.toLocaleString(
-                                "id-ID"
+                                "id-ID",
                               )}
                             </span>
                             <span className="text-xs text-[#6B7280] font-medium group-hover:text-[#1A1A1A] transition-colors">

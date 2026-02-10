@@ -5,7 +5,7 @@
  * Displays product details with add to cart functionality
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
@@ -23,6 +23,21 @@ export default function ProductDetail({ product }) {
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [alert, setAlert] = useState(null);
+
+  // Update selectedVariant when product data changes (after admin edit)
+  useEffect(() => {
+    const updatedVariant = product.variants.find(
+      (v) => v.id === selectedVariant?.id
+    );
+    if (updatedVariant) {
+      setSelectedVariant(updatedVariant);
+    } else {
+      // If selected variant no longer exists, select first available
+      setSelectedVariant(
+        product.variants.find((v) => v.stock > 0) || product.variants[0]
+      );
+    }
+  }, [product.variants]);
 
   // Calculate B2B price
   // IMPORTANT: API already applies B2B discount to variant.price
@@ -178,11 +193,6 @@ export default function ProductDetail({ product }) {
             </div>
           )}
         </div>
-
-        {/* Description */}
-        <p className="text-sm sm:text-base text-gray-700 mb-6 leading-relaxed">
-          {product.description}
-        </p>
 
         {/* Variant Selector */}
         <div className="mb-6">
