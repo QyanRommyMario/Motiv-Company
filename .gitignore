@@ -37,6 +37,19 @@ yarn-error.log*
 ADMIN_CREDENTIALS.md
 create-admin.js
 
+# documentation files (internal only)
+LAPORAN_*.md
+*_FIX.md
+*_SETUP_*.md
+*_UPDATE.md
+*_SYNC_*.md
+PERFORMANCE_*.md
+MIDTRANS_*.md
+NAVIGATION_*.md
+PAYMENT_*.md
+PRICE_*.md
+PRODUCT_*.md
+
 # vercel
 .vercel
 
