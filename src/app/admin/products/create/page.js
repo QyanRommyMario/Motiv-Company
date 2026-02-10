@@ -351,7 +351,7 @@ export default function CreateProductPage() {
                       <img
                         src={imagePreviews[index]}
                         alt={`Preview ${index + 1}`}
-                        className="w-full h-48 object-cover border border-gray-200 rounded"
+                        className="w-full aspect-square object-cover border border-gray-200 rounded"
                       />
                       <button
                         type="button"

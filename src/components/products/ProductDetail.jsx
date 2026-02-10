@@ -101,10 +101,10 @@ export default function ProductDetail({ product }) {
             <img
               src={product.images[0]}
               alt={product.name}
-              className="w-full h-64 sm:h-80 md:h-96 object-cover"
+              className="w-full aspect-square object-cover"
             />
           ) : (
-            <div className="w-full h-64 sm:h-80 md:h-96 flex items-center justify-center text-gray-400">
+            <div className="w-full aspect-square flex items-center justify-center text-gray-400">
               <span className="text-6xl sm:text-9xl">☕</span>
             </div>
           )}
@@ -121,7 +121,7 @@ export default function ProductDetail({ product }) {
                 <img
                   src={image}
                   alt={`${product.name} ${index + 1}`}
-                  className="w-full h-20 sm:h-24 object-cover"
+                  className="w-full aspect-square object-cover"
                 />
               </div>
             ))}

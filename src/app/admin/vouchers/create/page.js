@@ -327,7 +327,7 @@ export default function CreateVoucherPage() {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-coffee-600 text-white rounded-lg hover:bg-coffee-700 disabled:bg-gray-400 disabled:cursor-not-allowed relative min-h-10 min-w-[140px]"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed relative min-h-10 min-w-[140px]"
             >
               <span className={loading ? "invisible" : "visible"}>
                 Simpan Voucher

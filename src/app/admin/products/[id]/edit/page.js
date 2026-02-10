@@ -408,7 +408,7 @@ export default function EditProductPage() {
                       <img
                         src={imagePreviews[index]}
                         alt={`Preview ${index + 1}`}
-                        className="w-full h-48 object-cover border border-gray-200 rounded"
+                        className="w-full aspect-square object-cover border border-gray-200 rounded"
                       />
                       <button
                         type="button"
@@ -655,7 +655,7 @@ export default function EditProductPage() {
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-coffee-600 text-white rounded-lg hover:bg-coffee-700 transition-colors font-medium disabled:opacity-50 relative min-h-12"
+              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 relative min-h-12"
               disabled={saving}
             >
               <span className={saving ? "invisible" : "visible"}>
