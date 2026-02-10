@@ -266,14 +266,19 @@ export default function EditProductPage() {
             price: parseFloat(v.price),
             stock: parseInt(v.stock, 10),
           };
-          
+
           console.log(`📦 Mapping variant:`, {
-            original: { id: v.id, name: v.name, price: v.price, stock: v.stock },
+            original: {
+              id: v.id,
+              name: v.name,
+              price: v.price,
+              stock: v.stock,
+            },
             mapped: mappedVariant,
             priceIsNaN: isNaN(mappedVariant.price),
             stockIsNaN: isNaN(mappedVariant.stock),
           });
-          
+
           return mappedVariant;
         }),
       };

@@ -17,7 +17,7 @@ export async function GET(request, { params }) {
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -27,7 +27,7 @@ export async function GET(request, { params }) {
     if (!product) {
       return NextResponse.json(
         { success: false, message: "Produk tidak ditemukan" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -38,7 +38,7 @@ export async function GET(request, { params }) {
   } catch (error) {
     return NextResponse.json(
       { success: false, message: "Gagal mengambil data produk" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -50,7 +50,7 @@ export async function PUT(request, { params }) {
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -84,7 +84,7 @@ export async function PUT(request, { params }) {
     if (!existingProduct) {
       return NextResponse.json(
         { success: false, message: "Produk tidak ditemukan" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -111,7 +111,7 @@ export async function PUT(request, { params }) {
   } catch (error) {
     return NextResponse.json(
       { success: false, message: "Gagal mengupdate produk" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -123,7 +123,7 @@ export async function DELETE(request, { params }) {
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -134,7 +134,7 @@ export async function DELETE(request, { params }) {
     if (!product) {
       return NextResponse.json(
         { success: false, message: "Produk tidak ditemukan" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -147,30 +147,35 @@ export async function DELETE(request, { params }) {
     });
   } catch (error) {
     console.error("❌ Delete product error:", error);
-    
+
     // Extract detailed error message from Supabase
     let errorMessage = "Gagal menghapus produk";
-    
+
     if (error.message) {
       // Check for foreign key constraint violation
-      if (error.message.includes("violates foreign key constraint") || 
-          error.message.includes("still referenced")) {
-        errorMessage = "Produk tidak dapat dihapus karena masih terdapat pesanan yang menggunakan produk ini. Hubungi developer untuk solusi.";
+      if (
+        error.message.includes("violates foreign key constraint") ||
+        error.message.includes("still referenced")
+      ) {
+        errorMessage =
+          "Produk tidak dapat dihapus karena masih terdapat pesanan yang menggunakan produk ini. Hubungi developer untuk solusi.";
       } else if (error.code === "23503") {
         // PostgreSQL foreign key violation code
-        errorMessage = "Produk tidak dapat dihapus karena terhubung dengan data lain (pesanan/keranjang).";
+        errorMessage =
+          "Produk tidak dapat dihapus karena terhubung dengan data lain (pesanan/keranjang).";
       } else {
         errorMessage = `Gagal menghapus produk: ${error.message}`;
       }
     }
-    
+
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         message: errorMessage,
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        error:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
