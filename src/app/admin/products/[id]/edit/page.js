@@ -43,6 +43,9 @@ export default function EditProductPage() {
         const data = await response.json();
         const prod = data.product;
 
+        console.log("📥 Loaded product:", prod);
+        console.log("📦 Product variants:", prod.variants);
+
         setProduct(prod);
         setFormData({
           name: prod.name,
@@ -61,6 +64,7 @@ export default function EditProductPage() {
         router.push("/admin/products");
       }
     } catch (error) {
+      console.error("❌ Failed to fetch product:", error);
       alert("Gagal memuat produk");
     } finally {
       setLoading(false);
@@ -152,7 +156,14 @@ export default function EditProductPage() {
 
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...variants];
-    newVariants[index][field] = value;
+    // Convert numeric fields to proper types
+    if (field === "stock" || field === "price") {
+      newVariants[index][field] = value === "" ? "" : value;
+    } else {
+      newVariants[index][field] = value;
+    }
+    console.log(`🔄 Variant ${index + 1} ${field} changed to:`, newVariants[index][field]);
+    console.log(`   Variant ID: ${newVariants[index].id}`, `Type: ${typeof newVariants[index][field]}`);
     setVariants(newVariants);
   };
 
@@ -202,17 +213,15 @@ export default function EditProductPage() {
     }
 
     // Validate variants
-    const validVariants = variants.filter(
-      (v) =>
-        v.name &&
-        v.name.trim() !== "" &&
-        v.price !== "" &&
-        v.price !== null &&
-        v.price !== undefined &&
-        v.stock !== "" &&
-        v.stock !== null &&
-        v.stock !== undefined,
-    );
+    const validVariants = variants.filter((v) => {
+      const hasName = v.name && v.name.trim() !== "";
+      const hasPrice = v.price !== "" && v.price !== null && v.price !== undefined;
+      const hasStock = v.stock !== "" && v.stock !== null && v.stock !== undefined;
+      return hasName && hasPrice && hasStock;
+    });
+
+    console.log("✅ Valid variants:", validVariants);
+    
     if (validVariants.length === 0) {
       alert("Minimal 1 varian harus diisi lengkap");
       return;
@@ -227,35 +236,48 @@ export default function EditProductPage() {
     try {
       setSaving(true);
 
+      const payload = {
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        images: validImages,
+        features: validFeatures,
+        variants: validVariants.map((v) => ({
+          id: v.id, // Keep existing ID if available
+          name: v.name,
+          price: parseFloat(v.price),
+          stock: parseInt(v.stock),
+        })),
+      };
+
+      console.log("📤 Sending update payload:", payload);
+      console.log("📦 Variants to update:", payload.variants);
+
       const response = await fetch(`/api/admin/products/${params.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: formData.name,
-          description: formData.description,
-          category: formData.category,
-          images: validImages,
-          features: validFeatures,
-          variants: validVariants.map((v) => ({
-            id: v.id, // Keep existing ID if available
-            name: v.name,
-            price: parseFloat(v.price),
-            stock: parseInt(v.stock),
-          })),
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
+      console.log("📥 Update response:", data);
+
       if (response.ok) {
         alert("Produk berhasil diupdate!");
-        router.push("/admin/products");
+        // Refresh data before redirecting to show latest state
+        await fetchProduct();
+        setTimeout(() => {
+          router.push("/admin/products");
+        }, 500);
       } else {
+        console.error("❌ Update failed:", data);
         alert(data.message || "Gagal mengupdate produk");
       }
     } catch (error) {
+      console.error("❌ Update error:", error);
       alert("Terjadi kesalahan");
     } finally {
       setSaving(false);

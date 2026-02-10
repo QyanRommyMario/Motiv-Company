@@ -10,11 +10,13 @@ export default function ProductCard({ product }) {
   const tCart = useTranslations("cart");
   const [imageError, setImageError] = useState(false);
 
-  // Ambil harga terendah dari varian produk
+  // Ambil harga terendah dan tertinggi dari varian produk
   const variants = product?.variants || [];
-  const displayPrice =
-    variants.length > 0 ? Math.min(...variants.map((v) => v.price)) : 0;
+  const prices = variants.map((v) => v.price);
+  const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+  const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
   const hasMultipleVariants = variants.length > 1;
+  const hasPriceRange = hasMultipleVariants && minPrice !== maxPrice;
 
   // Cek stok - semua varian habis = out of stock
   const totalStock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
@@ -97,14 +99,21 @@ export default function ProductCard({ product }) {
 
           {/* Price Section */}
           <div className="mt-auto">
-            {displayPrice > 0 ? (
+            {minPrice > 0 ? (
               <div className="flex items-baseline gap-2 flex-wrap">
                 <p
                   className={`text-base sm:text-lg font-bold ${
                     isOutOfStock ? "text-gray-500" : "text-[#1A1A1A]"
                   }`}
                 >
-                  Rp {displayPrice.toLocaleString("id-ID")}
+                  {hasPriceRange ? (
+                    <>
+                      Rp {minPrice.toLocaleString("id-ID")} - Rp{" "}
+                      {maxPrice.toLocaleString("id-ID")}
+                    </>
+                  ) : (
+                    <>Rp {minPrice.toLocaleString("id-ID")}</>
+                  )}
                 </p>
               </div>
             ) : (
