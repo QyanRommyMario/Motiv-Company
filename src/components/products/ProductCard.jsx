@@ -24,14 +24,6 @@ export default function ProductCard({ product }) {
   const imageSrc =
     product?.images && product.images.length > 0 ? product.images[0] : null;
 
-  // Hitung diskon jika ada
-  const originalPrice =
-    variants.length > 0 ? Math.max(...variants.map((v) => v.price)) : 0;
-  const hasDiscount = originalPrice > displayPrice && displayPrice > 0;
-  const discountPercent = hasDiscount
-    ? Math.round(((originalPrice - displayPrice) / originalPrice) * 100)
-    : 0;
-
   return (
     <Link href={`/products/${product?.id}`} className="block h-full">
       <div
@@ -79,13 +71,6 @@ export default function ProductCard({ product }) {
             </div>
           )}
 
-          {/* Discount Badge - hanya tampil jika ada stok */}
-          {!isOutOfStock && hasDiscount && discountPercent >= 5 && (
-            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-red-500 text-white text-[10px] sm:text-xs font-bold px-2 py-1 z-10">
-              -{discountPercent}%
-            </div>
-          )}
-
           {/* Quick View Overlay - Desktop Only, hanya jika ada stok */}
           {!isOutOfStock && (
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 hidden sm:flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -121,11 +106,6 @@ export default function ProductCard({ product }) {
                 >
                   Rp {displayPrice.toLocaleString("id-ID")}
                 </p>
-                {hasDiscount && !isOutOfStock && (
-                  <p className="text-xs text-gray-500 line-through">
-                    Rp {originalPrice.toLocaleString("id-ID")}
-                  </p>
-                )}
               </div>
             ) : (
               <p className="text-xs text-gray-600">{t("priceNotAvailable")}</p>
