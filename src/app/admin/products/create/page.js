@@ -118,7 +118,11 @@ export default function CreateProductPage() {
 
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...variants];
-    newVariants[index][field] = value;
+    // Create a new object for the variant being changed to avoid mutation issues
+    newVariants[index] = {
+      ...newVariants[index],
+      [field]: value === "" ? "" : value,
+    };
     setVariants(newVariants);
   };
 

@@ -156,12 +156,11 @@ export default function EditProductPage() {
 
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...variants];
-    // Convert numeric fields to proper types
-    if (field === "stock" || field === "price") {
-      newVariants[index][field] = value === "" ? "" : value;
-    } else {
-      newVariants[index][field] = value;
-    }
+    // Create a new object for the variant being changed to avoid mutation issues
+    newVariants[index] = {
+      ...newVariants[index],
+      [field]: value === "" ? "" : value,
+    };
     console.log(
       `🔄 Variant ${index + 1} ${field} changed to:`,
       newVariants[index][field],
