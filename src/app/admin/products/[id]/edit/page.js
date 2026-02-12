@@ -58,7 +58,14 @@ export default function EditProductPage() {
         setImagePreviews(
           prod.images && prod.images.length > 0 ? prod.images : [""],
         );
-        setVariants(prod.variants || []);
+        // Convert price and stock to string for input compatibility
+        setVariants(
+          prod.variants?.map((v) => ({
+            ...v,
+            price: String(v.price),
+            stock: String(v.stock),
+          })) || [],
+        );
       } else {
         alert("Produk tidak ditemukan");
         router.push("/admin/products");
