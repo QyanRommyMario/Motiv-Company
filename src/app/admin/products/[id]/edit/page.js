@@ -156,19 +156,10 @@ export default function EditProductPage() {
 
   const handleVariantChange = (index, field, value) => {
     const newVariants = [...variants];
-    // Create a new object for the variant being changed to avoid mutation issues
     newVariants[index] = {
       ...newVariants[index],
-      [field]: value === "" ? "" : value,
+      [field]: value,
     };
-    console.log(
-      `🔄 Variant ${index + 1} ${field} changed to:`,
-      newVariants[index][field],
-    );
-    console.log(
-      `   Variant ID: ${newVariants[index].id}`,
-      `Type: ${typeof newVariants[index][field]}`,
-    );
     setVariants(newVariants);
   };
 
