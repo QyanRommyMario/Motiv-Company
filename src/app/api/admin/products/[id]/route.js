@@ -11,7 +11,7 @@ import { authOptions } from "@/lib/auth";
 import { ProductModel } from "@/models/ProductModel";
 
 // CRITICAL: Disable Next.js caching for this API route
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(request, { params }) {
@@ -117,7 +117,7 @@ export async function PUT(request, { params }) {
   } catch (error) {
     // IMPORTANT: Log the actual error for debugging
     console.error("❌ Update product error:", error.message, error.stack);
-    
+
     return NextResponse.json(
       { success: false, message: "Gagal mengupdate produk: " + error.message },
       { status: 500 },

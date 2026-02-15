@@ -10,7 +10,7 @@ import { authOptions } from "@/lib/auth";
 import { ProductModel } from "@/models/ProductModel";
 
 // CRITICAL: Disable Next.js caching for admin API routes
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function POST(request) {
@@ -20,7 +20,7 @@ export async function POST(request) {
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -39,14 +39,14 @@ export async function POST(request) {
     if (!name || !description || !category) {
       return NextResponse.json(
         { success: false, message: "Data tidak lengkap" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!variants || variants.length === 0) {
       return NextResponse.json(
         { success: false, message: "Minimal 1 varian diperlukan" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -61,7 +61,9 @@ export async function POST(request) {
         name: v.name || v.size,
         price: parseFloat(v.price),
         stock: parseInt(v.stock),
-        sku: v.sku || `${name.substring(0, 3).toUpperCase()}-${v.name || v.size}-${Date.now()}`,
+        sku:
+          v.sku ||
+          `${name.substring(0, 3).toUpperCase()}-${v.name || v.size}-${Date.now()}`,
       })),
     });
 
@@ -71,12 +73,12 @@ export async function POST(request) {
         message: "Produk berhasil dibuat",
         product,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     return NextResponse.json(
       { success: false, message: error.message || "Gagal membuat produk" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -88,7 +90,7 @@ export async function GET(request) {
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -126,7 +128,7 @@ export async function GET(request) {
   } catch (error) {
     return NextResponse.json(
       { success: false, message: "Gagal mengambil data produk" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

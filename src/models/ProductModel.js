@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Product Model
  * Handles all product-related data operations
  */
@@ -100,10 +100,11 @@ export class ProductModel {
   }
 
   /**
-   * Update product
+   * Update product with variants
    */
   static async update(id, data) {
-    const { data: product, error } = await supabase
+    // 1. Update product base data
+    const { error: productError } = await supabase
       .from("Product")
       .update({
         name: data.name,
@@ -112,12 +113,67 @@ export class ProductModel {
         category: data.category,
         features: data.features || [],
       })
-      .eq("id", id)
-      .select(`*, variants:ProductVariant(*)`)
-      .single();
+      .eq("id", id);
 
-    if (error) throw error;
-    return product;
+    if (productError) throw productError;
+
+    // 2. Handle variants update
+    if (data.variants && data.variants.length > 0) {
+      // Get existing variant IDs for this product
+      const { data: existingVariants } = await supabase
+        .from("ProductVariant")
+        .select("id")
+        .eq("productId", id);
+
+      const existingIds = existingVariants?.map((v) => v.id) || [];
+      const newVariantIds = data.variants.filter((v) => v.id).map((v) => v.id);
+
+      // Delete variants that are no longer in the list
+      const toDelete = existingIds.filter((eid) => !newVariantIds.includes(eid));
+      if (toDelete.length > 0) {
+        await supabase.from("ProductVariant").delete().in("id", toDelete);
+      }
+
+      // Update or create each variant
+      for (const variant of data.variants) {
+        const price = Number(variant.price);
+        const stock = Number(variant.stock);
+
+        if (isNaN(price) || isNaN(stock)) {
+          throw new Error(`Invalid variant data: price=${variant.price}, stock=${variant.stock}`);
+        }
+
+        if (variant.id) {
+          // Update existing variant
+          const { error: updateError } = await supabase
+            .from("ProductVariant")
+            .update({
+              name: variant.name,
+              price: price,
+              stock: stock,
+            })
+            .eq("id", variant.id);
+
+          if (updateError) throw updateError;
+        } else {
+          // Create new variant
+          const { error: insertError } = await supabase
+            .from("ProductVariant")
+            .insert({
+              id: generateId(),
+              productId: id,
+              name: variant.name,
+              price: price,
+              stock: stock,
+            });
+
+          if (insertError) throw insertError;
+        }
+      }
+    }
+
+    // Return updated product with fresh data
+    return await ProductModel.findById(id);
   }
 
   /**
@@ -126,7 +182,7 @@ export class ProductModel {
   static async delete(id) {
     const { error } = await supabase.from("Product").delete().eq("id", id);
     if (error) {
-      console.error("🔴 Supabase delete error:", {
+      console.error("Supabase delete error:", {
         message: error.message,
         details: error.details,
         hint: error.hint,
