@@ -10,6 +10,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { ProductModel } from "@/models/ProductModel";
 
+// CRITICAL: Disable Next.js caching for this API route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request, { params }) {
   try {
     const session = await getServerSession(authOptions);
@@ -99,9 +103,11 @@ export async function PUT(request, { params }) {
         id: v.id, // Include ID if updating existing variant
         name: v.name || v.size, // Support both 'name' and 'size'
         price: parseFloat(v.price),
-        stock: parseInt(v.stock),
+        stock: parseInt(v.stock, 10), // FIXED: Add radix 10
       })),
     });
+
+    console.log("✅ Product updated successfully:", product?.id);
 
     return NextResponse.json({
       success: true,
@@ -109,8 +115,11 @@ export async function PUT(request, { params }) {
       product,
     });
   } catch (error) {
+    // IMPORTANT: Log the actual error for debugging
+    console.error("❌ Update product error:", error.message, error.stack);
+    
     return NextResponse.json(
-      { success: false, message: "Gagal mengupdate produk" },
+      { success: false, message: "Gagal mengupdate produk: " + error.message },
       { status: 500 },
     );
   }

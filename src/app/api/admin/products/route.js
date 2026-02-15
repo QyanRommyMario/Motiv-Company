@@ -9,6 +9,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { ProductModel } from "@/models/ProductModel";
 
+// CRITICAL: Disable Next.js caching for admin API routes
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function POST(request) {
   try {
     const session = await getServerSession(authOptions);
