@@ -117,12 +117,14 @@ export default function CreateProductPage() {
   };
 
   const handleVariantChange = (index, field, value) => {
-    const newVariants = [...variants];
-    newVariants[index] = {
-      ...newVariants[index],
-      [field]: value,
-    };
-    setVariants(newVariants);
+    setVariants((prevVariants) => {
+      const newVariants = [...prevVariants];
+      newVariants[index] = {
+        ...newVariants[index],
+        [field]: value,
+      };
+      return newVariants;
+    });
   };
 
   const addVariant = () => {
