@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import AdminLayout from "@/components/layout/AdminLayout";
 
 export default function CreateProductPage() {
@@ -23,36 +24,38 @@ export default function CreateProductPage() {
     { name: "100g", price: "", stock: "" },
   ]);
 
-  const categories = [
+  // Memoize categories to prevent re-creation on every render (Performance Optimization)
+  const categories = useMemo(() => [
     { value: "ARABICA", label: tCats("arabica") },
     { value: "ROBUSTA", label: tCats("robusta") },
     { value: "BLEND", label: tCats("blend") },
     { value: "INSTANT", label: tCats("instant") },
-  ];
+  ], [tCats]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }, []);
 
-  const handleImageChange = (index, value) => {
-    const newImages = [...formData.images];
-    newImages[index] = value;
-    setFormData((prev) => ({
-      ...prev,
-      images: newImages,
-    }));
+  const handleImageChange = useCallback((index, value) => {
+    setFormData((prev) => {
+      const newImages = [...prev.images];
+      newImages[index] = value;
+      return { ...prev, images: newImages };
+    });
 
     // Update preview for URL input
-    const newPreviews = [...imagePreviews];
-    newPreviews[index] = value;
-    setImagePreviews(newPreviews);
-  };
+    setImagePreviews((prev) => {
+      const newPreviews = [...prev];
+      newPreviews[index] = value;
+      return newPreviews;
+    });
+  }, []);
 
-  const handleFileUpload = async (index, file) => {
+  const handleFileUpload = useCallback(async (index, file) => {
     if (!file) return;
 
     // Validate file type
@@ -79,16 +82,17 @@ export default function CreateProductPage() {
 
       const data = await response.json();
       if (data.success) {
-        const newImages = [...formData.images];
-        newImages[index] = data.url;
-        setFormData((prev) => ({
-          ...prev,
-          images: newImages,
-        }));
+        setFormData((prev) => {
+          const newImages = [...prev.images];
+          newImages[index] = data.url;
+          return { ...prev, images: newImages };
+        });
 
-        const newPreviews = [...imagePreviews];
-        newPreviews[index] = data.url;
-        setImagePreviews(newPreviews);
+        setImagePreviews((prev) => {
+          const newPreviews = [...prev];
+          newPreviews[index] = data.url;
+          return newPreviews;
+        });
       } else {
         alert(data.message || "Failed to upload image");
       }
@@ -97,73 +101,87 @@ export default function CreateProductPage() {
     } finally {
       setUploading(false);
     }
-  };
+  }, []);
 
-  const addImageField = () => {
+  const addImageField = useCallback(() => {
     setFormData((prev) => ({
       ...prev,
       images: [...prev.images, ""],
     }));
-    setImagePreviews([...imagePreviews, ""]);
-  };
+    setImagePreviews((prev) => [...prev, ""]);
+  }, []);
 
-  const removeImageField = (index) => {
-    const newImages = formData.images.filter((_, i) => i !== index);
+  const removeImageField = useCallback((index) => {
     setFormData((prev) => ({
       ...prev,
-      images: newImages,
+      images: prev.images.filter((_, i) => i !== index),
     }));
-    setImagePreviews(imagePreviews.filter((_, i) => i !== index));
-  };
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
-  const handleVariantChange = (index, field, value) => {
+  const handleVariantChange = useCallback((index, field, value) => {
     setVariants((prevVariants) => {
       const newVariants = [...prevVariants];
+      
+      // Parse numeric values sesuai kernel rules (Data Integrity First)
+      let parsedValue = value;
+      if (field === "price") {
+        const num = parseFloat(value);
+        parsedValue = value === "" ? "" : isNaN(num) ? "" : num;
+      } else if (field === "stock") {
+        const num = parseInt(value);
+        parsedValue = value === "" ? "" : isNaN(num) ? "" : num;
+      }
+      
       newVariants[index] = {
         ...newVariants[index],
-        [field]: value,
+        [field]: parsedValue,
       };
       return newVariants;
     });
-  };
+  }, []);
 
-  const addVariant = () => {
-    setVariants([...variants, { name: "", price: "", stock: "" }]);
-  };
+  const addVariant = useCallback(() => {
+    setVariants((prev) => [...prev, { name: "", price: "", stock: "" }]);
+  }, []);
 
-  const removeVariant = (index) => {
-    if (variants.length > 1) {
-      setVariants(variants.filter((_, i) => i !== index));
-    }
-  };
+  const removeVariant = useCallback((index) => {
+    setVariants((prev) => {
+      if (prev.length > 1) {
+        return prev.filter((_, i) => i !== index);
+      }
+      return prev;
+    });
+  }, []);
 
-  const handleFeatureChange = (index, value) => {
-    const newFeatures = [...formData.features];
-    newFeatures[index] = value;
-    setFormData((prev) => ({
-      ...prev,
-      features: newFeatures,
-    }));
-  };
+  const handleFeatureChange = useCallback((index, value) => {
+    setFormData((prev) => {
+      const newFeatures = [...prev.features];
+      newFeatures[index] = value;
+      return { ...prev, features: newFeatures };
+    });
+  }, []);
 
-  const addFeature = () => {
+  const addFeature = useCallback(() => {
     setFormData((prev) => ({
       ...prev,
       features: [...prev.features, ""],
     }));
-  };
+  }, []);
 
-  const removeFeature = (index) => {
-    if (formData.features.length > 1) {
-      const newFeatures = formData.features.filter((_, i) => i !== index);
-      setFormData((prev) => ({
-        ...prev,
-        features: newFeatures,
-      }));
-    }
-  };
+  const removeFeature = useCallback((index) => {
+    setFormData((prev) => {
+      if (prev.features.length > 1) {
+        return {
+          ...prev,
+          features: prev.features.filter((_, i) => i !== index),
+        };
+      }
+      return prev;
+    });
+  }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
 
     // Validation
@@ -198,6 +216,7 @@ export default function CreateProductPage() {
     try {
       setLoading(true);
 
+      // Data already parsed in handleVariantChange - no need to parse again (Data Integrity)
       const payload = {
         name: formData.name,
         description: formData.description,
@@ -206,8 +225,8 @@ export default function CreateProductPage() {
         features: validFeatures,
         variants: validVariants.map((v) => ({
           name: v.name,
-          price: parseFloat(v.price),
-          stock: parseInt(v.stock),
+          price: typeof v.price === 'number' ? v.price : parseFloat(v.price) || 0,
+          stock: typeof v.stock === 'number' ? v.stock : parseInt(v.stock) || 0,
         })),
       };
 
@@ -232,7 +251,7 @@ export default function CreateProductPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [formData, variants, t, router]);
 
   return (
     <AdminLayout>
@@ -366,22 +385,29 @@ export default function CreateProductPage() {
 
                   {/* Image Preview */}
                   {imagePreviews[index] && (
-                    <div className="mb-3 relative">
-                      <img
+                    <div className="mb-3 relative w-full aspect-square">
+                      <Image
                         src={imagePreviews[index]}
                         alt={`Preview ${index + 1}`}
-                        className="w-full aspect-square object-cover border border-gray-200 rounded"
+                        fill
+                        className="object-cover border border-gray-200 rounded"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        unoptimized={imagePreviews[index].startsWith('blob:')}
                       />
                       <button
                         type="button"
                         onClick={() => {
-                          const newPreviews = [...imagePreviews];
-                          newPreviews[index] = "";
-                          setImagePreviews(newPreviews);
+                          setImagePreviews((prev) => {
+                            const newPreviews = [...prev];
+                            newPreviews[index] = "";
+                            return newPreviews;
+                          });
 
-                          const newImages = [...formData.images];
-                          newImages[index] = "";
-                          setFormData({ ...formData, images: newImages });
+                          setFormData((prev) => {
+                            const newImages = [...prev.images];
+                            newImages[index] = "";
+                            return { ...prev, images: newImages };
+                          });
                         }}
                         className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded hover:bg-red-700"
                       >
