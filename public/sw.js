@@ -1,8 +1,8 @@
 // public/sw.js
 
-const CACHE_NAME = "motiv-cache-v4";
+const CACHE_NAME = "motiv-cache-v5"; // Bumped version to force SW update
 const OFFLINE_URL = "/offline";
-const API_CACHE_NAME = "motiv-api-cache-v1";
+const API_CACHE_NAME = "motiv-api-cache-v2"; // Bumped version
 
 // Daftar file yang wajib di-cache saat install (App Shell)
 const STATIC_ASSETS = [OFFLINE_URL, "/", "/products", "/icons/ikon-motiv.png"];
@@ -22,6 +22,7 @@ const NON_CACHEABLE_API = [
   /\/api\/orders/, // Orders
   /\/api\/checkout/, // Checkout
   /\/api\/payment/, // Payment
+  /\/api\/admin/, // All Admin APIs (harus selalu fresh untuk data integrity)
 ];
 
 // Assets yang akan di-cache secara runtime
@@ -40,7 +41,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
-    })
+    }),
   );
 });
 
@@ -58,10 +59,10 @@ self.addEventListener("activate", (event) => {
               console.log("Service Worker: Clearing Old Cache", cache);
               return caches.delete(cache);
             }
-          })
+          }),
         );
       })
-      .then(() => self.clients.claim())
+      .then(() => self.clients.claim()),
   );
 });
 
@@ -131,10 +132,10 @@ self.addEventListener("fetch", (event) => {
               {
                 status: 503,
                 headers: { "Content-Type": "application/json" },
-              }
+              },
             );
           });
-        })
+        }),
     );
     return;
   }
@@ -162,7 +163,7 @@ self.addEventListener("fetch", (event) => {
             // Jika tidak ada di cache, tampilkan halaman offline custom
             return caches.match(OFFLINE_URL);
           });
-        })
+        }),
     );
   } else {
     // Strategi: Stale-While-Revalidate untuk aset statis
@@ -183,7 +184,7 @@ self.addEventListener("fetch", (event) => {
 
         // Return cached response segera, update di background
         return cachedResponse || fetchPromise;
-      })
+      }),
     );
   }
 });
@@ -235,6 +236,6 @@ self.addEventListener("notificationclick", (event) => {
         if (clients.openWindow) {
           return clients.openWindow(event.notification.data.url);
         }
-      })
+      }),
   );
 });

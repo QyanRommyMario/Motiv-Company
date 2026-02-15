@@ -126,11 +126,13 @@ export default function CreateProductPage() {
       // Parse numeric values sesuai kernel rules (Data Integrity First)
       let parsedValue = value;
       if (field === "price") {
+        // parseFloat untuk harga (bisa desimal)
         const num = parseFloat(value);
-        parsedValue = value === "" ? "" : isNaN(num) ? "" : num;
+        parsedValue = value === "" ? "" : isNaN(num) || num < 0 ? "" : num;
       } else if (field === "stock") {
-        const num = parseInt(value);
-        parsedValue = value === "" ? "" : isNaN(num) ? "" : num;
+        // parseInt dengan radix 10 untuk stok (integer only)
+        const num = parseInt(value, 10);
+        parsedValue = value === "" ? "" : isNaN(num) || num < 0 ? "" : Math.floor(num);
       }
       
       newVariants[index] = {

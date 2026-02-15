@@ -31,7 +31,14 @@ export default function AdminProductsPage() {
       if (search) params.append("search", search);
       params.append("limit", "50");
 
-      const response = await fetch(`/api/admin/products?${params.toString()}`);
+      // Add cache busting to always get fresh data
+      const response = await fetch(`/api/admin/products?${params.toString()}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         setProducts(data.products || []);
@@ -56,7 +63,7 @@ export default function AdminProductsPage() {
         `/api/admin/products/${selectedProduct.id}`,
         {
           method: "DELETE",
-        }
+        },
       );
 
       if (response.ok) {

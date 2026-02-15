@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import AdminLayout from "@/components/layout/AdminLayout";
 import Loading from "@/components/ui/Loading";
@@ -38,7 +38,14 @@ export default function EditProductPage() {
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin/products/${params.id}`);
+      // CRITICAL: Add cache: 'no-store' to always get fresh data from server
+      const response = await fetch(`/api/admin/products/${params.id}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         const prod = data.product;
@@ -161,16 +168,31 @@ export default function EditProductPage() {
     setImagePreviews(imagePreviews.filter((_, i) => i !== index));
   };
 
-  const handleVariantChange = (index, field, value) => {
+  // FIXED: Add parsing logic consistent with create page (Data Integrity First)
+  const handleVariantChange = useCallback((index, field, value) => {
     setVariants((prevVariants) => {
       const newVariants = [...prevVariants];
+
+      // Parse numeric values sesuai kernel rules (Data Integrity First)
+      let parsedValue = value;
+      if (field === "price") {
+        // parseFloat untuk harga (bisa desimal)
+        const num = parseFloat(value);
+        parsedValue = value === "" ? "" : isNaN(num) || num < 0 ? "" : num;
+      } else if (field === "stock") {
+        // parseInt dengan radix 10 untuk stok (integer only)
+        const num = parseInt(value, 10);
+        parsedValue =
+          value === "" ? "" : isNaN(num) || num < 0 ? "" : Math.floor(num);
+      }
+
       newVariants[index] = {
         ...newVariants[index],
-        [field]: value,
+        [field]: parsedValue,
       };
       return newVariants;
     });
-  };
+  }, []);
 
   const addVariant = () => {
     setVariants([...variants, { name: "", price: "", stock: "" }]);
